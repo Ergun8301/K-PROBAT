@@ -186,6 +186,10 @@ html = html.replace('<nav data-fade="" style="display:flex;gap:30px;align-items:
   '<nav data-fade="" data-nav-hero style="display:flex;gap:30px;align-items:center">');
 html = html.replace(/<figure data-reveal="" style="grid-column:/g,
   '<figure data-reveal="" data-rea style="grid-column:');
+// La grille elle-même : les cases s'alignent en haut (sinon elles s'étirent à
+// la hauteur de la rangée et laissent du vide sous les photos).
+html = html.replace('<div style="display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(12px,1.6vw,24px)">',
+  '<div data-rea-grid style="display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(12px,1.6vw,24px);align-items:start">');
 // marqueurs pour le JS : rideau du menu et piste des colonnes savoir-faire
 html = html.replace('<div style="position:fixed;inset:0;z-index:80;background:#221E19',
   '<div data-menu style="position:fixed;inset:0;z-index:80;background:#221E19');

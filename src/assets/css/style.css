@@ -101,3 +101,16 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
 
 /* La signature IPPYX occupe sa propre ligne, en bas du pied de page. */
 footer .ippyx-sig-wrap{flex-basis:100%;border-top:1px solid rgba(234,227,212,.12);margin-top:16px;padding-top:2px}
+
+/* ---- correctifs de mise en page ------------------------------------------
+   1) Liste déroulante « type de travaux » : la maquette lui donnait le même
+   padding (11px) qu'aux champs texte, mais un <select> natif ne réserve pas
+   de place pour les jambages : à 17 px en League Spartan, il ne restait que
+   22 px de hauteur utile et le texte était rogné en bas. */
+select{line-height:1.5;min-height:48px}
+
+/* 2) Galerie des réalisations : les <figure> sont des cases de grille et
+   s'étiraient à la hauteur de la rangée la plus haute, laissant jusqu'à
+   300 px de vide sous une photo — d'où l'impression de photos « décalées »
+   et de trous. Chaque figure reprend désormais la hauteur de son contenu. */
+.rea-grid,[data-rea]{align-self:start}

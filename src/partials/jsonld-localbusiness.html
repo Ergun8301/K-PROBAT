@@ -3,10 +3,10 @@
      Source unique : src/partials/jsonld-localbusiness.html, injectée dans le
      <head> des pages par build.mjs (jeton JSONLD). Les adresses absolues
      viennent de site.config.json ({{SITE_URL}}).
-     Règle : uniquement des informations présentes sur le site. Pas de SIRET,
-     pas d'horaires, pas de note ni d'avis : si une information manque, on
-     omet le champ, on n'invente pas. La liste des prestations est celle de
-     la section Savoir-faire de l'accueil (source unique).
+     Règle : uniquement des informations présentes sur le site. Pas d'horaires,
+     pas de note ni d'avis : si une information manque, on omet le champ, on
+     n'invente pas. La liste des prestations est celle de la section
+     Savoir-faire de l'accueil (source unique).
      ══════════════════════════════════════════════════════════════════════ -->
 <script type="application/ld+json">
 {
@@ -20,6 +20,7 @@
   "email": "k.probat01@gmail.com",
   "image": "{{SITE_URL}}/assets/og/k-probat-og.jpg",
   "foundingDate": "1991",
+  "taxID": "38049068000028",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "416 chemin des Buffets",

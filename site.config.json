@@ -1,0 +1,5 @@
+{
+  "_commentaire": "Les deux seules valeurs propres à ce site. siteUrl = adresse publique SANS / final. client = identifiant du client (minuscules, chiffres, tirets) → utm_source de la signature IPPYX. Voir MAINTENANCE.md.",
+  "siteUrl": "https://k-probat-site.k-probat.workers.dev",
+  "client": "k-probat"
+}

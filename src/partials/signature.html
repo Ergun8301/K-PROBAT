@@ -1,0 +1,28 @@
+<!-- ══════════════════════════════════════════════════════════════════════
+     SIGNATURE IPPYX — bloc commun à tous les sites de l'agence (étalon).
+     Source unique : src/partials/signature.html, injecté dans chaque page
+     par build.mjs (jeton SIGNATURE entre doubles accolades). Le lien est
+     généré depuis site.config.json → "client" (utm_source) : ne pas l'écrire.
+     Pied de page sombre : tel quel. Pied de page clair : ajouter la classe
+     ippyx-sig-wrap--light sur le <div> ci-dessous.
+     Liens légaux (Mentions légales · Confidentialité) : même ligne que la
+     signature, blancs (jamais néon — le néon est réservé à la signature),
+     zone tactile ≥ 44 px. Les pages visées sont src/mentions-legales.html et
+     src/confidentialite.html, communes à tous les sites de l'agence.
+     ══════════════════════════════════════════════════════════════════════ -->
+<div class="ippyx-sig-wrap">
+<style>
+.ippyx-sig-wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 6px;text-align:center;margin-top:6px}
+.ippyx-sig{display:inline-flex;align-items:center;gap:7px;padding:14px 10px;color:#FFFFFF;opacity:.75;font:inherit;font-size:11.5px;line-height:1;text-decoration:none;transition:color .3s ease,opacity .3s ease}
+.ippyx-sig-wrap--light .ippyx-sig{color:#333333}
+.ippyx-sig:hover,.ippyx-sig:focus-visible{color:#D8FF3E;opacity:1}
+.ippyx-sig b{font-weight:600;letter-spacing:.1em}
+.ippyx-legal{display:inline-flex;align-items:center;gap:0 6px;font:inherit;font-size:11.5px;line-height:1}
+.ippyx-legal a{display:inline-flex;align-items:center;padding:17px 8px;color:#FFFFFF;opacity:.75;text-decoration:none;transition:opacity .3s ease}
+.ippyx-legal a:hover,.ippyx-legal a:focus-visible{opacity:1}
+.ippyx-legal .ippyx-sep{color:#FFFFFF;opacity:.35}
+.ippyx-sig-wrap--light .ippyx-legal a,.ippyx-sig-wrap--light .ippyx-legal .ippyx-sep{color:#333333}
+</style>
+<nav class="ippyx-legal" aria-label="Informations légales"><a href="mentions-legales.html">Mentions légales</a><span class="ippyx-sep" aria-hidden="true">·</span><a href="confidentialite.html">Confidentialité</a><span class="ippyx-sep" aria-hidden="true">·</span></nav>
+<a class="ippyx-sig" href="{{SIGNATURE_URL}}" target="_blank" rel="noopener"><svg width="13" height="13.5" viewBox="0 0 26 27" fill="currentColor" aria-hidden="true" style="flex:none"><rect x="0" y="7" width="4" height="4"></rect><rect x="4" y="11" width="4" height="4"></rect><rect x="8" y="15" width="4" height="4"></rect><rect x="12" y="19" width="4" height="4"></rect><rect x="16" y="23" width="4" height="4"></rect><rect x="16" y="7" width="4" height="4"></rect><rect x="12" y="11" width="4" height="4"></rect><rect x="4" y="19" width="4" height="4"></rect><rect x="0" y="23" width="4" height="4"></rect><rect x="21.6" y="1.4" width="4" height="4"></rect></svg><span>Site réalisé par <b>IPPYX</b></span></a>
+</div>

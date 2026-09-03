@@ -1,0 +1,35 @@
+# K-ProBat
+
+> Maçon artisan à Montagnat (Ain, 01). Maçonnerie générale et gros œuvre : fondations, coffrage et béton armé, briques et parpaings, béton cellulaire (Siporex), escaliers béton, piscines maçonnées, clôtures et piliers, terrasses et dalles. Depuis 1991.
+
+## Métier
+
+K-ProBat est une entreprise artisanale de maçonnerie dirigée par Yasar Kilic, maçon à Montagnat depuis 1991. Pas de commercial ni de sous-traitance en cascade : celui qui signe le devis est celui qui coule le béton. Devis gratuit, réponse sous 24 h.
+
+## Zone d'intervention
+
+Montagnat et un rayon d'environ 30 km : Bourg-en-Bresse, Ceyzériat, Péronnas, Saint-Denis-lès-Bourg (Ain, 01).
+
+## Prestations
+
+- Gros œuvre et fondations (fouilles, semelles)
+- Coffrage et béton armé (ferraillage, linteaux)
+- Briques et parpaings (Porotherm, Wienerberger)
+- Béton cellulaire — Siporex (murs, cloisons)
+- Escaliers béton sur mesure
+- Piscines maçonnées (radier, parois)
+- Clôtures et piliers (murets, portails)
+- Terrasses, dalles et vide sanitaire
+
+## Contact
+
+- Téléphone : 06 52 37 32 93
+- E-mail : k.probat01@gmail.com
+- WhatsApp : https://wa.me/33652373293
+- Adresse : 416 chemin des Buffets, 01250 Montagnat
+
+## Pages
+
+- [Accueil]({{SITE_URL}}/) : présentation, savoir-faire, réalisations, l'artisan, formulaire de contact
+- [Mentions légales]({{SITE_URL}}/mentions-legales)
+- [Politique de confidentialité]({{SITE_URL}}/confidentialite)

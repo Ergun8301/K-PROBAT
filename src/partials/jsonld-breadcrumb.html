@@ -1,0 +1,13 @@
+<!-- Fil d'Ariane (JSON-LD BreadcrumbList) des pages internes — injecté par
+     build.mjs (jeton BREADCRUMB) avec le nom et le chemin de la page
+     (table PAGE_NAMES dans build.mjs). Pas sur l'Accueil. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "{{SITE_URL}}/" },
+    { "@type": "ListItem", "position": 2, "name": "{{PAGE_NAME}}", "item": "{{SITE_URL}}{{PAGE_PATH}}" }
+  ]
+}
+</script>

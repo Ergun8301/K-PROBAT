@@ -359,6 +359,12 @@ const HEAD = `<!DOCTYPE html>
 </head>
 <body>
 `;
+// Pied de page : bloc « zone d'intervention ». Discret, mais indispensable —
+// sans ce lien entrant, les pages par commune (src/villes.json) seraient
+// orphelines et les moteurs les exploreraient très mal. build.mjs le remplit.
+html = html.replace('  {{SIGNATURE}}\n</footer>',
+  '  <span data-zones style="flex-basis:100%;color:rgba(234,227,212,.38);letter-spacing:.1em;line-height:2">{{ZONES}}</span>\n  {{SIGNATURE}}\n</footer>');
+
 const TAIL = `
 <!-- Librairies servies EN LOCAL (jamais depuis un CDN) : si un CDN tombe ou est
      bloqué, le chargeur resterait affiché et le site paraîtrait cassé.

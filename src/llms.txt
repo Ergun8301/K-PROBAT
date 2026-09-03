@@ -33,3 +33,18 @@ Montagnat et un rayon d'environ 30 km : Bourg-en-Bresse, Ceyzériat, Péronnas, 
 - [Accueil]({{SITE_URL}}/) : présentation, savoir-faire, réalisations, l'artisan, formulaire de contact
 - [Mentions légales]({{SITE_URL}}/mentions-legales)
 - [Politique de confidentialité]({{SITE_URL}}/confidentialite)
+
+## Zone d'intervention (pages par commune)
+
+- [Maçon à Bourg-en-Bresse (01000)]({{SITE_URL}}/maconnerie-bourg-en-bresse)
+- [Maçon à Montagnat (01250)]({{SITE_URL}}/maconnerie-montagnat)
+- [Maçon à Péronnas (01960)]({{SITE_URL}}/maconnerie-peronnas)
+- [Maçon à Viriat (01440)]({{SITE_URL}}/maconnerie-viriat)
+- [Maçon à Certines (01240)]({{SITE_URL}}/maconnerie-certines)
+- [Maçon à Ceyzériat (01250)]({{SITE_URL}}/maconnerie-ceyzeriat)
+- [Maçon à Saint-Denis-lès-Bourg (01000)]({{SITE_URL}}/maconnerie-saint-denis-les-bourg)
+- [Maçon à Jasseron (01250)]({{SITE_URL}}/maconnerie-jasseron)
+- [Maçon à Attignat (01340)]({{SITE_URL}}/maconnerie-attignat)
+- [Maçon à Servas (01960)]({{SITE_URL}}/maconnerie-servas)
+- [Maçon à Tossiat (01250)]({{SITE_URL}}/maconnerie-tossiat)
+- [Maçon à Buellas (01310)]({{SITE_URL}}/maconnerie-buellas)

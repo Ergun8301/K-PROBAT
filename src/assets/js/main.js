@@ -260,6 +260,16 @@
     else fallbackReveal();
   }
 
+  /* ---------------------------------------------------------------------
+     Service worker : rend le site installable comme application et
+     consultable hors connexion. Ignoré en local (http non sécurisé).
+     --------------------------------------------------------------------- */
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () { /* sans effet si indisponible */ });
+    });
+  }
+
   layoutSvColumns();
   waitForLibs();
 })();

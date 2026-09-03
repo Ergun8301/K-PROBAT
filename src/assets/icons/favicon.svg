@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#221E19"/>
+  <text x="238" y="352" text-anchor="middle" font-family="'League Spartan',Arial,Helvetica,sans-serif"
+        font-size="340" font-weight="900" letter-spacing="-10" fill="#EAE3D4">K</text>
+  <rect x="382" y="356" width="52" height="52" fill="#D93916"/>
+</svg>

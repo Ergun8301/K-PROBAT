@@ -41,7 +41,7 @@ const PAGE_NAMES = {
   'mentions-legales.html': 'Mentions légales', 'confidentialite.html': 'Politique de confidentialité',
 };
 const pagePath = f => (f === 'index.html' ? '/' : '/' + f.replace(/\.html$/, ''));
-const TEXT_FILES = ['robots.txt', 'llms.txt', '_headers'];
+const TEXT_FILES = ['robots.txt', 'llms.txt', '_headers', 'manifest.webmanifest', 'sw.js'];
 
 // ---- 1. configuration -------------------------------------------------------
 const cfg = JSON.parse(readFileSync(join(ROOT, 'site.config.json'), 'utf8'));

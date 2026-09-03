@@ -53,6 +53,10 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
   [data-rea]{grid-column:1 / -1 !important;margin-top:0 !important}
   /* pas de survol sur tactile : photos en couleur dès le chargement */
   :root{--gs:0;--dim:.96}
+  /* les deux boutons d'accueil passent à la ligne : on les met à la même
+     largeur pour qu'ils s'alignent proprement au lieu de finir décalés */
+  [data-hero-cta]{align-items:stretch}
+  [data-hero-cta] > a{flex:1 1 100%;text-align:center}
 }
 
 /* Appareils sans survol : mêmes réglages photo, quelle que soit la largeur. */

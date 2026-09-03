@@ -192,6 +192,19 @@ html = html.replace('<div style="position:fixed;inset:0;z-index:80;background:#2
 html = html.replace('<div style="display:flex;gap:clamp(10px,1.5vw,20px);transform:rotate(-3deg) scale(1.12);align-items:stretch">',
   '<div data-svtrack style="display:flex;gap:clamp(10px,1.5vw,20px);transform:rotate(-3deg) scale(1.12);align-items:stretch">');
 
+// ---- 6 quater. WhatsApp : message pré-rempli + position -------------------
+// La maquette ne mettait aucun texte sur les liens WhatsApp hors formulaire.
+const WA_TEXT = encodeURIComponent(
+  "Bonjour, je vous contacte depuis votre site K-ProBat. Je souhaite un devis gratuit pour un projet de maçonnerie.");
+html = html.replace(/href="https:\/\/wa\.me\/33652373293"/g, `href="https://wa.me/33652373293?text=${WA_TEXT}"`);
+// Bouton flottant : en bas à GAUCHE — à droite il chevauchait le fil à plomb
+// (barre verticale fixée à right:31px), et les marges paraissaient fausses.
+html = html.replace('position:fixed;bottom:80px;right:22px;z-index:70', 'position:fixed;bottom:24px;left:24px;z-index:70');
+
+// marqueur pour aligner les deux boutons d'accueil sur mobile
+html = html.replace('<div data-fade="" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;pointer-events:auto">',
+  '<div data-fade="" data-hero-cta style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;pointer-events:auto">');
+
 // ---- 6 bis. pied de page : SIRET réel + signature IPPYX (jeton du build) ----
 html = html.replace('SIRET SUR DEMANDE — ASSURANCE DÉCENNALE', 'SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE');
 html = html.replace('</footer>', '  {{SIGNATURE}}\n</footer>');
@@ -232,6 +245,14 @@ const HEAD = `<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@300..900&amp;display=swap">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@300..900&amp;display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#221E19">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="K-ProBat">
 <link rel="canonical" href="{{SITE_URL}}/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="K-ProBat">

@@ -16,16 +16,19 @@
 
   // Journal des requêtes : chaque demande de devis y est tracée, donc rien
   // n'est perdu même si le stockage et l'e-mail ne sont pas encore branchés.
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
 
   // ---------------------------------------------------------------------
-  // À DÉCOMMENTER quand les options seront configurées (voir MAINTENANCE.md)
+  // Options du formulaire (voir MAINTENANCE.md)
   //
-  // 1) Enregistrer les demandes (aucun domaine requis) :
-  //    créer un espace KV nommé « LEADS » dans le compte Cloudflare, puis :
-  // "kv_namespaces": [
-  //   { "binding": "LEADS", "id": "identifiant-de-l-espace-kv" }
-  // ],
+  // 1) Enregistrer les demandes — BRANCHÉ.
+  //    Espace KV « kprobat-leads » du compte Cloudflare K-ProBat. Les demandes
+  //    de devis y sont rangées sous la clé « devis:<date>:<identifiant> » et se
+  //    consultent dans Cloudflare → Stockage et bases de données → KV →
+  //    kprobat-leads → onglet « Paires KV ».
+  "kv_namespaces": [
+    { "binding": "LEADS", "id": "458b94871dec4018b304b024d66e28a0" }
+  ]
   //
   // 2) Envoyer les demandes par e-mail à l'artisan (nécessite un domaine
   //    avec Email Routing actif et l'adresse de destination vérifiée) :

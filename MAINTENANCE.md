@@ -122,17 +122,21 @@ Une demande reçue suit trois canaux, **indépendants et facultatifs** :
 | Canal | État | Ce qu'il faut faire |
 |---|---|---|
 | **Journal du Worker** | actif | rien — toute demande y est tracée, donc rien n'est jamais perdu. Cloudflare -> Workers -> `k-probat-site` -> *Logs* |
-| **Enregistrement (KV)** | à activer | voir A ci-dessous — 2 minutes, aucun domaine requis |
+| **Enregistrement (KV)** | **actif** | rien — voir A ci-dessous pour savoir où les lire |
 | **E-mail à l'artisan** | à activer | voir B ci-dessous — nécessite le domaine définitif |
 
-### A. Enregistrer les demandes (recommandé tout de suite)
+### A. Enregistrer les demandes — FAIT
 
-1. Cloudflare -> *Stockage et bases de données -> KV* -> **Créer un espace**,
-   nom : `LEADS`. Copier son identifiant.
-2. Dans `wrangler.jsonc`, décommenter le bloc `kv_namespaces` et coller
-   l'identifiant.
-3. `git commit` + `git push` : les demandes sont dès lors consultables dans
-   l'espace KV (une entrée par demande, clé `devis:<date>`).
+L'espace KV **`kprobat-leads`** est créé dans le compte Cloudflare et branché
+au Worker sous le nom `LEADS` (`kv_namespaces` dans `wrangler.jsonc`).
+
+**Pour lire les demandes reçues :** Cloudflare -> *Stockage et bases de données
+-> KV* -> `kprobat-leads` -> onglet **Paires KV**. Une ligne par demande, clé
+`devis:<date>:<identifiant>`, valeur au format JSON (nom, téléphone, e-mail,
+type de travaux, message, date de réception).
+
+C'est le filet de sécurité : même sans e-mail branché, aucune demande n'est
+perdue et elles restent consultables indéfiniment.
 
 ### B. Envoyer les demandes par e-mail à l'artisan
 
@@ -153,7 +157,7 @@ domaine qu'il gère.
 Cloudflare ne peut envoyer d'e-mail qu'à des adresses **vérifiées dans le
 compte**. Écrire à un visiteur inconnu impose donc un service d'envoi tiers
 (Brevo, Resend...). Aujourd'hui le visiteur a sa confirmation **à l'écran**
-(« Votre demande est bien envoyée. Yasar vous rappelle sous 24 h. »), ce qui
+(« Merci, votre demande est bien reçue. Nous vous rappelons sous 24 h. »), ce qui
 couvre l'essentiel du besoin. Le champ e-mail du formulaire est déjà en place :
 le jour où un service d'envoi est ajouté, il n'y aura que la fonction
 `sendToArtisan` de `worker/index.js` à dupliquer pour le visiteur.

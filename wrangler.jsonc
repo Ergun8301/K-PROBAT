@@ -1,10 +1,37 @@
 {
+  // Nom du Worker dans le compte Cloudflare du client.
   "name": "k-probat-site",
   "compatibility_date": "2025-06-01",
   "workers_dev": true,
+
+  // Le Worker sert le site ET reçoit le formulaire (POST /api/devis).
+  // Tout le reste est servi depuis site/ via le binding ASSETS.
+  "main": "worker/index.js",
   "assets": {
     "directory": "./site",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
-  }
+  },
+
+  // Journal des requêtes : chaque demande de devis y est tracée, donc rien
+  // n'est perdu même si le stockage et l'e-mail ne sont pas encore branchés.
+  "observability": { "enabled": true }
+
+  // ---------------------------------------------------------------------
+  // À DÉCOMMENTER quand les options seront configurées (voir MAINTENANCE.md)
+  //
+  // 1) Enregistrer les demandes (aucun domaine requis) :
+  //    créer un espace KV nommé « LEADS » dans le compte Cloudflare, puis :
+  // "kv_namespaces": [
+  //   { "binding": "LEADS", "id": "identifiant-de-l-espace-kv" }
+  // ],
+  //
+  // 2) Envoyer les demandes par e-mail à l'artisan (nécessite un domaine
+  //    avec Email Routing actif et l'adresse de destination vérifiée) :
+  // "send_email": [
+  //   { "name": "SEND_EMAIL", "destination_address": "k.probat01@gmail.com" }
+  // ],
+  // "vars": { "MAIL_FROM": "site@k-probat.fr" }
+  // ---------------------------------------------------------------------
 }

@@ -31,10 +31,12 @@
 [data-hx="h27"]:hover{filter:grayscale(0) contrast(1.06)}
 [data-hx="h28"]:hover{filter:grayscale(0) contrast(1.06)}
 [data-hx="h29"]:hover{color:var(--acc,#D93916)}
-[data-hx="h30"]:hover{background:#1DA851}
-[data-hx="h31"]:hover{background:#D93916}
-[data-hx="h32"]:hover{background:#1DA851}
+[data-hx="h30"]:hover{background:#221E19}
+[data-hx="h31"]:hover{background:#1DA851}
+[data-hx="h32"]:hover{background:#D93916}
+[data-hx="h33"]:hover{background:#1DA851}
 [data-fx="f0"]:focus{border-bottom:1px solid #D93916}
 [data-fx="f1"]:focus{border-bottom:1px solid #D93916}
 [data-fx="f2"]:focus{border-bottom:1px solid #D93916}
 [data-fx="f3"]:focus{border-bottom:1px solid #D93916}
+[data-fx="f4"]:focus{border-bottom:1px solid #D93916}

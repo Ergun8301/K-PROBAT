@@ -77,16 +77,65 @@
      --------------------------------------------------------------------- */
   function formVals() {
     var g = function (id) { var el = document.getElementById(id); return el && el.value ? el.value.trim() : ''; };
-    return { nom: g('kpb-nom'), tel: g('kpb-tel'), trav: g('kpb-trav'), msg: g('kpb-msg') };
+    return { nom: g('kpb-nom'), tel: g('kpb-tel'), email: g('kpb-email'), trav: g('kpb-trav'), msg: g('kpb-msg') };
   }
   function formMessage() {
     var v = formVals(), L = ['Bonjour, je souhaite un devis gratuit.'];
     if (v.nom) L.push('Nom : ' + v.nom);
     if (v.tel) L.push('Téléphone : ' + v.tel);
+    if (v.email) L.push('E-mail : ' + v.email);
     if (v.trav) L.push('Travaux : ' + v.trav);
     if (v.msg) L.push('Projet : ' + v.msg);
     return L.join('\n');
   }
+  /* Envoi vers le site lui-même (Worker /api/devis) : le visiteur NE QUITTE PAS
+     la page — la confirmation s'affiche sous le formulaire. */
+  var statut = document.getElementById('kpb-statut');
+  function afficherStatut(texte, succes) {
+    if (!statut) return;
+    statut.style.display = 'block';
+    statut.textContent = texte;
+    statut.style.background = succes ? 'rgba(37,211,102,.12)' : 'rgba(217,57,22,.1)';
+    statut.style.boxShadow = 'inset 0 0 0 1.5px ' + (succes ? '#25D366' : 'var(--acc,#D93916)');
+    statut.style.color = '#221E19';
+  }
+  var envoyer = document.getElementById('kpb-envoyer');
+  if (envoyer) envoyer.addEventListener('click', function () {
+    var v = formVals();
+    if (!v.nom || !v.tel) {
+      afficherStatut('Merci d\'indiquer au moins votre nom et votre téléphone.', false);
+      return;
+    }
+    var libelle = envoyer.textContent;
+    envoyer.disabled = true;
+    envoyer.textContent = 'Envoi en cours…';
+    var piege = document.getElementById('kpb-website');
+    fetch('/api/devis', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        nom: v.nom, tel: v.tel, email: v.email, travaux: v.trav, message: v.msg,
+        website: piege ? piege.value : ''
+      })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d.ok) {
+          afficherStatut(res.d.message || 'Votre demande est bien envoyée.', true);
+          ['kpb-nom', 'kpb-tel', 'kpb-email', 'kpb-msg'].forEach(function (id) {
+            var el = document.getElementById(id); if (el) el.value = '';
+          });
+          var sel = document.getElementById('kpb-trav'); if (sel) sel.selectedIndex = 0;
+        } else {
+          afficherStatut(res.d.erreur || 'L\'envoi a échoué. Appelez-nous au 06 52 37 32 93.', false);
+        }
+      })
+      .catch(function () {
+        afficherStatut('L\'envoi a échoué (connexion). Utilisez WhatsApp ou appelez le 06 52 37 32 93.', false);
+      })
+      .then(function () { envoyer.disabled = false; envoyer.textContent = libelle; });
+  });
+
   var waBtn = document.getElementById('sendWa');
   if (waBtn) waBtn.addEventListener('click', function () {
     window.open('https://wa.me/33652373293?text=' + encodeURIComponent(formMessage()), '_blank');

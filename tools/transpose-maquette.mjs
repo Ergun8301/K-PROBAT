@@ -249,9 +249,39 @@ html = html.replace('<div data-fade="" style="display:flex;flex-wrap:wrap;align-
   html = html.replace(mailLink, group);
 }
 
-// ---- 6 septies. boutons du formulaire : même largeur, alignés --------------
-html = html.replace('<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">',
-  '<div data-form-actions style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">');
+// ---- 6 septies. formulaire : envoi réel sans quitter la page ---------------
+// La maquette n'avait pas de serveur. Le formulaire poste maintenant sur
+// /api/devis (Worker Cloudflare) et affiche lui-même la confirmation.
+{
+  const FIELD = "background:transparent;border:none;border-bottom:1px solid rgba(34,30,25,.35);border-radius:0;padding:11px 0;font-family:'League Spartan',sans-serif;font-weight:500;font-size:17px;color:#221E19;outline:none";
+  const LABEL = "font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(34,30,25,.55)";
+
+  // a) champ e-mail : nécessaire pour pouvoir accuser réception au visiteur
+  const telLabelEnd = '<input id="kpb-tel" type="tel" placeholder="06 12 34 56 78" style="' + FIELD + '" style-focus="border-bottom:1px solid #D93916">\n      </label>';
+  const emailField = telLabelEnd + `
+      <label style="display:flex;flex-direction:column;gap:9px">
+        <span style="${LABEL}">VOTRE E-MAIL <span style="opacity:.6">(FACULTATIF)</span></span>
+        <input id="kpb-email" type="email" autocomplete="email" placeholder="prenom@exemple.fr" style="${FIELD}" style-focus="border-bottom:1px solid #D93916">
+      </label>`;
+  if (!html.includes(telLabelEnd)) { console.error('✗ champ téléphone introuvable'); process.exit(1); }
+  html = html.replace(telLabelEnd, emailField);
+
+  // b) piège à robots (invisible) + zone de message d'état
+  const actionsOpen = '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">';
+  const newActions = `<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+      <label>Ne pas remplir<input id="kpb-website" type="text" tabindex="-1" autocomplete="off"></label>
+    </div>
+    <div id="kpb-statut" role="status" aria-live="polite" style="display:none;padding:16px 18px;font-size:15px;line-height:1.5"></div>
+    <div data-form-actions style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">`;
+  if (!html.includes(actionsOpen)) { console.error('✗ bloc des boutons du formulaire introuvable'); process.exit(1); }
+  html = html.replace(actionsOpen, newActions);
+
+  // c) bouton d'envoi principal, en tête des actions
+  const waBtnStart = '<button id="sendWa"';
+  const sendBtn = `<button id="kpb-envoyer" type="button" style="font-family:'League Spartan',sans-serif;font-weight:700;font-size:14px;letter-spacing:.04em;padding:18px 30px;background:var(--acc,#D93916);color:#EAE3D4;border:none;cursor:pointer;transition:background .3s" style-hover="background:#221E19">Envoyer ma demande</button>
+      ` + waBtnStart;
+  html = html.replace(waBtnStart, sendBtn);
+}
 
 // ---- 6 bis. pied de page : SIRET réel + signature IPPYX (jeton du build) ----
 html = html.replace('SIRET SUR DEMANDE — ASSURANCE DÉCENNALE', 'SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE');

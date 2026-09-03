@@ -110,15 +110,58 @@ dans les pages légales.
 
 ---
 
-## Le formulaire de devis (`src/index.html`, section Contact)
+## Le formulaire de devis — ce qui est branché, ce qui reste à brancher
 
-- Il n'a **pas de serveur ni de service tiers** : les boutons « Envoyer sur
-  WhatsApp » et « Envoyer par e-mail » (dans `src/assets/js/main.js`,
-  fonctions `sendWa`/`sendMail`) ouvrent simplement WhatsApp ou le client de
-  messagerie du visiteur, avec un message pré-rempli à partir des champs
-  saisis. Rien à activer, rien à configurer.
-- Pour changer le texte pré-rempli : voir la fonction `formMessage()` dans
-  `src/assets/js/main.js`.
+Le formulaire de la section Contact envoie la demande **au site lui-même**
+(`POST /api/devis`, traité par `worker/index.js`). Le visiteur **ne quitte
+jamais la page** : la confirmation s'affiche sous le formulaire. Les boutons
+WhatsApp et e-mail restent à côté, comme raccourcis facultatifs.
+
+Une demande reçue suit trois canaux, **indépendants et facultatifs** :
+
+| Canal | État | Ce qu'il faut faire |
+|---|---|---|
+| **Journal du Worker** | actif | rien — toute demande y est tracée, donc rien n'est jamais perdu. Cloudflare -> Workers -> `k-probat-site` -> *Logs* |
+| **Enregistrement (KV)** | à activer | voir A ci-dessous — 2 minutes, aucun domaine requis |
+| **E-mail à l'artisan** | à activer | voir B ci-dessous — nécessite le domaine définitif |
+
+### A. Enregistrer les demandes (recommandé tout de suite)
+
+1. Cloudflare -> *Stockage et bases de données -> KV* -> **Créer un espace**,
+   nom : `LEADS`. Copier son identifiant.
+2. Dans `wrangler.jsonc`, décommenter le bloc `kv_namespaces` et coller
+   l'identifiant.
+3. `git commit` + `git push` : les demandes sont dès lors consultables dans
+   l'espace KV (une entrée par demande, clé `devis:<date>`).
+
+### B. Envoyer les demandes par e-mail à l'artisan
+
+Possible **seulement une fois le domaine définitif en place** (voir la section
+« Passage au domaine définitif ») : Cloudflare n'envoie d'e-mail que depuis un
+domaine qu'il gère.
+
+1. Cloudflare -> le domaine -> *Email -> Email Routing* -> activer.
+2. *Adresses de destination* -> ajouter `k.probat01@gmail.com` -> l'artisan
+   valide le lien reçu par e-mail.
+3. Dans `wrangler.jsonc`, décommenter les blocs `send_email` et `vars`
+   (adresse `MAIL_FROM` sur le domaine, ex. `site@k-probat.fr`).
+4. `git push`. Chaque demande part alors dans la boîte de l'artisan, avec
+   l'adresse du visiteur en `Reply-To` (il répond directement).
+
+### C. Accusé de réception au visiteur — limite à connaître
+
+Cloudflare ne peut envoyer d'e-mail qu'à des adresses **vérifiées dans le
+compte**. Écrire à un visiteur inconnu impose donc un service d'envoi tiers
+(Brevo, Resend...). Aujourd'hui le visiteur a sa confirmation **à l'écran**
+(« Votre demande est bien envoyée. Yasar vous rappelle sous 24 h. »), ce qui
+couvre l'essentiel du besoin. Le champ e-mail du formulaire est déjà en place :
+le jour où un service d'envoi est ajouté, il n'y aura que la fonction
+`sendToArtisan` de `worker/index.js` à dupliquer pour le visiteur.
+
+### Anti-spam
+
+Un champ caché (« piège à robots ») est présent dans le formulaire : rempli, la
+demande est ignorée silencieusement. Aucun captcha, donc aucune friction.
 
 ---
 

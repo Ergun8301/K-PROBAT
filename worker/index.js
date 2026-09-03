@@ -109,7 +109,7 @@ async function handleDevis(request, env) {
 
   return json({
     ok: true,
-    message: 'Votre demande est bien envoyée. Yasar vous rappelle sous 24 h.',
+    message: 'Merci, votre demande est bien reçue. Nous vous rappelons sous 24 h. Pour une urgence : 06 52 37 32 93.',
   });
 }
 

@@ -79,8 +79,11 @@
     var g = function (id) { var el = document.getElementById(id); return el && el.value ? el.value.trim() : ''; };
     return { nom: g('kpb-nom'), tel: g('kpb-tel'), email: g('kpb-email'), trav: g('kpb-trav'), msg: g('kpb-msg') };
   }
+  // Même phrase que les boutons WhatsApp directs de la page : le message reçu
+  // par l'artisan est identique quel que soit le chemin emprunté.
+  var MESSAGE_ACCROCHE = 'Bonjour, je vous contacte depuis votre site K-ProBat. Je souhaite un devis pour un projet de maçonnerie.';
   function formMessage() {
-    var v = formVals(), L = ['Bonjour, je souhaite un devis gratuit.'];
+    var v = formVals(), L = [MESSAGE_ACCROCHE, ''];
     if (v.nom) L.push('Nom : ' + v.nom);
     if (v.tel) L.push('Téléphone : ' + v.tel);
     if (v.email) L.push('E-mail : ' + v.email);

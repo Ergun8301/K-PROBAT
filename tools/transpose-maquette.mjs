@@ -194,8 +194,11 @@ html = html.replace('<div style="display:flex;gap:clamp(10px,1.5vw,20px);transfo
 
 // ---- 6 quater. WhatsApp : message pré-rempli + position -------------------
 // La maquette ne mettait aucun texte sur les liens WhatsApp hors formulaire.
+// Phrase d'accroche UNIQUE, identique au bouton « Envoyer sur WhatsApp » du
+// formulaire (voir MESSAGE_ACCROCHE dans assets/js/main.js) : le visiteur doit
+// retrouver exactement le même message, quel que soit le bouton utilisé.
 const WA_TEXT = encodeURIComponent(
-  "Bonjour, je vous contacte depuis votre site K-ProBat. Je souhaite un devis gratuit pour un projet de maçonnerie.");
+  "Bonjour, je vous contacte depuis votre site K-ProBat. Je souhaite un devis pour un projet de maçonnerie.");
 html = html.replace(/href="https:\/\/wa\.me\/33652373293"/g, `href="https://wa.me/33652373293?text=${WA_TEXT}"`);
 // Bouton flottant : en bas à DROITE (comme sur les autres sites de l'agence).
 // Le fil à plomb décoratif est masqué sur mobile (style.css) pour éviter que

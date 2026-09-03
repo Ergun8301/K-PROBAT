@@ -7,7 +7,8 @@
 <meta name="description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Fondations, murs, dalles, escaliers, piscines — dans les règles de l'art, depuis 1991.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@300..900&amp;display=swap">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@300..900&amp;display=swap" rel="stylesheet">
 <link rel="canonical" href="{{SITE_URL}}/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="K-ProBat">
@@ -59,11 +60,11 @@
     <span class="menu-label">NAVIGATION</span>
   </div>
   <nav class="menu-nav" id="menuNav">
-    <a href="#hero" class="menu-link" data-go="#hero" style="transition-delay:0s"><span class="menu-num">01</span><span class="menu-text">Accueil</span></a>
-    <a href="#savoirfaire" class="menu-link" data-go="#savoirfaire" style="transition-delay:.06s"><span class="menu-num">02</span><span class="menu-text">Savoir-faire</span></a>
-    <a href="#realisations" class="menu-link" data-go="#realisations" style="transition-delay:.12s"><span class="menu-num">03</span><span class="menu-text">Réalisations</span></a>
-    <a href="#artisan" class="menu-link" data-go="#artisan" style="transition-delay:.18s"><span class="menu-num">04</span><span class="menu-text">L'artisan</span></a>
-    <a href="#contact" class="menu-link" data-go="#contact" style="transition-delay:.24s"><span class="menu-num">05</span><span class="menu-text">Contact</span></a>
+    <a href="#hero" class="menu-link" data-go="#hero" style="transition-delay:0.15s"><span class="menu-num">01</span><span class="menu-text">Accueil</span></a>
+    <a href="#savoirfaire" class="menu-link" data-go="#savoirfaire" style="transition-delay:0.21s"><span class="menu-num">02</span><span class="menu-text">Savoir-faire</span></a>
+    <a href="#realisations" class="menu-link" data-go="#realisations" style="transition-delay:0.27s"><span class="menu-num">03</span><span class="menu-text">Réalisations</span></a>
+    <a href="#artisan" class="menu-link" data-go="#artisan" style="transition-delay:0.33s"><span class="menu-num">04</span><span class="menu-text">L'artisan</span></a>
+    <a href="#contact" class="menu-link" data-go="#contact" style="transition-delay:0.39s"><span class="menu-num">05</span><span class="menu-text">Contact</span></a>
   </nav>
   <div class="menu-coords">
     <a href="tel:0652373293" class="menu-tel">06 52 37 32 93</a>
@@ -127,42 +128,45 @@
     <p class="section-note" data-reveal>Huit métiers, un seul artisan. Celui qui chiffre est celui qui coule le béton.</p>
   </div>
 
+  <!-- Les 8 cartes sont écrites ici dans l'ordre 01→08, réparties en 4 colonnes
+       (desktop). Le JS les regroupe en 2 colonnes sous 860 px — voir
+       SPECS-TECHNIQUES.md §4. Sans JS, la disposition desktop reste valide. -->
   <div class="sv-wrap" data-reveal>
-    <div class="sv-track">
-      <div class="sv-col sv-col-down">
+    <div class="sv-track" id="svTrack">
+      <div class="sv-col">
         <div class="sv-card"><img src="assets/img/fondations-reseaux.jpg" alt="Gros œuvre &amp; fondations" loading="lazy">
           <div class="sv-fade"></div>
           <div class="sv-info"><span class="sv-n">01</span><span class="sv-t">Gros œuvre &amp; fondations</span><span class="sv-tech">FOUILLES — SEMELLES</span></div>
         </div>
-        <div class="sv-card"><img src="assets/img/escalier-coffrage.jpg" alt="Escaliers béton" loading="lazy">
-          <div class="sv-fade"></div>
-          <div class="sv-info"><span class="sv-n">05</span><span class="sv-t">Escaliers béton</span><span class="sv-tech">SUR MESURE</span></div>
-        </div>
-      </div>
-      <div class="sv-col sv-col-up">
         <div class="sv-card"><img src="assets/img/ferraillage-fondations.jpg" alt="Coffrage &amp; béton armé" loading="lazy">
           <div class="sv-fade"></div>
           <div class="sv-info"><span class="sv-n">02</span><span class="sv-t">Coffrage &amp; béton armé</span><span class="sv-tech">FERRAILLAGE — LINTEAUX</span></div>
+        </div>
+      </div>
+      <div class="sv-col">
+        <div class="sv-card"><img src="assets/img/porotherm-chantier.jpg" alt="Briques &amp; parpaings" loading="lazy">
+          <div class="sv-fade"></div>
+          <div class="sv-info"><span class="sv-n">03</span><span class="sv-t">Briques &amp; parpaings</span><span class="sv-tech">POROTHERM — WIENERBERGER</span></div>
+        </div>
+        <div class="sv-card"><img src="assets/img/siporex-1.jpg" alt="Béton cellulaire — Siporex" loading="lazy">
+          <div class="sv-fade"></div>
+          <div class="sv-info"><span class="sv-n">04</span><span class="sv-t">Béton cellulaire — Siporex</span><span class="sv-tech">MURS — CLOISONS</span></div>
+        </div>
+      </div>
+      <div class="sv-col">
+        <div class="sv-card"><img src="assets/img/escalier-coffrage.jpg" alt="Escaliers béton" loading="lazy">
+          <div class="sv-fade"></div>
+          <div class="sv-info"><span class="sv-n">05</span><span class="sv-t">Escaliers béton</span><span class="sv-tech">SUR MESURE</span></div>
         </div>
         <div class="sv-card"><img src="assets/img/piscine-parpaings.jpg" alt="Piscines maçonnées" loading="lazy">
           <div class="sv-fade"></div>
           <div class="sv-info"><span class="sv-n">06</span><span class="sv-t">Piscines maçonnées</span><span class="sv-tech">RADIER — PAROIS</span></div>
         </div>
       </div>
-      <div class="sv-col sv-col-down">
-        <div class="sv-card"><img src="assets/img/porotherm-chantier.jpg" alt="Briques &amp; parpaings" loading="lazy">
-          <div class="sv-fade"></div>
-          <div class="sv-info"><span class="sv-n">03</span><span class="sv-t">Briques &amp; parpaings</span><span class="sv-tech">POROTHERM — WIENERBERGER</span></div>
-        </div>
+      <div class="sv-col">
         <div class="sv-card"><img src="assets/img/cloture-composite.jpg" alt="Clôtures &amp; piliers" loading="lazy">
           <div class="sv-fade"></div>
           <div class="sv-info"><span class="sv-n">07</span><span class="sv-t">Clôtures &amp; piliers</span><span class="sv-tech">MURETS — PORTAILS</span></div>
-        </div>
-      </div>
-      <div class="sv-col sv-col-up">
-        <div class="sv-card"><img src="assets/img/siporex-1.jpg" alt="Béton cellulaire — Siporex" loading="lazy">
-          <div class="sv-fade"></div>
-          <div class="sv-info"><span class="sv-n">04</span><span class="sv-t">Béton cellulaire — Siporex</span><span class="sv-tech">MURS — CLOISONS</span></div>
         </div>
         <div class="sv-card"><img src="assets/img/plancher-isole.jpg" alt="Terrasses, dalles &amp; VS" loading="lazy">
           <div class="sv-fade"></div>
@@ -304,9 +308,12 @@
   <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2a9.9 9.9 0 0 0-8.51 14.9L2 22l5.27-1.48A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.2 15.3l-.3-.18-3.12.88.86-3.04-.2-.31a8.23 8.23 0 0 1 6.96-12.65m-3.5 3.6c-.16 0-.43.06-.65.3-.23.24-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.16 1.72 2.75 4.25 3.75 2.1.83 2.53.66 2.99.62.45-.04 1.47-.6 1.68-1.18.2-.58.2-1.08.15-1.18-.06-.1-.23-.16-.48-.29-.25-.12-1.47-.72-1.7-.8-.22-.09-.39-.13-.55.12-.17.25-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.13-1.05-.39-2-1.24-.73-.65-1.23-1.46-1.37-1.7-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.13-.55-1.35-.77-1.84-.2-.48-.4-.42-.55-.42z"></path></svg>
 </a>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<!-- Librairies servies EN LOCAL (jamais depuis un CDN) : si un CDN tombe ou est
+     bloqué, le chargeur resterait affiché et le site paraîtrait cassé.
+     Voir SPECS-TECHNIQUES.md §5.2. Versions : GSAP 3.12.5, Lenis 1.1.18. -->
+<script src="assets/js/vendor/gsap.min.js"></script>
+<script src="assets/js/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/js/vendor/lenis.min.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

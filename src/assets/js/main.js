@@ -86,10 +86,59 @@
   document.getElementById('devisForm').addEventListener('submit', function (e) { e.preventDefault(); });
 
   /* -------------------------------------------------------------
-     Resize watcher (hero mosaic behaviour differs on mobile)
+     Savoir-faire : 4 colonnes (desktop) → 2 colonnes (mobile)
+     Les 8 cartes sont écrites dans l'ordre 01→08 dans le HTML ; on les
+     redistribue en tranches selon la largeur (SPECS-TECHNIQUES.md §4).
+     ------------------------------------------------------------- */
+  var svTrack = document.getElementById('svTrack');
+  var svCards = svTrack ? Array.prototype.slice.call(svTrack.querySelectorAll('.sv-card')) : [];
+  var svCols = null; // nombre de colonnes actuellement rendu
+
+  function layoutSvColumns() {
+    if (!svTrack || !svCards.length) return false;
+    var cols = mobile ? 2 : 4;
+    if (cols === svCols) return false;
+    svCols = cols;
+    var per = Math.ceil(svCards.length / cols);
+    svTrack.innerHTML = '';
+    for (var i = 0; i < cols; i++) {
+      var col = document.createElement('div');
+      col.className = 'sv-col';
+      // colonnes paires : dérive vers le bas ; impaires : vers le haut
+      col.setAttribute('data-svcol', i % 2 ? 'up' : 'down');
+      svCards.slice(i * per, (i + 1) * per).forEach(function (c) { col.appendChild(c); });
+      svTrack.appendChild(col);
+    }
+    return true;
+  }
+
+  // Dérive verticale des colonnes pendant le scroll (±80 px, scrub).
+  // Rejouée après chaque changement de disposition : les anciens
+  // ScrollTrigger de colonnes sont détruits avant d'en recréer.
+  var svTriggers = [];
+  function hookSvColumns() {
+    if (!window.gsap || !window.ScrollTrigger || !svTrack) return;
+    svTriggers.forEach(function (t) { t.kill(); });
+    svTriggers = [];
+    svTrack.querySelectorAll('[data-svcol]').forEach(function (col) {
+      var dir = col.getAttribute('data-svcol') === 'up' ? 1 : -1;
+      var tween = window.gsap.fromTo(col, { y: dir * 80 }, {
+        y: dir * -80, ease: 'none',
+        scrollTrigger: { trigger: col.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+      });
+      if (tween.scrollTrigger) svTriggers.push(tween.scrollTrigger);
+    });
+  }
+
+  /* -------------------------------------------------------------
+     Resize watcher (mosaïque hero et colonnes savoir-faire diffèrent
+     au-delà / en deçà de 860 px)
      ------------------------------------------------------------- */
   window.addEventListener('resize', function () {
-    mobile = window.innerWidth < 860;
+    var m = window.innerWidth < 860;
+    if (m === mobile) return;
+    mobile = m;
+    if (layoutSvColumns() && window.ScrollTrigger) hookSvColumns();
   });
 
   /* -------------------------------------------------------------
@@ -164,13 +213,7 @@
       });
     });
 
-    document.querySelectorAll('.sv-col').forEach(function (col, i) {
-      var dir = i % 2 ? 1 : -1;
-      gsap.fromTo(col, { y: dir * 80 }, {
-        y: dir * -80, ease: 'none',
-        scrollTrigger: { trigger: col.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
-      });
-    });
+    hookSvColumns();
 
     var bead = document.querySelector('[data-bead]');
     if (bead) {
@@ -181,8 +224,10 @@
     }
   }
 
+  // Filet de sécurité : si une librairie ne charge pas, on masque le chargeur
+  // et on montre la page telle quelle, sans animation. Sans cela, le chargeur
+  // resterait affiché indéfiniment (SPECS-TECHNIQUES.md §5.2).
   function fallbackReveal() {
-    // No GSAP available: just make everything visible, no animation.
     document.querySelectorAll('[data-reveal],[data-fade],.ltr').forEach(function (el) {
       el.style.opacity = '1';
       el.style.transform = 'none';
@@ -191,17 +236,21 @@
     if (loader) loader.style.display = 'none';
   }
 
+  // Les librairies sont servies en local : elles sont donc présentes dès le
+  // premier essai. La boucle (max 4 s) ne sert que de garde-fou.
   function waitForLibs(tries) {
     tries = tries || 0;
     if (window.gsap && window.ScrollTrigger) {
       initAnimations();
       document.body.classList.remove('js-loading');
-    } else if (tries < 50) {
+    } else if (tries < 100) {
       setTimeout(function () { waitForLibs(tries + 1); }, 40);
     } else {
       fallbackReveal();
       document.body.classList.remove('js-loading');
     }
   }
+
+  layoutSvColumns();
   waitForLibs();
 })();

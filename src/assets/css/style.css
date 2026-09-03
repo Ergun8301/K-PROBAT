@@ -126,9 +126,17 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
 .hero-kicker{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--cream);background:rgba(26,23,19,.75);padding:8px 12px}
 .hero-title{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.9;font-size:clamp(44px,13.5vw,205px);color:var(--cream)}
 .ltr-wrap{display:inline-block;white-space:nowrap}
-.ltr{display:inline-block;transform:translateY(115%) rotate(4deg)}
+/* Les états initiaux des animations (opacité/décalage) sont posés par GSAP
+   (fromTo), JAMAIS en CSS : sans JS ou si une librairie ne charge pas, la page
+   doit rester entièrement lisible. Voir SPECS-TECHNIQUES.md §5.3. */
+.ltr{display:inline-block}
 .ltr.acc{color:var(--acc)}
 .ltr.outline{-webkit-text-stroke:2.5px var(--cream);color:transparent}
+/* Repli : sans -webkit-text-stroke, color:transparent rendrait B, A, T
+   invisibles (SPECS-TECHNIQUES.md §1 et §5.1). */
+@supports not (-webkit-text-stroke: 1px #fff){
+  .ltr.outline{color:var(--cream)}
+}
 .hero-cta-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
 .hero-lede{margin:0;font-weight:400;font-size:clamp(15px,1.6vw,19px);line-height:1.55;max-width:520px;color:rgba(234,227,212,.9)}
 .hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px;pointer-events:auto}
@@ -137,7 +145,6 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
 .marquee-track{display:flex;width:max-content;animation:kmarq 26s linear infinite;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.22em;white-space:nowrap}
 @keyframes kmarq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-[data-fade]{opacity:0;transform:translateY(24px)}
 
 /* ==========================================================================
    Sections (generic)
@@ -151,7 +158,6 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
 .section-note{margin:0;max-width:380px;font-size:15px;line-height:1.6;color:rgba(34,30,25,.7)}
 .section-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:rgba(34,30,25,.5)}
 
-[data-reveal]{opacity:0;transform:translateY(44px)}
 
 /* ==========================================================================
    Savoir-faire
@@ -235,14 +241,26 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
 .wa-float:hover{background:var(--wa-hover)}
 
 /* ==========================================================================
-   Responsive — mobile breakpoint 860px
+   Responsive — bascule mobile à 860px (SPECS-TECHNIQUES.md §4)
+   Le JS bascule sur `innerWidth < 860` : l'équivalent CSS est donc 859px.
+   Les colonnes savoir-faire (4 → 2) sont regroupées par le JS.
    ========================================================================== */
-@media (max-width:860px){
+@media (max-width:859px){
   .hero-nav{display:none}
   .rea-item{grid-column:1 / -1 !important;margin-top:0 !important}
+  /* Pas de survol sur tactile : photos en couleur dès le chargement
+     (--gs:0, --dim:.96 de la maquette). */
   .mos img{filter:grayscale(0) brightness(.96)}
-  .mos:hover img{transform:none}
+  .mos:hover img{filter:grayscale(0) brightness(.96);transform:none}
+  .rea-frame img{filter:grayscale(0) contrast(1.06)}
   .sv-track{gap:10px}
+}
+
+/* Appareils sans survol (tactile) : mêmes règles, quelle que soit la largeur. */
+@media (hover:none){
+  .mos img{filter:grayscale(0) brightness(.96)}
+  .mos:hover img{filter:grayscale(0) brightness(.96);transform:none}
+  .rea-frame img{filter:grayscale(0) contrast(1.06)}
 }
 
 @media (prefers-reduced-motion:reduce){

@@ -1,0 +1,137 @@
+{
+  "_commentaire": "Pages locales (une par commune). Chaque page est générée par build.mjs à partir de src/partials/ville.html. RÈGLE : chaque commune doit avoir un contenu RÉELLEMENT différent (contexte, bâti, chantier, question) — des pages quasi identiques seraient traitées par Google comme des « pages satellites » et pénalisées. Ne jamais dupliquer un paragraphe d'une commune à l'autre.",
+  "villes": [
+    {
+      "slug": "bourg-en-bresse",
+      "nom": "Bourg-en-Bresse",
+      "cp": "01000",
+      "distance": "6 km",
+      "intro": "Préfecture de l'Ain, Bourg-en-Bresse mêle immeubles de centre-ville, maisons bressanes anciennes et lotissements récents en périphérie. K-ProBat y intervient depuis 1991 pour le gros œuvre neuf comme pour la reprise de maçonneries anciennes.",
+      "contexte": "Le bâti burgien est très hétérogène : pierre et brique foraine dans le centre historique autour de Brou, parpaing des années 1970 sur les Vennes et Croix-Blanche, béton cellulaire et rupteurs thermiques sur les constructions neuves de la périphérie sud. Chaque type appelle une technique différente, et un mur ancien ne se reprend pas comme on monte une élévation neuve.",
+      "chantier": "Ouverture d'un mur porteur en brique foraine avec pose d'un linteau béton armé, dans une maison de ville du quartier de Brou.",
+      "question": "Intervenez-vous en centre-ville malgré l'accès difficile ?",
+      "reponse": "Oui. Les rues étroites et les stationnements contraints du centre burgien font partie du quotidien : nous adaptons les moyens de levage et les livraisons de matériaux, et nous gérons les demandes d'autorisation de voirie quand elles sont nécessaires."
+    },
+    {
+      "slug": "montagnat",
+      "nom": "Montagnat",
+      "cp": "01250",
+      "distance": "notre commune",
+      "intro": "Montagnat est le siège de l'entreprise : c'est ici, chemin des Buffets, que K-ProBat est installée depuis 1991. Une grande partie de nos chantiers se trouve à moins de dix minutes de l'atelier.",
+      "contexte": "La commune s'est fortement développée en maisons individuelles au pied du Revermont. Les terrains y sont souvent en pente légère, ce qui impose des fondations en redans et des soutènements soignés. Nous connaissons les sols du secteur, les délais d'instruction en mairie et les entreprises locales avec lesquelles nous coordonnons les lots.",
+      "chantier": "Élévation complète en briques d'une maison individuelle de plain-pied, dalle, vide sanitaire et terrasse coulée.",
+      "question": "Peut-on vous rencontrer sur place à Montagnat ?",
+      "reponse": "Le déplacement se fait chez vous, sur votre terrain : c'est là que se prennent les décisions utiles. L'adresse de l'entreprise n'est pas un lieu d'accueil du public, les visites se font sur rendez-vous."
+    },
+    {
+      "slug": "peronnas",
+      "nom": "Péronnas",
+      "cp": "01960",
+      "distance": "8 km",
+      "intro": "Commune résidentielle au sud de Bourg-en-Bresse, Péronnas connaît une construction neuve soutenue. K-ProBat y réalise fondations, élévations et aménagements extérieurs maçonnés.",
+      "contexte": "Beaucoup de parcelles récentes en lotissement, avec des cahiers des charges précis sur les clôtures, les hauteurs et les teintes d'enduit. Nous travaillons régulièrement à partir des plans d'un architecte ou d'un constructeur, en respectant les prescriptions du lotissement.",
+      "chantier": "Piscine maçonnée avec plage béton et muret de soutènement, sur un terrain de lotissement.",
+      "question": "Travaillez-vous avec les constructeurs de maisons ?",
+      "reponse": "Oui, en sous-traitance de gros œuvre comme en direct avec le particulier. Dans les deux cas, le devis détaille précisément ce qui est à notre charge et ce qui reste aux autres corps d'état."
+    },
+    {
+      "slug": "viriat",
+      "nom": "Viriat",
+      "cp": "01440",
+      "distance": "10 km",
+      "intro": "Vaste commune au nord de Bourg-en-Bresse, Viriat compte de nombreux hameaux et fermes bressanes. K-ProBat y intervient aussi bien en construction neuve qu'en rénovation de bâti ancien.",
+      "contexte": "Le patrimoine agricole y est important : anciennes granges, murs en pisé, dépendances transformées en habitation. Ces reprises demandent des reconnaissances de fondations et des chaînages ajoutés avec précaution — on ne charge pas un mur ancien comme un mur neuf.",
+      "chantier": "Reprise en sous-œuvre et création d'ouvertures dans une ancienne dépendance agricole transformée en logement.",
+      "question": "Faites-vous les transformations de granges en habitation ?",
+      "reponse": "Nous réalisons la partie maçonnerie : reprise des fondations, chaînages, création d'ouvertures, planchers et dalles. Le diagnostic structurel préalable est indispensable et nous vous disons franchement quand un bureau d'études est nécessaire."
+    },
+    {
+      "slug": "certines",
+      "nom": "Certines",
+      "cp": "01240",
+      "distance": "9 km",
+      "intro": "Certines, à l'est de Bourg-en-Bresse, conjugue village ancien et constructions récentes. K-ProBat y réalise dalles, élévations, escaliers béton et clôtures maçonnées.",
+      "contexte": "Le secteur est marqué par des terrains argileux, sensibles au retrait-gonflement en période de sécheresse. Les fondations y sont dimensionnées en conséquence, plus profondes, avec un chaînage périphérique continu : c'est la seule vraie protection contre les fissures qui apparaissent des années plus tard.",
+      "chantier": "Fondations et vide sanitaire d'une maison individuelle sur terrain argileux, avec plancher isolé.",
+      "question": "Comment tenez-vous compte de la nature du sol ?",
+      "reponse": "Nous partons de l'étude de sol quand elle existe, et nous la recommandons vivement quand elle manque. Le type de fondation, sa profondeur et le ferraillage en découlent directement."
+    },
+    {
+      "slug": "ceyzeriat",
+      "nom": "Ceyzériat",
+      "cp": "01250",
+      "distance": "5 km",
+      "intro": "Adossée au Revermont, Ceyzériat est l'une des communes les plus proches de notre atelier. K-ProBat y réalise murs de soutènement, terrasses, escaliers et gros œuvre de maison individuelle.",
+      "contexte": "Les terrains en pente du pied de côte imposent presque toujours des travaux de soutènement : murs en béton armé, escaliers extérieurs, terrasses sur plots ou sur dalle. Un soutènement mal drainé finit par pousser — le drainage et les barbacanes ne sont pas des options.",
+      "chantier": "Mur de soutènement en béton armé et escalier extérieur, sur un terrain fortement en pente.",
+      "question": "Un mur de soutènement demande-t-il une autorisation ?",
+      "reponse": "Au-delà de deux mètres de hauteur, une déclaration préalable est généralement nécessaire, et le règlement d'urbanisme local peut être plus strict. Nous vous indiquons ce qu'il faut déposer avant de commencer."
+    },
+    {
+      "slug": "saint-denis-les-bourg",
+      "nom": "Saint-Denis-lès-Bourg",
+      "cp": "01000",
+      "distance": "9 km",
+      "intro": "Commune de l'agglomération burgienne, Saint-Denis-lès-Bourg accueille pavillons des années 1970 à 1990 et constructions neuves. K-ProBat y intervient beaucoup en extension et en rénovation.",
+      "contexte": "Le parc pavillonnaire arrive à l'âge des extensions : véranda maçonnée, garage accolé, surélévation, ouverture de mur porteur. La difficulté n'est pas la construction neuve, c'est le raccord — liaison de fondations, joint de dilatation, reprise de charge sur l'existant.",
+      "chantier": "Extension maçonnée accolée à un pavillon existant, avec liaison de fondations et chaînage de reprise.",
+      "question": "Une extension peut-elle se raccorder sans fissurer l'existant ?",
+      "reponse": "Oui, à condition de traiter la liaison correctement : fondations descendues au même niveau, joint de dilatation quand il le faut, et chaînage continu. C'est le point qui distingue une extension bien faite d'une extension qui fissure au bout de deux hivers."
+    },
+    {
+      "slug": "jasseron",
+      "nom": "Jasseron",
+      "cp": "01250",
+      "distance": "8 km",
+      "intro": "Village du Revermont dominé par son château, Jasseron mêle bâti ancien en pierre et maisons récentes. K-ProBat y réalise maçonnerie traditionnelle et gros œuvre.",
+      "contexte": "La pierre calcaire du Revermont est très présente : murets, soubassements, encadrements. Les reprises se font au mortier de chaux, pas au ciment — un mur ancien doit rester perspirant, sinon l'humidité se déplace et ressort ailleurs, souvent en pied de mur.",
+      "chantier": "Reprise de muret en pierre calcaire et création d'un escalier béton extérieur.",
+      "question": "Travaillez-vous la pierre et la chaux ?",
+      "reponse": "Oui, sur les reprises de bâti ancien. Nous distinguons clairement ce qui relève de la maçonnerie traditionnelle à la chaux et ce qui relève du béton contemporain, et nous ne mélangeons pas les deux là où ça n'a pas lieu d'être."
+    },
+    {
+      "slug": "attignat",
+      "nom": "Attignat",
+      "cp": "01340",
+      "distance": "14 km",
+      "intro": "Au nord de l'agglomération, Attignat est une commune bressane en développement. K-ProBat y réalise fondations, élévations, dalles et vide sanitaire de maisons individuelles.",
+      "contexte": "Terrains plats et parcelles généreuses : les projets y sont souvent de plain-pied, avec un vide sanitaire plutôt qu'un terre-plein. Le vide sanitaire coûte un peu plus cher à la construction, mais il isole mieux du sol et rend les réseaux accessibles pour toute la vie de la maison.",
+      "chantier": "Dalle sur vide sanitaire avec plancher poutrelles-hourdis isolé, pour une maison de plain-pied.",
+      "question": "Vide sanitaire ou dalle sur terre-plein ?",
+      "reponse": "Cela dépend du sol, du niveau de la nappe et de votre budget. Sur un terrain humide ou argileux, le vide sanitaire est presque toujours le bon choix. Nous vous chiffrons les deux solutions pour que la comparaison soit honnête."
+    },
+    {
+      "slug": "servas",
+      "nom": "Servas",
+      "cp": "01960",
+      "distance": "12 km",
+      "intro": "Petite commune bressane au sud-ouest de Bourg-en-Bresse, Servas conserve un caractère rural. K-ProBat y intervient en construction neuve et en rénovation de fermes.",
+      "contexte": "Habitat dispersé, corps de ferme, dépendances : les chantiers y sont souvent des réhabilitations partielles, avec des accès parfois étroits pour la toupie à béton. Nous anticipons l'approvisionnement — pompe à béton ou coulage par bennes selon la configuration.",
+      "chantier": "Dalle béton et reprise de murs dans un corps de ferme réhabilité en habitation principale.",
+      "question": "Et si le camion toupie ne peut pas accéder au chantier ?",
+      "reponse": "C'est fréquent en secteur rural. Selon la distance et le volume, nous utilisons une pompe à béton, un tapis, ou nous coulons par bennes. C'est prévu et chiffré dès le devis, pas découvert le jour du coulage."
+    },
+    {
+      "slug": "tossiat",
+      "nom": "Tossiat",
+      "cp": "01250",
+      "distance": "6 km",
+      "intro": "Voisine directe de Montagnat, Tossiat est adossée au Revermont. K-ProBat y réalise gros œuvre, terrasses, piscines maçonnées et clôtures.",
+      "contexte": "Comme à Ceyzériat, la pente et la proximité du coteau conditionnent les projets : décaissements, murs de soutènement, terrasses à plusieurs niveaux. Les aménagements extérieurs maçonnés y représentent une part importante de notre activité.",
+      "chantier": "Terrasse béton à deux niveaux avec muret de séparation et piliers de clôture.",
+      "question": "Faites-vous les aménagements extérieurs seuls, sans maison à construire ?",
+      "reponse": "Oui. Terrasse, escalier, muret, piliers de portail, dalle de garage ou d'abri : ces chantiers-là sont une part régulière de notre travail, et ils sont devisés au même niveau de détail qu'une construction."
+    },
+    {
+      "slug": "buellas",
+      "nom": "Buellas",
+      "cp": "01310",
+      "distance": "13 km",
+      "intro": "À l'ouest de Bourg-en-Bresse, Buellas est une commune bressane résidentielle et agricole. K-ProBat y réalise fondations, élévations et maçonneries de rénovation.",
+      "contexte": "Le secteur mêle constructions pavillonnaires récentes et bâti bressan traditionnel à colombages et briques. Sur l'ancien, la question principale est presque toujours celle de l'humidité en pied de mur : drainage périphérique, arase étanche, ventilation du soubassement.",
+      "chantier": "Drainage périphérique et reprise de soubassement sur une maison bressane traditionnelle.",
+      "question": "Comment traiter l'humidité qui remonte dans les murs ?",
+      "reponse": "En traitant la cause avant le symptôme : drainage extérieur, gestion des eaux pluviales, arase étanche si le mur le permet. Un enduit posé sur un mur humide ne fait que déplacer le problème plus haut."
+    }
+  ]
+}

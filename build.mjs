@@ -43,6 +43,13 @@ const PAGE_NAMES = {
 const pagePath = f => (f === 'index.html' ? '/' : '/' + f.replace(/\.html$/, ''));
 const TEXT_FILES = ['robots.txt', 'llms.txt', '_headers', 'manifest.webmanifest', 'sw.js'];
 
+// Pages locales (référencement) : une page par commune de src/villes.json,
+// assemblée à partir du gabarit src/partials/ville.html. Elles ne figurent pas
+// dans la navigation de l'accueil ; seul un bloc discret en pied de page leur
+// donne le lien entrant nécessaire à leur exploration par les moteurs.
+const VILLES = JSON.parse(readFileSync(join(SRC, 'villes.json'), 'utf8')).villes;
+const villeFile = v => `maconnerie-${v.slug}.html`;
+
 // ---- 1. configuration -------------------------------------------------------
 const cfg = JSON.parse(readFileSync(join(ROOT, 'site.config.json'), 'utf8'));
 if (!/^https:\/\/[a-z0-9.-]+$/i.test(cfg.siteUrl || ''))
@@ -60,7 +67,7 @@ const foreign = h => /\.(workers|pages)\.dev$/i.test(h) && h !== SITE_HOST;
 // ---- 2. contrôle : rien en dur dans les sources ----------------------------
 const pages = readdirSync(SRC).filter(f => f.endsWith('.html')).sort();
 const partials = readdirSync(join(SRC, 'partials')).filter(f => f.endsWith('.html'));
-const sources = [...pages.map(p => join('src', p)), ...partials.map(p => join('src', 'partials', p)), ...TEXT_FILES.filter(f => existsSync(join(SRC, f))).map(f => join('src', f))];
+const sources = [...pages.map(p => join('src', p)), ...partials.map(p => join('src', 'partials', p)), ...TEXT_FILES.filter(f => existsSync(join(SRC, f))).map(f => join('src', f)), join('src', 'villes.json')];
 for (const f of sources) {
   for (const [u] of readFileSync(join(ROOT, f), 'utf8').matchAll(URL_RE)) {
     const h = hostOf(u);
@@ -78,22 +85,51 @@ const jsonld = partial('jsonld-localbusiness.html');
 const crumbTpl = partial('jsonld-breadcrumb.html');
 const jsonText = s => JSON.stringify(s).slice(1, -1);
 
-for (const p of pages) {
-  let html = readFileSync(join(SRC, p), 'utf8')
+// Assemble une page : jetons communs (signature, JSON-LD, fil d'Ariane,
+// adresse du site) + en-tête « fichier généré ». `nom` sert au fil d'Ariane et
+// aux messages d'erreur ; `chemin` est l'URL propre de la page.
+function assemble(source, brut, nom, chemin) {
+  let html = brut
+    .replace(/\{\{ZONES\}\}/g, () => 'ZONE D\'INTERVENTION — ' + VILLES.map(v => `<a href="${villeFile(v)}" style="color:inherit;text-decoration:none">${v.nom.toUpperCase()}</a>`).join(' · '))
     .replace(/\{\{SIGNATURE\}\}/g, () => signature)
     .replace(/\{\{JSONLD\}\}/g, () => jsonld)
     .replace(/\{\{BREADCRUMB\}\}/g, () => {
-      const name = PAGE_NAMES[p];
-      if (!name) { errors.push(`src/${p} : jeton {{BREADCRUMB}} mais page absente de PAGE_NAMES (build.mjs)`); return ''; }
-      return crumbTpl.replace(/\{\{PAGE_NAME\}\}/g, jsonText(name)).replace(/\{\{PAGE_PATH\}\}/g, pagePath(p));
+      if (!nom) { errors.push(`${source} : jeton {{BREADCRUMB}} mais page sans nom de fil d'Ariane (PAGE_NAMES dans build.mjs)`); return ''; }
+      return crumbTpl.replace(/\{\{PAGE_NAME\}\}/g, jsonText(nom)).replace(/\{\{PAGE_PATH\}\}/g, chemin);
     })
     .replace(/\{\{SITE_URL\}\}/g, SITE_URL);
   const left = [...new Set([...html.matchAll(/\{\{[A-Z_]+\}\}/g)].map(m => m[0]))];
-  if (left.length) errors.push(`src/${p} : jeton(s) non résolu(s) : ${left.join(', ')}`);
-  html = html.replace(/^<!DOCTYPE html>\s*/i, `<!DOCTYPE html>\n<!-- Fichier GÉNÉRÉ par build.mjs à partir de src/${p} — ne pas modifier ici : modifiez la source, puis relancez node build.mjs -->\n`);
-  writeFileSync(join(OUT, p), html);
+  if (left.length) errors.push(`${source} : jeton(s) non résolu(s) : ${left.join(', ')}`);
+  return html.replace(/^<!DOCTYPE html>\s*/i, `<!DOCTYPE html>\n<!-- Fichier GÉNÉRÉ par build.mjs à partir de ${source} — ne pas modifier ici : modifiez la source, puis relancez node build.mjs -->\n`);
+}
+
+for (const p of pages) {
+  writeFileSync(join(OUT, p), assemble(`src/${p}`, readFileSync(join(SRC, p), 'utf8'), PAGE_NAMES[p], pagePath(p)));
 }
 fail();
+
+// ---- 3 bis. pages locales (une par commune) --------------------------------
+// Le gabarit est commun ; le CONTENU de chaque commune vient de villes.json et
+// doit rester réellement différent d'une page à l'autre (sinon Google les
+// traite en « pages satellites »). Chaque page renvoie vers les autres.
+const villeTpl = partial('ville.html');
+const lienVille = v => `<a href="${villeFile(v)}">${v.nom}</a>`;
+const villePages = [];
+for (const v of VILLES) {
+  const f = villeFile(v);
+  const brut = villeTpl
+    .replace(/\{\{VILLE\}\}/g, v.nom).replace(/\{\{CP\}\}/g, v.cp).replace(/\{\{SLUG\}\}/g, v.slug)
+    .replace(/\{\{DISTANCE\}\}/g, v.distance).replace(/\{\{INTRO\}\}/g, v.intro)
+    .replace(/\{\{CONTEXTE\}\}/g, v.contexte).replace(/\{\{CHANTIER\}\}/g, v.chantier)
+    .replace(/\{\{QUESTION_JSON\}\}/g, jsonText(v.question)).replace(/\{\{REPONSE_JSON\}\}/g, jsonText(v.reponse))
+    .replace(/\{\{QUESTION\}\}/g, v.question).replace(/\{\{REPONSE\}\}/g, v.reponse)
+    .replace(/\{\{LIENS_VILLES\}\}/g, VILLES.filter(o => o.slug !== v.slug).map(lienVille).join('\n    '));
+  writeFileSync(join(OUT, f), assemble('src/partials/ville.html', brut, `Maçon à ${v.nom}`, pagePath(f)));
+  villePages.push(f);
+}
+fail();
+const allPages = [...pages, ...villePages];
+
 cpSync(join(SRC, 'assets'), join(OUT, 'assets'), { recursive: true });
 
 // Fichiers texte : robots.txt, llms.txt, _headers (adresse du site injectée).
@@ -107,15 +143,15 @@ for (const f of TEXT_FILES) {
 // sitemap.xml : une entrée par page réellement présente dans src/ (URL propre,
 // identique à la balise canonical). lastmod = date du dernier commit du fichier.
 const today = new Date().toISOString().slice(0, 10);
-const lastmod = f => { try { return execFileSync('git', ['log', '-1', '--format=%cs', '--', join('src', f)], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || today; } catch { return today; } };
+const lastmod = f => { try { return execFileSync('git', ['log', '-1', '--format=%cs', '--', existsSync(join(SRC, f)) ? join('src', f) : join('src', 'villes.json')], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || today; } catch { return today; } };
 const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-  + pages.map(p => `  <url>\n    <loc>${SITE_URL}${pagePath(p)}</loc>\n    <lastmod>${lastmod(p)}</lastmod>\n  </url>`).join('\n')
+  + allPages.map(p => `  <url>\n    <loc>${SITE_URL}${pagePath(p)}</loc>\n    <lastmod>${lastmod(p)}</lastmod>\n  </url>`).join('\n')
   + '\n</urlset>\n';
 writeFileSync(join(OUT, 'sitemap.xml'), sitemap);
 fail();
 
 // ---- 4. contrôle du résultat ---------------------------------------------------
-for (const p of pages) {
+for (const p of allPages) {
   const html = readFileSync(join(OUT, p), 'utf8');
   for (const [u] of html.matchAll(URL_RE)) if (foreign(hostOf(u))) errors.push(`site/${p} : URL absolue étrangère à siteUrl : ${u}`);
   for (const k of ['rel="canonical"', 'property="og:url"', 'property="og:image"', 'name="twitter:image"', 'class="ippyx-sig"', 'href="mentions-legales.html"', 'href="confidentialite.html"'])
@@ -135,4 +171,4 @@ for (const f of [...TEXT_FILES, 'sitemap.xml']) {
   for (const [u] of txt.matchAll(URL_RE)) if (foreign(hostOf(u))) errors.push(`site/${f} : URL absolue étrangère à siteUrl : ${u}`);
 }
 fail();
-console.log(`✓ site/ généré — ${pages.length} pages + sitemap.xml, robots.txt, llms.txt, _headers · siteUrl = ${SITE_URL} · signature utm_source = ${cfg.client}`);
+console.log(`✓ site/ généré — ${pages.length} pages + ${villePages.length} pages locales + sitemap.xml, robots.txt, llms.txt, _headers · siteUrl = ${SITE_URL} · signature utm_source = ${cfg.client}`);

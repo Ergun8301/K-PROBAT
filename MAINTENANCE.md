@@ -265,6 +265,28 @@ groupe `*`. Toute exclusion doit être répétée dans chaque groupe.
 contenu, et que le JSON-LD est servi (annotation « Site en ligne vérifié »
 sur le run).
 
+## Pages par commune (référencement local)
+
+Douze pages, une par commune : `/maconnerie-bourg-en-bresse`, `/maconnerie-montagnat`, etc.
+Elles ne sont **pas** dans le menu du site : elles existent pour être trouvées sur
+Google (« maçon à … »).
+
+**Où se trouve le contenu :** `src/villes.json`. Une commune = un bloc.
+**Le gabarit :** `src/partials/ville.html`. On n'y touche que pour changer la mise en page.
+
+Ajouter une commune : ajoutez un bloc dans `src/villes.json`, puis `node build.mjs`.
+La page, le sitemap, le `llms.txt` et le bloc « zone d'intervention » du pied de page
+se mettent à jour tout seuls.
+
+⚠️ **Règle absolue :** chaque commune doit avoir un texte **réellement différent**
+(`intro`, `contexte`, `chantier`, `question`, `reponse`). Des pages quasi identiques où
+seul le nom de la ville change sont traitées par Google comme des « pages satellites »
+(*doorway pages*) et peuvent faire chuter tout le site. Ne jamais copier-coller un
+paragraphe d'une commune à l'autre.
+
+ℹ️ Le petit bloc gris **ZONE D'INTERVENTION** en bas de l'accueil est volontaire :
+sans ce lien, ces pages seraient orphelines et Google les explorerait très mal.
+
 ## Aperçu lors d'un partage (WhatsApp, Facebook, LinkedIn…)
 
 Les 3 pages contiennent des balises **Open Graph / Twitter** (vignette au

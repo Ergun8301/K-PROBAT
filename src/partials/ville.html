@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!-- ══════════════════════════════════════════════════════════════════════
+     GABARIT DES PAGES LOCALES — une page par commune de src/villes.json,
+     assemblée par build.mjs (jetons VILLE, CP, SLUG, DISTANCE, INTRO,
+     CONTEXTE, CHANTIER, QUESTION, REPONSE, LIENS_VILLES).
+     Ces pages ne sont PAS dans la navigation de l'accueil : elles existent
+     pour le référencement local. Elles sont reliées entre elles et listées
+     dans le sitemap ; un petit bloc « zone d'intervention » en pied de page
+     d'accueil leur donne le lien entrant sans lequel Google les explore mal.
+     Le contenu de chaque commune doit rester RÉELLEMENT différent : voir le
+     commentaire en tête de src/villes.json.
+     ══════════════════════════════════════════════════════════════════════ -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maçon à {{VILLE}} ({{CP}}) — K-ProBat, maçonnerie générale &amp; gros œuvre</title>
+<meta name="description" content="Maçonnerie générale et gros œuvre à {{VILLE}} ({{CP}}, Ain) : fondations, dalles, élévations, escaliers béton, terrasses et piscines. Artisan installé à Montagnat depuis 1991. Devis gratuit.">
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#221E19">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="K-ProBat">
+<link rel="canonical" href="{{SITE_URL}}/maconnerie-{{SLUG}}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="K-ProBat">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Maçon à {{VILLE}} ({{CP}}) — K-ProBat">
+<meta property="og:description" content="Maçonnerie générale et gros œuvre à {{VILLE}} ({{CP}}, Ain) : fondations, dalles, élévations, escaliers béton, terrasses et piscines.">
+<meta property="og:url" content="{{SITE_URL}}/maconnerie-{{SLUG}}">
+<meta property="og:image" content="{{SITE_URL}}/assets/og/k-probat-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="K-ProBat — Maçonnerie générale à Montagnat, dans l'Ain">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Maçon à {{VILLE}} ({{CP}}) — K-ProBat">
+<meta name="twitter:description" content="Maçonnerie générale et gros œuvre à {{VILLE}} ({{CP}}, Ain).">
+<meta name="twitter:image" content="{{SITE_URL}}/assets/og/k-probat-og.jpg">
+{{JSONLD}}
+{{BREADCRUMB}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "{{QUESTION_JSON}}", "acceptedAnswer": { "@type": "Answer", "text": "{{REPONSE_JSON}}" } }
+  ]
+}
+</script>
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+.ville-actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 4px}
+.ville-actions a{display:inline-flex;align-items:center;justify-content:center;min-width:230px;min-height:52px;padding:0 22px;font-family:'League Spartan',sans-serif;font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;border-radius:2px}
+/* .legal-content a (0,2,1) l'emporterait sur une simple classe : on garde
+   la même spécificité, sinon le texte des boutons repasse en rouge accent
+   — et devient invisible sur le bouton rouge. */
+.legal-content .ville-cta-1{background:var(--acc);color:#EAE3D4}
+.legal-content .ville-cta-2{background:#25D366;color:#0b2e18}
+.legal-content .ville-cta-3{background:transparent;color:var(--ink);border:1px solid rgba(34,30,25,.35)}
+.legal-content .ville-actions a:hover{filter:brightness(.92);text-decoration:none}
+.legal-content .ville-cta-3:hover{background:var(--ink);color:var(--cream)}
+.ville-fiche{border-left:2px solid var(--acc);padding:2px 0 2px 18px;margin:26px 0}
+.ville-liens{margin-top:40px;padding-top:22px;border-top:1px solid rgba(34,30,25,.12)}
+.ville-liens p{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(34,30,25,.55);margin:0 0 10px}
+.legal-content .ville-liens a{display:inline-block;padding:6px 0;margin-right:16px;font-size:14px}
+@media (max-width:859px){.ville-actions a{min-width:0;flex:1 1 100%}}
+</style>
+</head>
+<body>
+<div class="legal-body">
+<header class="legal-header">
+  <a href="index.html" class="legal-brand">K-PROBAT</a>
+  <a href="index.html" class="legal-back">← RETOUR À L'ACCUEIL</a>
+</header>
+
+<section class="legal-hero">
+  <div class="legal-crumb"><a href="index.html">Accueil</a> / Maçon à {{VILLE}}</div>
+  <h1 class="legal-h1">Maçon à<br>{{VILLE}}.</h1>
+</section>
+
+<section class="legal-content">
+  <p class="legal-updated">MAÇONNERIE GÉNÉRALE &amp; GROS ŒUVRE — {{VILLE}} ({{CP}}) — AIN</p>
+
+  <p>{{INTRO}}</p>
+
+  <div class="ville-actions">
+    <a class="ville-cta-1" href="index.html#contact">Demander un devis</a>
+    <a class="ville-cta-2" href="https://wa.me/33652373293?text=Bonjour%2C%20je%20vous%20contacte%20depuis%20votre%20site%20K-ProBat.%20Je%20souhaite%20un%20devis%20pour%20un%20projet%20de%20ma%C3%A7onnerie." rel="noopener" target="_blank">WhatsApp</a>
+    <a class="ville-cta-3" href="tel:0652373293">06 52 37 32 93</a>
+  </div>
+
+  <h2>Le bâti à {{VILLE}}</h2>
+  <p>{{CONTEXTE}}</p>
+
+  <h2>Nos prestations à {{VILLE}}</h2>
+  <ul>
+    <li>Gros œuvre &amp; fondations — semelles, longrines, chaînages</li>
+    <li>Coffrage &amp; béton armé — murs banchés, poutres, linteaux</li>
+    <li>Élévations en briques, parpaings ou béton cellulaire (Siporex)</li>
+    <li>Dalles, planchers isolés et vide sanitaire</li>
+    <li>Escaliers béton coulés en place</li>
+    <li>Terrasses, murs de soutènement, clôtures et piliers</li>
+    <li>Piscines maçonnées</li>
+  </ul>
+
+  <div class="ville-fiche">
+    <h2 style="margin-top:0">Un chantier réalisé dans le secteur</h2>
+    <p>{{CHANTIER}}</p>
+    <p><strong>Distance depuis notre atelier de Montagnat :</strong> {{DISTANCE}}.</p>
+  </div>
+
+  <h2>{{QUESTION}}</h2>
+  <p>{{REPONSE}}</p>
+
+  <h2>Demander un devis à {{VILLE}}</h2>
+  <p>Le devis est gratuit et détaillé, poste par poste. Le déplacement se fait sur votre terrain, à {{VILLE}} ou dans les communes voisines. Réponse sous 24 h : <a href="tel:0652373293">06 52 37 32 93</a> ou <a href="mailto:k.probat01@gmail.com">k.probat01@gmail.com</a>. Vous pouvez aussi remplir le <a href="index.html#contact">formulaire de contact</a> — il ne prend pas deux minutes.</p>
+
+  <div class="ville-liens">
+    <p>Nous intervenons également à</p>
+    {{LIENS_VILLES}}
+  </div>
+</section>
+
+<footer class="footer">
+  <span>© 2026 K-PROBAT — MAÇONNERIE GÉNÉRALE &amp; GROS ŒUVRE</span>
+  <span>416 CHEMIN DES BUFFETS — 01250 MONTAGNAT — AIN (01)</span>
+  <span>SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE</span>
+  {{SIGNATURE}}
+</footer>
+</div>
+</body>
+</html>

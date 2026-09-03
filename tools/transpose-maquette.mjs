@@ -197,13 +197,61 @@ html = html.replace('<div style="display:flex;gap:clamp(10px,1.5vw,20px);transfo
 const WA_TEXT = encodeURIComponent(
   "Bonjour, je vous contacte depuis votre site K-ProBat. Je souhaite un devis gratuit pour un projet de maçonnerie.");
 html = html.replace(/href="https:\/\/wa\.me\/33652373293"/g, `href="https://wa.me/33652373293?text=${WA_TEXT}"`);
-// Bouton flottant : en bas à GAUCHE — à droite il chevauchait le fil à plomb
-// (barre verticale fixée à right:31px), et les marges paraissaient fausses.
-html = html.replace('position:fixed;bottom:80px;right:22px;z-index:70', 'position:fixed;bottom:24px;left:24px;z-index:70');
+// Bouton flottant : en bas à DROITE (comme sur les autres sites de l'agence).
+// Le fil à plomb décoratif est masqué sur mobile (style.css) pour éviter que
+// la barre verticale ne vienne toucher la bulle.
+// Marges IDENTIQUES au retrait horizontal des sections (clamp(18px,4vw,48px)) :
+// le bouton s'aligne ainsi exactement sous les boutons de l'accueil.
+html = html.replace('position:fixed;bottom:80px;right:22px;z-index:70',
+  'position:fixed;bottom:clamp(18px,4vw,48px);right:clamp(18px,4vw,48px);z-index:70');
 
 // marqueur pour aligner les deux boutons d'accueil sur mobile
 html = html.replace('<div data-fade="" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;pointer-events:auto">',
   '<div data-fade="" data-hero-cta style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;pointer-events:auto">');
+
+// ---- 6 quinquies. l'équipe familiale ---------------------------------------
+// Ajout hors maquette, demandé par le client (référencement local : les noms
+// de l'artisan et de ses fils). Rédigé à partir des seules informations
+// fournies : fondateur + deux fils maçons expérimentés. Aucune date inventée.
+{
+  const anchor = "Intervention à Montagnat et dans un rayon de 30 km — Bourg-en-Bresse, Ceyzériat, Péronnas, Saint-Denis-lès-Bourg.</p>";
+  const para = '\n      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(234,227,212,.75);max-width:560px">'
+    + 'Aujourd\'hui, <strong style="color:#EAE3D4;font-weight:700">Yasar Kilic</strong> travaille avec ses deux fils, '
+    + '<strong style="color:#EAE3D4;font-weight:700">Oktay</strong> et <strong style="color:#EAE3D4;font-weight:700">Okan</strong>, '
+    + 'maçons expérimentés formés sur les chantiers de l\'entreprise. Trois artisans, un seul nom sur le devis.</p>';
+  if (!html.includes(anchor)) { console.error('✗ paragraphe « zone d\'intervention » introuvable'); process.exit(1); }
+  html = html.replace(anchor, anchor + para);
+}
+
+// ---- 6 sexies. contact : 3 boutons d'action alignés ------------------------
+// Demandé par le client, sur le modèle du site MC Crépi : Appeler / WhatsApp /
+// E-mail, empilés, TOUS de la même largeur (aucun décalage). Ils remplacent le
+// lien e-mail en texte, qui faisait doublon.
+{
+  // (l'attribut style-hover est encore présent : la conversion en CSS a lieu plus bas)
+  const mailLink = '<a data-reveal="" href="mailto:k.probat01@gmail.com" style="font-family:\'IBM Plex Mono\',monospace;font-size:clamp(14px,1.8vw,20px);letter-spacing:.1em;color:#221E19;text-decoration:none;width:fit-content;transition:color .3s" style-hover="color:var(--acc,#D93916)">K.PROBAT01@GMAIL.COM</a>';
+  const ICON = 'width:18px;height:18px;flex:none';
+  const base = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 30px;'
+    + 'font-family:\'League Spartan\',sans-serif;font-weight:700;font-size:14px;letter-spacing:.04em;'
+    + 'text-decoration:none;transition:all .3s;min-height:56px';
+  const group = `  <div data-reveal="" data-contact-actions style="display:flex;flex-direction:column;gap:12px;max-width:420px;width:100%">
+    <a href="tel:0652373293" style="${base};background:#221E19;color:#EAE3D4">
+      <svg style="${ICON}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      06 52 37 32 93</a>
+    <a href="https://wa.me/33652373293" target="_blank" rel="noopener" style="${base};background:#EAE3D4;color:#221E19;box-shadow:inset 0 0 0 1.5px rgba(34,30,25,.25)">
+      <svg style="${ICON}" viewBox="0 0 24 24" fill="#25D366"><path d="M12.04 2a9.9 9.9 0 0 0-8.51 14.9L2 22l5.27-1.48A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.2 15.3l-.3-.18-3.12.88.86-3.04-.2-.31a8.23 8.23 0 0 1 6.96-12.65m-3.5 3.6c-.16 0-.43.06-.65.3-.23.24-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.16 1.72 2.75 4.25 3.75 2.1.83 2.53.66 2.99.62.45-.04 1.47-.6 1.68-1.18.2-.58.2-1.08.15-1.18-.06-.1-.23-.16-.48-.29-.25-.12-1.47-.72-1.7-.8-.22-.09-.39-.13-.55.12-.17.25-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.13-1.05-.39-2-1.24-.73-.65-1.23-1.46-1.37-1.7-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.13-.55-1.35-.77-1.84-.2-.48-.4-.42-.55-.42z"></path></svg>
+      WHATSAPP DIRECT</a>
+    <a href="mailto:k.probat01@gmail.com" style="${base};background:transparent;color:#221E19;box-shadow:inset 0 0 0 1.5px #221E19">
+      <svg style="${ICON}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m2 7 10 6 10-6"></path></svg>
+      K.PROBAT01@GMAIL.COM</a>
+  </div>`;
+  if (!html.includes(mailLink)) { console.error('✗ lien e-mail du contact introuvable'); process.exit(1); }
+  html = html.replace(mailLink, group);
+}
+
+// ---- 6 septies. boutons du formulaire : même largeur, alignés --------------
+html = html.replace('<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">',
+  '<div data-form-actions style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">');
 
 // ---- 6 bis. pied de page : SIRET réel + signature IPPYX (jeton du build) ----
 html = html.replace('SIRET SUR DEMANDE — ASSURANCE DÉCENNALE', 'SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE');

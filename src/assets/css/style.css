@@ -37,6 +37,14 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
   --pop:1;
 }
 
+/* ---- boutons : équilibrés, jamais aléatoires -----------------------------
+   Règle commune : deux boutons côte à côte ont la MÊME largeur, et les groupes
+   de boutons empilés occupent la même mesure (modèle du site MC Crépi). */
+[data-hero-cta] > a{min-width:210px;text-align:center}
+[data-form-actions] > button{min-width:230px;text-align:center}
+[data-contact-actions] > a:hover{filter:brightness(.92)}
+[data-contact-actions] > a:nth-child(3):hover{background:#221E19;color:#EAE3D4}
+
 /* Repli : sans -webkit-text-stroke, color:transparent rendrait les lettres
    B, A, T du titre invisibles (SPECS-TECHNIQUES.md §1 et §5.1). */
 @supports not (-webkit-text-stroke: 1px #fff){
@@ -53,10 +61,12 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
   [data-rea]{grid-column:1 / -1 !important;margin-top:0 !important}
   /* pas de survol sur tactile : photos en couleur dès le chargement */
   :root{--gs:0;--dim:.96}
-  /* les deux boutons d'accueil passent à la ligne : on les met à la même
-     largeur pour qu'ils s'alignent proprement au lieu de finir décalés */
-  [data-hero-cta]{align-items:stretch}
-  [data-hero-cta] > a{flex:1 1 100%;text-align:center}
+  /* boutons empilés : tous à la même largeur, jamais décalés */
+  [data-hero-cta],[data-form-actions]{align-items:stretch}
+  [data-hero-cta] > a,[data-form-actions] > button{flex:1 1 100%;text-align:center}
+  [data-contact-actions]{max-width:none}
+  /* le fil à plomb décoratif touchait la bulle WhatsApp : masqué sur mobile */
+  [data-plumb]{display:none}
 }
 
 /* Appareils sans survol : mêmes réglages photo, quelle que soit la largeur. */

@@ -1,0 +1,52 @@
+<!-- ══════════════════════════════════════════════════════════════════════
+     DONNÉES STRUCTURÉES (JSON-LD) — fiche LocalBusiness de K-ProBat.
+     Source unique : src/partials/jsonld-localbusiness.html, injectée dans le
+     <head> des pages par build.mjs (jeton JSONLD). Les adresses absolues
+     viennent de site.config.json ({{SITE_URL}}).
+     Règle : uniquement des informations présentes sur le site. Pas de SIRET,
+     pas d'horaires, pas de note ni d'avis : si une information manque, on
+     omet le champ, on n'invente pas. La liste des prestations est celle de
+     la section Savoir-faire de l'accueil (source unique).
+     ══════════════════════════════════════════════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["LocalBusiness", "HomeAndConstructionBusiness"],
+  "@id": "{{SITE_URL}}/#localbusiness",
+  "name": "K-ProBat",
+  "description": "Maçonnerie générale et gros œuvre à Montagnat, dans l'Ain. Fondations, murs, dalles, escaliers, piscines — pour les maisons individuelles, depuis 1991.",
+  "url": "{{SITE_URL}}/",
+  "telephone": "+33652373293",
+  "email": "k.probat01@gmail.com",
+  "image": "{{SITE_URL}}/assets/og/k-probat-og.jpg",
+  "foundingDate": "1991",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "416 chemin des Buffets",
+    "addressLocality": "Montagnat",
+    "postalCode": "01250",
+    "addressCountry": "FR"
+  },
+  "areaServed": [
+    { "@type": "City", "name": "Montagnat" },
+    { "@type": "City", "name": "Bourg-en-Bresse" },
+    { "@type": "City", "name": "Ceyzériat" },
+    { "@type": "City", "name": "Péronnas" },
+    { "@type": "City", "name": "Saint-Denis-lès-Bourg" }
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Prestations de maçonnerie",
+    "itemListElement": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Gros œuvre & fondations" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Coffrage & béton armé" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Briques & parpaings" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Béton cellulaire — Siporex" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Escaliers béton" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Piscines maçonnées" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Clôtures & piliers" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Terrasses, dalles & vide sanitaire" } }
+    ]
+  }
+}
+</script>

@@ -1,0 +1,167 @@
+# ============================================================================
+#  Déploiement automatique sur Cloudflare Workers (Static Assets)
+#  Site : K-ProBat — dépôt K-PROBAT
+# ----------------------------------------------------------------------------
+#  MODÈLE RÉUTILISABLE POUR TOUS LES CLIENTS
+#  Pour un nouveau client, copiez ce fichier TEL QUEL dans le nouveau dépôt
+#  (même chemin : .github/workflows/deploy.yml). Il n'y a RIEN à modifier ici :
+#    - le nom du Worker est lu dans wrangler.jsonc (ligne "name") ;
+#    - les accès Cloudflare viennent des secrets du dépôt GitHub.
+#
+#  Pré-requis, une seule fois par dépôt (donc par client) :
+#    1. Dans le compte Cloudflare DU CLIENT (Gérer le compte → Jetons API) :
+#       créer un jeton avec le modèle « Modifier Cloudflare Workers »,
+#       limité à ce seul compte.
+#    2. Dans GitHub → dépôt → Settings → Secrets and variables → Actions :
+#         CLOUDFLARE_ACCOUNT_ID = identifiant du compte Cloudflare du client
+#         CLOUDFLARE_API_TOKEN  = le jeton créé à l'étape 1
+#    3. Dans wrangler.jsonc : mettre le nom du Worker du client ("name").
+#    4. Dans site.config.json : "siteUrl" (adresse publique) et "client".
+#
+#  Déroulé : 1) contrôle des secrets  2) build (src/ → site/, contrôle des URLs)
+#  3) dry-run (valide la config, n'envoie rien)  4) déploiement  5) résultat
+#  ou erreur complète, en annotation lisible  6) contrôle en direct du site
+#  (200, types de contenu, JSON-LD, pages et liens légaux) depuis le runner.
+#
+#  Déclenchement : à chaque push sur main, ou à la main depuis l'onglet
+#  Actions (bouton « Run workflow »).
+#  Doc : https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/
+# ============================================================================
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permet de relancer manuellement depuis l'onglet Actions
+
+# Le workflow a seulement besoin de lire le dépôt.
+permissions:
+  contents: read
+
+# Si deux pushes arrivent coup sur coup, on annule le déploiement précédent
+# pour ne publier que la version la plus récente.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Version de wrangler FIGÉE — la même pour tous les clients.
+  # ⚠ Ne jamais laisser wrangler-action choisir : sa version par défaut (3.90)
+  #   ne lit pas wrangler.jsonc et échoue immédiatement, avant tout envoi.
+  #   Pour mettre à jour : changer ce numéro, vérifier un déploiement, puis
+  #   reporter le même numéro dans les autres dépôts.
+  WRANGLER_VERSION: "4.128.0"
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js (requis par wrangler)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Échoue tout de suite, avec un message clair, si un secret manque.
+      # N'affiche JAMAIS les valeurs — seulement leur longueur.
+      - name: Vérifier la présence des secrets (sans les afficher)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          ok=1
+          [ -n "$CLOUDFLARE_API_TOKEN" ]  || { echo "::error title=Secret manquant::CLOUDFLARE_API_TOKEN est vide ou absent (Settings → Secrets and variables → Actions)"; ok=0; }
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || { echo "::error title=Secret manquant::CLOUDFLARE_ACCOUNT_ID est vide ou absent (Settings → Secrets and variables → Actions)"; ok=0; }
+          [ "$ok" = 1 ] || exit 1
+          echo "Secrets présents — longueurs : jeton=${#CLOUDFLARE_API_TOKEN} caractères, compte=${#CLOUDFLARE_ACCOUNT_ID} caractères (32 attendus)"
+
+      # Génère site/ à partir de src/ et de site.config.json. Échoue si une URL
+      # du site est écrite en dur dans les sources (voir build.mjs).
+      - name: Générer le site (src/ → site/) et contrôler les URLs
+        run: node build.mjs
+
+      # Valide wrangler.jsonc et l'inventaire des fichiers SANS rien envoyer.
+      # Si cette étape échoue, le problème est dans la configuration, pas dans
+      # les accès Cloudflare.
+      - name: Contrôle de la configuration (dry-run, n'envoie rien)
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes "wrangler@${WRANGLER_VERSION}" --version
+          npx --yes "wrangler@${WRANGLER_VERSION}" deploy --dry-run
+
+      - name: Déployer sur Cloudflare avec wrangler
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          command: deploy
+
+      # Succès : l'URL et le résumé sont remontés en annotation (visible en
+      # haut du run, et lisible par l'API GitHub sans ouvrir le journal).
+      - name: Résultat du déploiement (annotation)
+        if: success()
+        env:
+          OUT: ${{ steps.deploy.outputs.command-output }}
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          echo "$OUT"
+          resume=$(printf '%s' "$OUT" | grep -E 'Deployed|workers\.dev|Uploaded|Current Version' | tail -c 800 | sed ':a;N;$!ba;s/\n/%0A/g' || true)
+          echo "::notice title=Déploiement réussi::URL : ${URL:-voir le journal}%0A${resume}"
+
+      # Contrôle EN DIRECT après déploiement, depuis le runner : les pages et
+      # fichiers SEO répondent en 200 avec le bon type de contenu (llms.txt en
+      # UTF-8), et le JSON-LD est bien servi. Suit automatiquement siteUrl.
+      - name: Vérifier le site en ligne (200, types de contenu, JSON-LD)
+        if: success()
+        run: |
+          URL=$(node -p "require('./site.config.json').siteUrl")
+          ok=1; out=""
+          check() { # $1 chemin  $2 type de contenu attendu (regex)
+            for i in 1 2 3 4; do
+              res=$(curl -sS -o /tmp/body -w '%{http_code}|%{content_type}' --max-time 20 "$URL$1" 2>/dev/null || echo "000|")
+              http=${res%%|*}; ct=${res#*|}
+              [ "$http" = "200" ] && break; sleep 8
+            done
+            line="$1 → $http ($ct)"
+            if [ "$http" != "200" ] || ! printf '%s' "$ct" | grep -Eiq "$2"; then ok=0; line="✗ $line — attendu 200 et « $2 »"; else line="✓ $line"; fi
+            echo "$line"; out="$out%0A$line"
+          }
+          sleep 10
+          check / 'text/html'
+          check /mentions-legales 'text/html'
+          check /confidentialite 'text/html'
+          check /sitemap.xml 'xml'
+          check /robots.txt 'text/plain; ?charset=utf-8'
+          check /llms.txt 'text/plain; ?charset=utf-8'
+          check /assets/og/k-probat-og.jpg 'image/jpeg'
+          n=$(curl -sS --max-time 20 "$URL/" | grep -c 'application/ld+json' || true)
+          if [ "$n" -ge 1 ]; then line="✓ JSON-LD servi sur / ($n bloc)"; else ok=0; line="✗ JSON-LD absent de /"; fi
+          echo "$line"; out="$out%0A$line"
+          # Liens légaux dans le pied de page des pages principales
+          for p in / /mentions-legales /confidentialite; do
+            body=$(curl -sS --max-time 20 "$URL$p" || true)
+            if printf '%s' "$body" | grep -q 'href="mentions-legales.html"' && printf '%s' "$body" | grep -q 'href="confidentialite.html"'; then line="✓ liens légaux présents sur $p"; else ok=0; line="✗ liens légaux absents sur $p"; fi
+            echo "$line"; out="$out%0A$line"
+          done
+          if [ "$ok" = 1 ]; then echo "::notice title=Site en ligne vérifié::$URL$out"; else echo "::error title=Contrôle en ligne échoué::$URL$out"; exit 1; fi
+
+      # Échec : la sortie COMPLÈTE de wrangler (stderr + stdout) est réécrite
+      # ici en clair et remontée en annotation, pour ne jamais rester avec un
+      # simple « exit code 1 ».
+      - name: Erreur complète de wrangler (annotation)
+        if: failure() && steps.deploy.outcome == 'failure'
+        env:
+          ERR: ${{ steps.deploy.outputs.command-stderr }}
+          OUT: ${{ steps.deploy.outputs.command-output }}
+        run: |
+          echo "----- stderr wrangler -----"; echo "$ERR"
+          echo "----- stdout wrangler -----"; echo "$OUT"
+          msg=$(printf '%s\n%s' "$ERR" "$OUT" | grep -vE '^\s*$' | tail -c 900 | sed ':a;N;$!ba;s/\n/%0A/g' || true)
+          echo "::error title=Échec wrangler::${msg:-aucune sortie capturée}"

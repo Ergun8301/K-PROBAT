@@ -1,30 +1,31 @@
 # K-ProBat — Site vitrine
 
-Site vitrine one-page pour **K-ProBat**, artisan maçon (Yasar Kilic) à Montagnat, dans l'Ain — maçonnerie générale &amp; gros œuvre depuis 1991.
+Site vitrine one-page pour **K-ProBat**, artisan maçon (Yasar Kilic) à Montagnat, dans l'Ain — maçonnerie générale et gros œuvre depuis 1991.
 
-Implémentation fidèle de la maquette Claude Design (`K-ProBat - Maquette.html`), recréée en HTML/CSS/JS statique avec les photos de chantier en fichiers optimisés séparés.
+Le site utilise du HTML/CSS/JS standard, déployé sur Cloudflare Workers avec déploiement automatique à chaque push sur `main`.
 
-## Structure
+## Configuration & build
 
-```
-index.html            page unique (hero, savoir-faire, réalisations, artisan, contact)
-assets/css/style.css   tous les styles (design tokens, responsive, animations CSS)
-assets/js/main.js      menu mobile, scroll fluide, animations GSAP/ScrollTrigger/Lenis, formulaire
-assets/img/*.jpg       22 photos de chantier réelles
-```
+Les valeurs propres au site sont dans `site.config.json` (adresse publique et identifiant client). Un script de build (`build.mjs`) génère le dossier publié (`site/`) à partir des sources — pages, sitemap, robots.txt, llms.txt et en-têtes — en refusant explicitement toute adresse écrite en dur.
 
-## Aperçu local
+## Structure des sources
 
-Le site est 100 % statique, aucun build n'est nécessaire :
-
-```bash
-python3 -m http.server 8000
-# puis ouvrir http://localhost:8000
-```
+Les sources sont organisées dans `src/` : la page d'accueil (one-page : savoir-faire, réalisations, artisan, contact) et les deux pages légales, avec `assets/` pour les styles, scripts et photos, et `partials/` pour les blocs communs (signature, données structurées JSON-LD).
 
 ## Déploiement
 
-Compatible avec n'importe quel hébergement statique (GitHub Pages, Netlify, Vercel, OVH, etc.) : il suffit de servir le dossier tel quel.
+Le principe : modifier les fichiers dans `src/`, lancer le build en local pour vérifier, puis pousser sur `main`. Le déploiement se fait automatiquement via GitHub Actions et `wrangler` (Cloudflare Workers), sans passer par l'intégration automatique Git de Cloudflare.
+
+## Maintenance
+
+Un guide dédié (`MAINTENANCE.md`) couvre le remplacement des photos, les modifications de texte, les coordonnées, les pages légales et la gestion du domaine — il sert de référence centrale pour l'administration du site, y compris le **passage au domaine définitif**.
+
+## Aperçu local
+
+```bash
+node build.mjs
+npx http-server site
+```
 
 ## Contact / formulaire
 

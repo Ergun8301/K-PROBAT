@@ -1,0 +1,41 @@
+/* Règles :hover / :focus extraites des attributs style-hover /
+   style-focus de la maquette par tools/transpose-maquette.mjs.
+   Ne pas modifier à la main : relancer l'outil. */
+[data-hx="h0"]:hover{background:#1a1713}
+[data-hx="h1"]:hover{color:var(--acc,#D93916)}
+[data-hx="h2"]:hover{color:var(--acc,#D93916)}
+[data-hx="h3"]:hover{color:var(--acc,#D93916)}
+[data-hx="h4"]:hover{color:var(--acc,#D93916)}
+[data-hx="h5"]:hover{color:var(--acc,#D93916)}
+[data-hx="h6"]:hover{color:var(--acc,#D93916)}
+[data-hx="h7"]:hover{color:var(--acc,#D93916)}
+[data-hx="h8"]:hover{color:var(--acc,#D93916)}
+[data-hx="h9"]:hover{color:var(--acc,#D93916)}
+[data-hx="h10"]:hover{color:var(--acc,#D93916)}
+[data-hx="h11"]:hover{color:var(--acc,#D93916)}
+[data-hx="h12"]:hover{color:var(--acc,#D93916)}
+[data-hx="h13"]:hover{filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)}
+[data-hx="h14"]:hover{filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)}
+[data-hx="h15"]:hover{filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)}
+[data-hx="h16"]:hover{filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)}
+[data-hx="h17"]:hover{filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)}
+[data-hx="h18"]:hover{filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)}
+[data-hx="h19"]:hover{background:#EAE3D4;color:#221E19}
+[data-hx="h20"]:hover{background:#EAE3D4;color:#221E19}
+[data-hx="h21"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h22"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h23"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h24"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h25"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h26"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h27"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h28"]:hover{filter:grayscale(0) contrast(1.06)}
+[data-hx="h29"]:hover{color:var(--acc,#D93916)}
+[data-hx="h30"]:hover{color:var(--acc,#D93916)}
+[data-hx="h31"]:hover{background:#1DA851}
+[data-hx="h32"]:hover{background:#D93916}
+[data-hx="h33"]:hover{background:#1DA851}
+[data-fx="f0"]:focus{border-bottom:1px solid #D93916}
+[data-fx="f1"]:focus{border-bottom:1px solid #D93916}
+[data-fx="f2"]:focus{border-bottom:1px solid #D93916}
+[data-fx="f3"]:focus{border-bottom:1px solid #D93916}

@@ -1,0 +1,227 @@
+<div style="font-family:'League Spartan',sans-serif;color:#221E19;background:#EAE3D4;min-height:100vh;overflow-x:clip;position:relative">
+
+<div data-loader="" style="position:fixed;inset:0;z-index:100">
+  <div style="position:absolute;inset:0;display:flex">
+    <div data-panel="" style="flex:1;background:#221E19;border-right:1px solid rgba(234,227,212,.05)"></div>
+    <div data-panel="" style="flex:1;background:#221E19;border-right:1px solid rgba(234,227,212,.05)"></div>
+    <div data-panel="" style="flex:1;background:#221E19;border-right:1px solid rgba(234,227,212,.05)"></div>
+    <div data-panel="" style="flex:1;background:#221E19;border-right:1px solid rgba(234,227,212,.05)"></div>
+    <div data-panel="" style="flex:1;background:#221E19;border-right:1px solid rgba(234,227,212,.05)"></div>
+    <div data-panel="" style="flex:1;background:#221E19"></div>
+  </div>
+  <div data-loadtxt="" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+    <span style="font-weight:800;letter-spacing:.04em;font-size:clamp(26px,5vw,60px);color:#EAE3D4;text-transform:uppercase">K-PROBAT</span>
+    <div style="width:min(320px,60vw);height:2px;background:rgba(234,227,212,.15)"><div data-loadbar="" style="width:0%;height:100%;background:var(--acc,#D93916)"></div></div>
+    <span data-counter="" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--acc,#D93916)">COULAGE 000</span>
+  </div>
+</div>
+
+<button sc-camel-on-click="{{ toggleMenu }}" aria-label="Menu" style="position:fixed;top:0;right:0;z-index:90;width:64px;height:64px;background:var(--acc,#D93916);border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;transition:background .3s" style-hover="background:#1a1713">
+  <span style="display:block;width:24px;height:2px;background:#EAE3D4;transition:transform .35s cubic-bezier(.76,0,.24,1);transform:{{ b1 }}"></span>
+  <span style="display:block;width:24px;height:2px;background:#EAE3D4;transition:transform .35s cubic-bezier(.76,0,.24,1);transform:{{ b2 }}"></span>
+</button>
+
+<div data-plumb="" style="position:fixed;top:0;bottom:0;right:31px;width:1px;background:rgba(34,30,25,.14);z-index:40;pointer-events:none">
+  <div data-bead="" style="position:absolute;left:-4px;top:80px;width:9px;height:9px;background:var(--acc,#D93916)"></div>
+</div>
+
+<div style="position:fixed;inset:0;z-index:80;background:#221E19;color:#EAE3D4;clip-path:{{ menuClip }};transition:clip-path .7s cubic-bezier(.76,0,.24,1);pointer-events:{{ menuPE }};display:flex;flex-direction:column;justify-content:space-between;padding:clamp(20px,4vw,48px)">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-right:70px">
+    <span style="font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase">K-PROBAT</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.3em;color:rgba(234,227,212,.45)">NAVIGATION</span>
+  </div>
+  <nav style="display:flex;flex-direction:column;gap:2px">
+    <sc-for list="{{ menuItems }}" as="mi" hint-placeholder-count="5">
+      <div style="overflow:hidden">
+        <a sc-camel-on-click="{{ mi.go }}" style="display:flex;align-items:baseline;gap:18px;cursor:pointer;color:#EAE3D4;text-decoration:none;transform:{{ menuY }};opacity:{{ menuOp }};transition:transform .8s cubic-bezier(.19,1,.22,1) {{ mi.delay }},opacity .5s {{ mi.delay }},color .25s" style-hover="color:var(--acc,#D93916)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--acc,#D93916)">{{ mi.n }}</span>
+          <span style="font-weight:800;font-size:clamp(34px,7.5vh,76px);line-height:1.05;text-transform:uppercase;letter-spacing:-.01em">{{ mi.label }}</span>
+        </a>
+      </div>
+    </sc-for>
+  </nav>
+  <div style="display:flex;flex-wrap:wrap;gap:14px 40px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em">
+    <a href="tel:0652373293" style="color:var(--acc,#D93916);text-decoration:none">06 52 37 32 93</a>
+    <a href="https://wa.me/33652373293" target="_blank" rel="noopener" style="color:rgba(234,227,212,.7);text-decoration:none" style-hover="color:var(--acc,#D93916)">WHATSAPP</a>
+    <a href="mailto:k.probat01@gmail.com" style="color:rgba(234,227,212,.7);text-decoration:none" style-hover="color:var(--acc,#D93916)">K.PROBAT01@GMAIL.COM</a>
+    <span style="color:rgba(234,227,212,.45)">416 CHEMIN DES BUFFETS — 01250 MONTAGNAT</span>
+  </div>
+</div>
+
+<section id="hero" data-screen-label="Accueil" style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:#1A1713">
+  <div style="position:absolute;top:0;left:0;right:64px;display:flex;justify-content:space-between;align-items:center;padding:22px clamp(18px,4vw,48px);z-index:5">
+    <span data-fade="" style="font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#EAE3D4">K-PROBAT</span>
+    <nav data-fade="" style="display:{{ navDisp }};gap:30px;align-items:center">
+      <a sc-camel-on-click="{{ goSavoir }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#EAE3D4;text-decoration:none" style-hover="color:var(--acc,#D93916)">SAVOIR-FAIRE</a>
+      <a sc-camel-on-click="{{ goRea }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#EAE3D4;text-decoration:none" style-hover="color:var(--acc,#D93916)">RÉALISATIONS</a>
+      <a sc-camel-on-click="{{ goArtisan }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#EAE3D4;text-decoration:none" style-hover="color:var(--acc,#D93916)">L'ARTISAN</a>
+      <a sc-camel-on-click="{{ goContact }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:#EAE3D4;text-decoration:none" style-hover="color:var(--acc,#D93916)">CONTACT</a>
+    </nav>
+    <a data-fade="" href="tel:0652373293" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;color:#EAE3D4;text-decoration:none" style-hover="color:var(--acc,#D93916)">06 52 37 32 93</a>
+  </div>
+  <div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:3px;background:#1A1713">
+    <div data-mos="" style="position:relative;overflow:hidden;grid-column:span 2;grid-row:span 2"><img data-ki="h0" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Élévation en briques" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--pop,1);filter:grayscale(var(--gs,.5)) brightness(var(--dim,.5));transition:filter .5s,transform .7s cubic-bezier(.19,1,.22,1)" style-hover="filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)"></div>
+    <div data-mos="" style="position:relative;overflow:hidden;grid-row:span 2"><img data-ki="h1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Villa neuve — béton cellulaire" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--pop,1);filter:grayscale(var(--gs,.5)) brightness(var(--dim,.5));transition:filter .5s,transform .7s cubic-bezier(.19,1,.22,1)" style-hover="filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)"></div>
+    <div data-mos="" style="position:relative;overflow:hidden"><img data-ki="h2" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Escalier béton hélicoïdal" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--pop,1);filter:grayscale(var(--gs,.5)) brightness(var(--dim,.5));transition:filter .5s,transform .7s cubic-bezier(.19,1,.22,1)" style-hover="filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)"></div>
+    <div data-mos="" style="background:var(--acc,#D93916);display:flex;align-items:center;justify-content:center"><span style="font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,1vw,12px);letter-spacing:.2em;color:#EAE3D4">DEPUIS 1991</span></div>
+    <div data-mos="" style="position:relative;overflow:hidden;grid-column:span 2"><img data-ki="h3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Dalle et bassin béton" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--pop,1);filter:grayscale(var(--gs,.5)) brightness(var(--dim,.5));transition:filter .5s,transform .7s cubic-bezier(.19,1,.22,1)" style-hover="filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)"></div>
+    <div data-mos="" style="position:relative;overflow:hidden"><img data-ki="h4" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Clôture grillage rigide" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--pop,1);filter:grayscale(var(--gs,.5)) brightness(var(--dim,.5));transition:filter .5s,transform .7s cubic-bezier(.19,1,.22,1)" style-hover="filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)"></div>
+    <div data-mos="" style="position:relative;overflow:hidden"><img data-ki="h5" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Murs Siporex — béton cellulaire" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--pop,1);filter:grayscale(var(--gs,.5)) brightness(var(--dim,.5));transition:filter .5s,transform .7s cubic-bezier(.19,1,.22,1)" style-hover="filter:grayscale(0) brightness(.85) saturate(1.15);transform:scale(1.05)"></div>
+  </div>
+  <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(26,23,19,.3) 0%,rgba(26,23,19,.15) 40%,rgba(26,23,19,.78) 100%);opacity:var(--veil,1)"></div>
+  <div style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;padding:100px clamp(18px,4vw,48px) clamp(26px,4.5vh,50px);gap:clamp(18px,3vh,30px);pointer-events:none">
+    <div data-fade=""><span style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:#EAE3D4;background:rgba(26,23,19,.75);padding:8px 12px">MAÇONNERIE GÉNÉRALE — GROS ŒUVRE — DEPUIS 1991</span></div>
+    <h1 style="margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.9;font-size:clamp(44px,13.5vw,205px);color:#EAE3D4">
+      <span style="display:block;overflow:hidden;padding-top:.08em"><span style="display:inline-block;white-space:nowrap"><span data-ltr="" style="display:inline-block">K</span><span data-ltr="" style="display:inline-block;color:var(--acc,#D93916)">-</span><span data-ltr="" style="display:inline-block">P</span><span data-ltr="" style="display:inline-block">R</span><span data-ltr="" style="display:inline-block">O</span><span data-ltr="" style="display:inline-block;-webkit-text-stroke:2.5px #EAE3D4;color:transparent">B</span><span data-ltr="" style="display:inline-block;-webkit-text-stroke:2.5px #EAE3D4;color:transparent">A</span><span data-ltr="" style="display:inline-block;-webkit-text-stroke:2.5px #EAE3D4;color:transparent">T</span><span data-ltr="" style="display:inline-block;color:var(--acc,#D93916)">.</span></span></span>
+    </h1>
+    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:22px">
+      <p data-fade="" style="margin:0;font-weight:400;font-size:clamp(15px,1.6vw,19px);line-height:1.55;max-width:520px;color:rgba(234,227,212,.9)">Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Fondations, murs, dalles, escaliers, piscines — dans les règles de l'art, depuis 1991.</p>
+      <div data-fade="" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;pointer-events:auto">
+        <a sc-camel-on-click="{{ goContact }}" style="cursor:pointer;font-weight:700;font-size:14px;letter-spacing:.04em;padding:18px 30px;background:var(--acc,#D93916);color:#EAE3D4;text-decoration:none;transition:all .3s" style-hover="background:#EAE3D4;color:#221E19">Demander un devis</a>
+        <a sc-camel-on-click="{{ goRea }}" style="cursor:pointer;font-weight:700;font-size:14px;letter-spacing:.04em;padding:18px 30px;color:#EAE3D4;text-decoration:none;box-shadow:inset 0 0 0 1.5px #EAE3D4;transition:all .3s" style-hover="background:#EAE3D4;color:#221E19">Voir les chantiers</a>
+      </div>
+    </div>
+  </div>
+  <div data-marq="" style="position:relative;z-index:3;background:#221E19;color:#EAE3D4;overflow:hidden;padding:16px 0">
+    <div style="display:flex;width:max-content;animation:kmarq 26s linear infinite;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.22em;white-space:nowrap">
+      <span style="padding-right:0px">BÉTON ARMÉ&nbsp;&nbsp;/&nbsp;&nbsp;COFFRAGE&nbsp;&nbsp;/&nbsp;&nbsp;SIPOREX&nbsp;&nbsp;/&nbsp;&nbsp;BRIQUES&nbsp;&nbsp;/&nbsp;&nbsp;PARPAINGS&nbsp;&nbsp;/&nbsp;&nbsp;DALLES&nbsp;&nbsp;/&nbsp;&nbsp;ESCALIERS&nbsp;&nbsp;/&nbsp;&nbsp;PISCINES&nbsp;&nbsp;/&nbsp;&nbsp;FONDATIONS&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+      <span>BÉTON ARMÉ&nbsp;&nbsp;/&nbsp;&nbsp;COFFRAGE&nbsp;&nbsp;/&nbsp;&nbsp;SIPOREX&nbsp;&nbsp;/&nbsp;&nbsp;BRIQUES&nbsp;&nbsp;/&nbsp;&nbsp;PARPAINGS&nbsp;&nbsp;/&nbsp;&nbsp;DALLES&nbsp;&nbsp;/&nbsp;&nbsp;ESCALIERS&nbsp;&nbsp;/&nbsp;&nbsp;PISCINES&nbsp;&nbsp;/&nbsp;&nbsp;FONDATIONS&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+    </div>
+  </div>
+</section>
+
+<section id="savoirfaire" data-screen-label="Savoir-faire" style="padding:clamp(70px,10vw,140px) clamp(18px,4vw,48px)">
+  <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(28px,4vw,52px)">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span data-reveal="" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--acc,#D93916)">01 / SAVOIR-FAIRE</span>
+      <h2 data-reveal="" style="margin:0;font-weight:900;font-size:clamp(30px,5vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:-.015em">Fondations solides,<br>structures durables.</h2>
+    </div>
+    <p data-reveal="" style="margin:0;max-width:380px;font-size:15px;line-height:1.6;color:rgba(34,30,25,.7)">Huit métiers, un seul artisan. Celui qui chiffre est celui qui coule le béton.</p>
+  </div>
+  <div data-reveal="" style="overflow:hidden;margin:0 calc(-1 * clamp(18px,4vw,48px));padding:clamp(30px,4vw,60px) 0">
+    <div style="display:flex;gap:clamp(10px,1.5vw,20px);transform:rotate(-3deg) scale(1.12);align-items:stretch">
+      <sc-for list="{{ svColumns }}" as="col" hint-placeholder-count="0">
+        <div data-svcol="{{ col.dir }}" style="flex:1;display:flex;flex-direction:column;gap:clamp(10px,1.5vw,20px)">
+          <sc-for list="{{ col.cards }}" as="c" hint-placeholder-count="0">
+            <div style="position:relative;overflow:hidden;aspect-ratio:3/4;background:#221E19">
+              <img data-ki="{{ c.k }}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="{{ c.t }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.92)">
+              <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(26,23,19,0) 45%,rgba(26,23,19,.82) 100%)"></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:clamp(12px,1.4vw,20px);pointer-events:none;display:flex;flex-direction:column;gap:6px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--acc,#D93916)">{{ c.n }}</span>
+                <span style="font-weight:800;font-size:clamp(15px,1.4vw,21px);line-height:1.05;text-transform:uppercase;letter-spacing:-.01em;color:#EAE3D4">{{ c.t }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(234,227,212,.65)">{{ c.tech }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="realisations" data-screen-label="Réalisations" style="padding:clamp(30px,4vw,60px) clamp(18px,4vw,48px) clamp(70px,10vw,140px)">
+  <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(28px,4vw,52px)">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span data-reveal="" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--acc,#D93916)">02 / RÉALISATIONS</span>
+      <h2 data-reveal="" style="margin:0;font-weight:900;font-size:clamp(30px,5vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:-.015em">Posé. Coulé.<br>Livré.</h2>
+    </div>
+    <span data-reveal="" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:rgba(34,30,25,.5)">PHOTOS DE NOS CHANTIERS — AIN (01)</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(12px,1.6vw,24px)">
+    <sc-if value="{{ projectsReady }}" hint-placeholder-val="{{ false }}">
+    <sc-for list="{{ projects }}" as="p" hint-placeholder-count="0">
+      <figure data-reveal="" style="grid-column:{{ p.col }};margin:{{ p.mt }} 0 0 0;display:flex;flex-direction:column;gap:12px">
+        <div style="position:relative;overflow:hidden;aspect-ratio:{{ p.ar }};background:#d9d0bd">
+          <img data-par="" data-ki="{{ p.k }}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="{{ p.t }}" style="width:100%;height:118%;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.04);transition:filter .5s" style-hover="filter:grayscale(0) contrast(1.06)">
+        </div>
+        <figcaption style="display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em">
+          <span style="font-family:'League Spartan',sans-serif;font-weight:700;font-size:14px;letter-spacing:.02em;text-transform:uppercase">{{ p.t }}</span>
+          <span style="color:rgba(34,30,25,.55);white-space:nowrap">{{ p.meta }}</span>
+        </figcaption>
+      </figure>
+    </sc-for>
+    </sc-if>
+  </div>
+</section>
+
+<section id="artisan" data-screen-label="L'artisan" style="background:#221E19;color:#EAE3D4;padding:clamp(70px,10vw,150px) clamp(18px,4vw,48px)">
+  <span data-reveal="" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--acc,#D93916)">03 / L'ARTISAN</span>
+  <div style="display:flex;flex-wrap:wrap;gap:clamp(30px,5vw,90px);margin-top:clamp(24px,3vw,44px);align-items:flex-start">
+    <div style="flex:1 1 460px;min-width:300px;display:flex;flex-direction:column;gap:26px">
+      <p data-reveal="" style="margin:0;font-weight:800;font-size:clamp(26px,3.4vw,46px);line-height:1.1;text-transform:uppercase;letter-spacing:-.01em">« Trente-cinq ans que je monte des murs. <span style="color:var(--acc,#D93916)">Ils sont tous encore debout. »</span></p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(234,227,212,.75);max-width:560px">Derrière K-ProBat, il y a Yasar Kilic, maçon à Montagnat depuis 1991. Pas de commercial, pas de sous-traitance en cascade : celui qui signe le devis est celui qui tient la truelle. Ce qui est faisable est annoncé, ce qui ne l'est pas est dit franchement.</p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(234,227,212,.75);max-width:560px">Intervention à Montagnat et dans un rayon de 30 km — Bourg-en-Bresse, Ceyzériat, Péronnas, Saint-Denis-lès-Bourg.</p>
+    </div>
+    <div style="flex:1 1 300px;min-width:260px;display:grid;grid-template-columns:1fr 1fr;gap:3px;background:rgba(234,227,212,.18);border:1px solid rgba(234,227,212,.18)">
+      <div data-reveal="" style="background:#221E19;padding:clamp(20px,2vw,32px);display:flex;flex-direction:column;gap:10px">
+        <span data-count="1991" style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">1991</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(234,227,212,.55)">INSTALLÉ DANS L'AIN</span>
+      </div>
+      <div data-reveal="" style="background:#221E19;padding:clamp(20px,2vw,32px);display:flex;flex-direction:column;gap:10px">
+        <span style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1;color:var(--acc,#D93916)"><span data-count="35">35</span> ANS</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(234,227,212,.55)">DE GROS ŒUVRE</span>
+      </div>
+      <div data-reveal="" style="background:#221E19;padding:clamp(20px,2vw,32px);display:flex;flex-direction:column;gap:10px;grid-column:1 / -1">
+        <span style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">01</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(234,227,212,.55)">SEUL INTERLOCUTEUR, DU DEVIS À LA LIVRAISON</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" data-screen-label="Contact" style="padding:clamp(80px,11vw,160px) clamp(18px,4vw,48px);display:flex;flex-direction:column;gap:clamp(24px,3vw,40px)">
+  <span data-reveal="" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--acc,#D93916)">04 / CONTACT — DEVIS GRATUIT</span>
+  <h2 data-reveal="" style="margin:0;font-weight:900;font-size:clamp(30px,5vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:-.015em">Un chantier en tête ?</h2>
+  <a data-reveal="" href="tel:0652373293" style="font-weight:900;font-size:clamp(38px,8.5vw,130px);line-height:.95;letter-spacing:-.02em;color:#221E19;text-decoration:none;width:fit-content;transition:color .3s" style-hover="color:var(--acc,#D93916)">06 52 37 32 93</a>
+  <a data-reveal="" href="mailto:k.probat01@gmail.com" style="font-family:'IBM Plex Mono',monospace;font-size:clamp(14px,1.8vw,20px);letter-spacing:.1em;color:#221E19;text-decoration:none;width:fit-content;transition:color .3s" style-hover="color:var(--acc,#D93916)">K.PROBAT01@GMAIL.COM</a>
+  <div data-reveal="" style="display:flex;flex-direction:column;gap:26px;max-width:880px;margin-top:clamp(8px,1.5vw,20px)">
+    <div style="display:flex;align-items:center;gap:18px">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:rgba(34,30,25,.55);white-space:nowrap">OU DÉCRIVEZ VOTRE PROJET</span>
+      <span style="flex:1;height:1px;background:rgba(34,30,25,.2)"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:26px 34px">
+      <label style="display:flex;flex-direction:column;gap:9px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(34,30,25,.55)">VOTRE NOM</span>
+        <input id="kpb-nom" type="text" placeholder="Nom et prénom" style="background:transparent;border:none;border-bottom:1px solid rgba(34,30,25,.35);border-radius:0;padding:11px 0;font-family:'League Spartan',sans-serif;font-weight:500;font-size:17px;color:#221E19;outline:none" style-focus="border-bottom:1px solid #D93916">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:9px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(34,30,25,.55)">TÉLÉPHONE</span>
+        <input id="kpb-tel" type="tel" placeholder="06 12 34 56 78" style="background:transparent;border:none;border-bottom:1px solid rgba(34,30,25,.35);border-radius:0;padding:11px 0;font-family:'League Spartan',sans-serif;font-weight:500;font-size:17px;color:#221E19;outline:none" style-focus="border-bottom:1px solid #D93916">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:9px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(34,30,25,.55)">TYPE DE TRAVAUX</span>
+        <sc-raw-select id="kpb-trav" style="background:transparent;border:none;border-bottom:1px solid rgba(34,30,25,.35);border-radius:0;padding:11px 0;font-family:'League Spartan',sans-serif;font-weight:500;font-size:17px;color:#221E19;outline:none;cursor:pointer" style-focus="border-bottom:1px solid #D93916">
+          <option value="">— Choisir —</option>
+          <option>Gros œuvre / fondations</option>
+          <option>Coffrage &amp; béton armé</option>
+          <option>Briques / parpaings</option>
+          <option>Béton cellulaire — Siporex</option>
+          <option>Escalier béton</option>
+          <option>Piscine maçonnée</option>
+          <option>Clôture / piliers</option>
+          <option>Terrasse / dalle</option>
+          <option>Autre</option>
+        </sc-raw-select>
+      </label>
+    </div>
+    <label style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(34,30,25,.55)">VOTRE MESSAGE</span>
+      <textarea id="kpb-msg" rows="4" placeholder="Décrivez votre chantier : lieu, surface, délais…" style="background:transparent;border:none;border-bottom:1px solid rgba(34,30,25,.35);border-radius:0;padding:11px 0;font-family:'League Spartan',sans-serif;font-weight:500;font-size:17px;color:#221E19;outline:none;resize:vertical;line-height:1.5" style-focus="border-bottom:1px solid #D93916"></textarea>
+    </label>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">
+      <button sc-camel-on-click="{{ sendWa }}" style="font-family:'League Spartan',sans-serif;font-weight:700;font-size:14px;letter-spacing:.04em;padding:18px 30px;background:#25D366;color:#fff;border:none;cursor:pointer;transition:background .3s" style-hover="background:#1DA851">Envoyer sur WhatsApp</button>
+      <button sc-camel-on-click="{{ sendMail }}" style="font-family:'League Spartan',sans-serif;font-weight:700;font-size:14px;letter-spacing:.04em;padding:18px 30px;background:#221E19;color:#EAE3D4;border:none;cursor:pointer;transition:background .3s" style-hover="background:#D93916">Envoyer par e-mail</button>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;color:rgba(34,30,25,.6)">RÉPONSE SOUS 24 H — MONTAGNAT &amp; 30 KM</span>
+    </div>
+  </div>
+</section>
+
+<footer style="background:#221E19;color:rgba(234,227,212,.6);padding:26px clamp(18px,4vw,48px);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em">
+  <span>© 2026 K-PROBAT — MAÇONNERIE GÉNÉRALE &amp; GROS ŒUVRE</span>
+  <span>416 CHEMIN DES BUFFETS — 01250 MONTAGNAT — AIN (01)</span>
+  <span>SIRET SUR DEMANDE — ASSURANCE DÉCENNALE</span>
+</footer>
+
+<sc-if value="{{ waFloat }}" hint-placeholder-val="{{ false }}">
+  <a href="https://wa.me/33652373293" target="_blank" rel="noopener" aria-label="WhatsApp" style="position:fixed;bottom:80px;right:22px;z-index:70;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 8px 24px rgba(34,30,25,.3);transition:background .3s" style-hover="background:#1DA851"><svg width="28" height="28" sc-camel-view-box="0 0 24 24" fill="currentColor"><path d="M12.04 2a9.9 9.9 0 0 0-8.51 14.9L2 22l5.27-1.48A9.9 9.9 0 1 0 12.04 2m0 1.67a8.23 8.23 0 1 1-4.2 15.3l-.3-.18-3.12.88.86-3.04-.2-.31a8.23 8.23 0 0 1 6.96-12.65m-3.5 3.6c-.16 0-.43.06-.65.3-.23.24-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.16 1.72 2.75 4.25 3.75 2.1.83 2.53.66 2.99.62.45-.04 1.47-.6 1.68-1.18.2-.58.2-1.08.15-1.18-.06-.1-.23-.16-.48-.29-.25-.12-1.47-.72-1.7-.8-.22-.09-.39-.13-.55.12-.17.25-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.13-1.05-.39-2-1.24-.73-.65-1.23-1.46-1.37-1.7-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.13-.55-1.35-.77-1.84-.2-.48-.4-.42-.55-.42z"></path></svg></a>
+</sc-if>

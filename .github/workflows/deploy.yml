@@ -150,6 +150,23 @@ jobs:
             if printf '%s' "$body" | grep -q 'href="mentions-legales.html"' && printf '%s' "$body" | grep -q 'href="confidentialite.html"'; then line="✓ liens légaux présents sur $p"; else ok=0; line="✗ liens légaux absents sur $p"; fi
             echo "$line"; out="$out%0A$line"
           done
+          # Formulaire de devis : l'endpoint doit accepter une demande et
+          # refuser une demande incomplète. On envoie le champ « piège à
+          # robots » rempli : le Worker répond OK mais n'enregistre RIEN,
+          # donc ce contrôle ne crée pas de fausse demande.
+          rep=$(curl -sS --max-time 20 -X POST "$URL/api/devis" \
+                -H 'content-type: application/json' \
+                -d '{"nom":"Controle deploiement","tel":"0000000000","website":"bot"}' \
+                -w '|%{http_code}' || echo '|000')
+          if printf '%s' "$rep" | grep -q '"ok":true' && printf '%s' "$rep" | grep -q '|200$'; then
+            line="✓ formulaire /api/devis : demande acceptée"
+          else ok=0; line="✗ formulaire /api/devis : réponse inattendue — $rep"; fi
+          echo "$line"; out="$out%0A$line"
+          code=$(curl -sS -o /dev/null --max-time 20 -X POST "$URL/api/devis" \
+                 -H 'content-type: application/json' -d '{"nom":"","tel":""}' -w '%{http_code}' || echo 000)
+          if [ "$code" = "400" ]; then line="✓ formulaire /api/devis : demande incomplète refusée (400)";
+          else ok=0; line="✗ formulaire /api/devis : demande incomplète non refusée (reçu $code)"; fi
+          echo "$line"; out="$out%0A$line"
           if [ "$ok" = 1 ]; then echo "::notice title=Site en ligne vérifié::$URL$out"; else echo "::error title=Contrôle en ligne échoué::$URL$out"; exit 1; fi
 
       # Échec : la sortie COMPLÈTE de wrangler (stderr + stdout) est réécrite

@@ -5,16 +5,18 @@
  *  statiques). POST /api/devis reçoit le formulaire SANS que le visiteur quitte
  *  la page : la réponse est du JSON, la page affiche elle-même la confirmation.
  *
- *  Que devient une demande, selon ce qui est configuré dans le compte :
- *    1. journal du Worker  — TOUJOURS (observability activée dans wrangler.jsonc)
- *       → rien n'est jamais perdu, même sans autre réglage.
- *    2. LEADS (KV)         — si le stockage est branché : la demande est
- *       enregistrée et consultable dans le tableau de bord Cloudflare.
- *    3. SEND_EMAIL         — si Email Routing est actif (nécessite un domaine) :
- *       la demande part par e-mail à l'artisan.
+ *  Que devient une demande :
+ *    1. LEADS (KV)         — canal durable. Branché : espace « kprobat-leads ».
+ *       La demande y est rangée et reste consultable dans le tableau de bord.
+ *    2. SEND_EMAIL         — canal durable. Actif seulement si Email Routing
+ *       l'est (donc une fois le domaine définitif en place).
+ *    3. journal du Worker  — trace de dépannage, PAS un canal : il ne se lit
+ *       qu'en direct et s'efface. On n'y compte jamais pour rassurer le visiteur.
  *
- *  Les trois sont indépendants et facultatifs : le formulaire répond
- *  correctement au visiteur même si rien n'est encore configuré.
+ *  RÈGLE : la confirmation « votre demande est bien reçue » n'est envoyée au
+ *  visiteur que si au moins un canal DURABLE a réussi. Sinon il reçoit une
+ *  erreur avec le téléphone, et le bouton WhatsApp reste à sa portée. On ne
+ *  lui annonce jamais une demande reçue que personne ne recevra.
  *  Étapes de configuration : voir MAINTENANCE.md.
  * ========================================================================== */
 
@@ -95,17 +97,36 @@ async function handleDevis(request, env) {
   const text = buildMessage(d);
   console.log('DEMANDE DE DEVIS\n' + text); // toujours dans le journal du Worker
 
+  // Enregistrement durable. Le journal du Worker ne compte PAS comme canal :
+  // il n'est consultable qu'en direct et s'efface. Seuls le KV et l'e-mail
+  // laissent une trace que l'artisan retrouvera plus tard.
+  let enregistre = false;
   if (env.LEADS) {
     try {
       await env.LEADS.put('devis:' + new Date().toISOString() + ':' + crypto.randomUUID().slice(0, 8),
         JSON.stringify({ ...d, recuLe: new Date().toISOString() }));
+      enregistre = true;
     } catch (e) {
       console.error('enregistrement impossible :', e && e.message);
     }
+  } else {
+    console.error('aucun espace KV branché (binding LEADS) : la demande n\'est pas enregistrée');
   }
 
   const mail = await sendToArtisan(env, d, text);
   console.log('notification artisan :', mail);
+
+  // Ne jamais annoncer au visiteur une demande « bien reçue » si RIEN ne l'a
+  // gardée : il repartirait confiant alors que personne ne le rappellera.
+  // Dans ce cas on le dit franchement et on lui donne le téléphone ; le bouton
+  // WhatsApp est juste à côté du formulaire, ses champs restent remplis.
+  if (!enregistre && mail !== 'envoyé') {
+    return json({
+      ok: false,
+      erreur: 'Votre demande n\'a pas pu être enregistrée. Appelez le 06 52 37 32 93 '
+        + 'ou utilisez le bouton WhatsApp ci-dessous — vos réponses sont conservées.',
+    }, 503);
+  }
 
   return json({
     ok: true,

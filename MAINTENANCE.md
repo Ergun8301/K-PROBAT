@@ -127,10 +127,15 @@ WhatsApp et e-mail restent à côté, comme raccourcis facultatifs.
 si au moins un canal **durable** a réussi. Le journal ne compte pas : on ne
 rassure jamais quelqu'un sur une trace qui va disparaître.
 
-### A. Lire les demandes de devis (à transmettre à l'artisan)
+### A. Lire les demandes de devis — POUR L'AGENCE UNIQUEMENT
 
-Tant que le domaine définitif n'est pas en place, **c'est le seul endroit où
-les demandes sont conservées**. À consulter régulièrement.
+⚠️ **Ne pas transmettre cette procédure au client.** Un artisan n'a pas à ouvrir
+un tableau de bord technique pour lire ses propres demandes : ce serait lui
+refiler notre plomberie. Il recevra ses demandes **par e-mail**, dès que le
+domaine définitif sera en place (section B).
+
+En attendant, c'est **le seul endroit où les demandes sont conservées** : c'est
+donc à l'agence de le consulter régulièrement et de relayer les demandes.
 
 **Procédure, pas à pas :**
 

@@ -117,26 +117,62 @@ Le formulaire de la section Contact envoie la demande **au site lui-même**
 jamais la page** : la confirmation s'affiche sous le formulaire. Les boutons
 WhatsApp et e-mail restent à côté, comme raccourcis facultatifs.
 
-Une demande reçue suit trois canaux, **indépendants et facultatifs** :
+| Canal | Durable ? | État | Ce qu'il faut faire |
+|---|---|---|---|
+| **Enregistrement (KV)** | oui | **actif** | rien — voir A : où lire les demandes |
+| **E-mail à l'artisan** | oui | à activer | voir B — nécessite le domaine définitif |
+| **Journal du Worker** | **non** | actif | dépannage seulement : il ne se lit qu'en direct et s'efface. Cloudflare -> Workers -> `k-probat-site` -> *Logs* |
 
-| Canal | État | Ce qu'il faut faire |
-|---|---|---|
-| **Journal du Worker** | actif | rien — toute demande y est tracée, donc rien n'est jamais perdu. Cloudflare -> Workers -> `k-probat-site` -> *Logs* |
-| **Enregistrement (KV)** | **actif** | rien — voir A ci-dessous pour savoir où les lire |
-| **E-mail à l'artisan** | à activer | voir B ci-dessous — nécessite le domaine définitif |
+**La règle du site :** le visiteur ne voit « votre demande est bien reçue » que
+si au moins un canal **durable** a réussi. Le journal ne compte pas : on ne
+rassure jamais quelqu'un sur une trace qui va disparaître.
 
-### A. Enregistrer les demandes — FAIT
+### A. Lire les demandes de devis (à transmettre à l'artisan)
 
-L'espace KV **`kprobat-leads`** est créé dans le compte Cloudflare et branché
-au Worker sous le nom `LEADS` (`kv_namespaces` dans `wrangler.jsonc`).
+Tant que le domaine définitif n'est pas en place, **c'est le seul endroit où
+les demandes sont conservées**. À consulter régulièrement.
 
-**Pour lire les demandes reçues :** Cloudflare -> *Stockage et bases de données
--> KV* -> `kprobat-leads` -> onglet **Paires KV**. Une ligne par demande, clé
-`devis:<date>:<identifiant>`, valeur au format JSON (nom, téléphone, e-mail,
-type de travaux, message, date de réception).
+**Procédure, pas à pas :**
 
-C'est le filet de sécurité : même sans e-mail branché, aucune demande n'est
-perdue et elles restent consultables indéfiniment.
+1. Aller sur **dash.cloudflare.com** et se connecter.
+2. En haut à gauche, vérifier que le compte affiché est bien **K-ProBat**.
+3. Dans le menu de gauche : **Stockage et bases de données** → **Travailleurs KV**.
+4. Cliquer sur **kprobat-leads**.
+5. Onglet **Paires KV** (à côté de « Mesures »).
+
+Chaque ligne est **une demande**. La colonne de gauche (la « clé ») commence par
+`devis:` suivi de la date et de l'heure de réception — les plus récentes sont
+donc en bas de la liste par ordre alphabétique.
+
+Cliquer sur une ligne affiche le contenu, sous cette forme :
+
+```
+{"nom":"Dupont Jean","tel":"06 12 34 56 78","email":"jean@exemple.fr",
+ "travaux":"Dalle & terrasse","message":"Bonjour, je souhaite…",
+ "recuLe":"2026-09-04T09:12:44.000Z"}
+```
+
+Se lisent ainsi : `nom` le nom, `tel` le téléphone à rappeler, `email`
+l'adresse (facultative), `travaux` le type de chantier choisi dans la liste,
+`message` le texte libre, `recuLe` la date et l'heure (en heure universelle :
+**ajouter 2 h l'été, 1 h l'hiver** pour l'heure française).
+
+**Rappeler sous 24 h**, c'est ce que le site promet au visiteur.
+
+Une fois la demande traitée, la ligne peut être supprimée (bouton à droite) ou
+laissée : il n'y a aucune limite de place en pratique.
+
+> Le jour où le domaine définitif sera en place, les demandes arriveront **aussi
+> par e-mail** (section B). Ce tableau restera l'archive.
+
+**Côté technique.** L'espace KV `kprobat-leads` est relié au Worker sous le nom
+`LEADS` (bloc `kv_namespaces` de `wrangler.jsonc`).
+
+**Le visiteur n'est jamais trompé :** si l'enregistrement échoue *et* que
+l'e-mail n'est pas actif, le site n'affiche PAS « demande bien reçue ». Il
+affiche un message d'erreur avec le téléphone, garde les réponses saisies et
+laisse le bouton WhatsApp à portée de clic (`worker/index.js`). Une confirmation
+à l'écran signifie donc toujours qu'une trace existe réellement.
 
 ### B. Envoyer les demandes par e-mail à l'artisan
 

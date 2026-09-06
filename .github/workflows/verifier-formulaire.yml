@@ -36,7 +36,7 @@ jobs:
       - name: Installer Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 22
 
       - name: Envoyer la demande et prouver son arrivée
         env:
@@ -71,26 +71,35 @@ jobs:
           sleep 2
 
           echo "== Journal du Worker (envoi de l'e-mail) =="
-          grep -o 'notification artisan : [a-zéèç ]*' /tmp/tail.log | tail -5 || echo "(rien capté)"
+          MAIL=$(grep -o 'notification artisan : [a-zéèçû]*' /tmp/tail.log | tail -1 || true)
+          echo "${MAIL:-(rien capté — le journal en direct rate parfois la requête)}"
           echo
 
           # 3) Relecture de l'entrée réellement écrite dans le KV.
           echo "== Entrée relue dans l'espace KV =="
+          # wrangler affiche une bannière avant le JSON : on ne garde que le
+          # tableau, puis la clé la plus récente (elles sont horodatées).
           CLE=$(npx --yes "wrangler@${WRANGLER_VERSION}" kv key list --namespace-id "$KV" --remote \
-                | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const l=JSON.parse(d.slice(d.indexOf('[')));console.log(l.map(k=>k.name).sort().pop()||'')}")
+                | sed -n '/^\[/,$p' | jq -r '[.[].name] | sort | last')
           echo "clé : $CLE"
-          npx --yes "wrangler@${WRANGLER_VERSION}" kv key get "$CLE" --namespace-id "$KV" --remote
-          echo; echo
+          npx --yes "wrangler@${WRANGLER_VERSION}" kv key get "$CLE" --namespace-id "$KV" --remote > /tmp/kv.json
+          cat /tmp/kv.json; echo; echo
 
           # Verdict : la réponse doit être une confirmation, et l'entrée KV doit
           # porter la marque de CETTE demande — pas celle d'un essai précédent.
-          node -e "
-            const fs=require('fs');
-            const rep=JSON.parse(fs.readFileSync('/tmp/rep.json','utf8'));
-            if('$CODE'!=='200'||!rep.ok) throw new Error('le site n a pas confirme la demande : '+JSON.stringify(rep));
-            if(!'$CLE'.startsWith('devis:')) throw new Error('aucune entree KV relue');
-            console.log('OK — le site a confirme et l entree KV existe.');
-          "
+          MARQUE="$MARQUE" CODE="$CODE" MAIL="$MAIL" node -e '
+            const fs = require("fs");
+            const rep = JSON.parse(fs.readFileSync("/tmp/rep.json", "utf8"));
+            if (process.env.CODE !== "200" || !rep.ok)
+              throw new Error("le site n a pas confirme la demande : " + JSON.stringify(rep));
+            const kv = JSON.parse(fs.readFileSync("/tmp/kv.json", "utf8"));
+            if (kv.nom !== process.env.MARQUE)
+              throw new Error("l entree KV relue n est pas celle de CETTE demande : " + kv.nom);
+            if (/échec/.test(process.env.MAIL || ""))
+              throw new Error("le Worker a signale un echec d envoi de l e-mail");
+            console.log("OK — le site a confirme, et l entree KV relue porte bien la marque de cette demande.");
+            console.log("Envoi e-mail (journal) : " + (process.env.MAIL || "non capte"));
+          '
 
       - name: Rappel
         if: always()

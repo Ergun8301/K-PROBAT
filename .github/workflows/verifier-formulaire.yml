@@ -56,7 +56,7 @@ jobs:
           #    dit si l'e-mail est parti (« notification artisan : envoyé »).
           npx --yes "wrangler@${WRANGLER_VERSION}" tail --format json > /tmp/tail.log 2>/tmp/tail.err &
           TAIL=$!
-          sleep 12
+          sleep 25   # le temps que la session d'écoute soit réellement ouverte
 
           # 2) La demande elle-même, telle qu'un visiteur l'enverrait.
           echo "== Réponse du site =="
@@ -72,7 +72,13 @@ jobs:
 
           echo "== Journal du Worker (envoi de l'e-mail) =="
           MAIL=$(grep -o 'notification artisan : [a-zéèçû]*' /tmp/tail.log | tail -1 || true)
-          echo "${MAIL:-(rien capté — le journal en direct rate parfois la requête)}"
+          echo "${MAIL:-(rien capté)}"
+          if [ -z "$MAIL" ]; then
+            echo "--- pourquoi l'écoute n'a rien donné (sortie d'erreur de wrangler tail) ---"
+            tail -20 /tmp/tail.err || true
+            echo "--- journal brut capté (20 premières lignes) ---"
+            head -20 /tmp/tail.log || true
+          fi
           echo
 
           # 3) Relecture de l'entrée réellement écrite dans le KV.

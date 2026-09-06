@@ -71,13 +71,17 @@ jobs:
           sleep 2
 
           echo "== Journal du Worker (envoi de l'e-mail) =="
-          MAIL=$(grep -o 'notification artisan : [a-zéèçû]*' /tmp/tail.log | tail -1 || true)
-          echo "${MAIL:-(rien capté)}"
+          # Le Worker journalise « console.log('notification artisan :', etat) » :
+          # en sortie JSON, l'étiquette et l'état sont DEUX éléments du tableau
+          # « message », donc sur deux lignes. On lit donc les lignes suivantes.
+          MAIL=$(grep -A3 'notification artisan' /tmp/tail.log \
+                 | grep -oE '"(envoyé|échec|non configuré)"' | tr -d '"' | tail -1 || true)
+          echo "état de l'envoi : ${MAIL:-(rien capté)}"
           if [ -z "$MAIL" ]; then
-            echo "--- pourquoi l'écoute n'a rien donné (sortie d'erreur de wrangler tail) ---"
+            echo "--- sortie d'erreur de wrangler tail ---"
             tail -20 /tmp/tail.err || true
-            echo "--- journal brut capté (20 premières lignes) ---"
-            head -20 /tmp/tail.log || true
+            echo "--- journal brut capté ---"
+            head -60 /tmp/tail.log || true
           fi
           echo
 
@@ -101,8 +105,10 @@ jobs:
             const kv = JSON.parse(fs.readFileSync("/tmp/kv.json", "utf8"));
             if (kv.nom !== process.env.MARQUE)
               throw new Error("l entree KV relue n est pas celle de CETTE demande : " + kv.nom);
-            if (/échec/.test(process.env.MAIL || ""))
-              throw new Error("le Worker a signale un echec d envoi de l e-mail");
+            const mail = process.env.MAIL || "";
+            if (mail !== "envoyé")
+              throw new Error("l envoi de l e-mail n est pas confirme par le journal du Worker : "
+                + (mail || "aucun etat capte"));
             console.log("OK — le site a confirme, et l entree KV relue porte bien la marque de cette demande.");
             console.log("Envoi e-mail (journal) : " + (process.env.MAIL || "non capte"));
           '

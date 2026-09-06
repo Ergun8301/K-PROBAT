@@ -120,7 +120,7 @@ WhatsApp et e-mail restent à côté, comme raccourcis facultatifs.
 | Canal | Durable ? | État | Ce qu'il faut faire |
 |---|---|---|---|
 | **Enregistrement (KV)** | oui | **actif** | rien — voir A : où lire les demandes |
-| **E-mail à l'artisan** | oui | à activer | voir B — nécessite le domaine définitif |
+| **E-mail à l'artisan** | oui | **actif** | rien — arrive dans la boîte `k.probat01@gmail.com` |
 | **Journal du Worker** | **non** | actif | dépannage seulement : il ne se lit qu'en direct et s'efface. Cloudflare -> Workers -> `k-probat-site` -> *Logs* |
 
 **La règle du site :** le visiteur ne voit « votre demande est bien reçue » que
@@ -131,11 +131,11 @@ rassure jamais quelqu'un sur une trace qui va disparaître.
 
 ⚠️ **Ne pas transmettre cette procédure au client.** Un artisan n'a pas à ouvrir
 un tableau de bord technique pour lire ses propres demandes : ce serait lui
-refiler notre plomberie. Il recevra ses demandes **par e-mail**, dès que le
-domaine définitif sera en place (section B).
+refiler notre plomberie. Il les reçoit **par e-mail** (section B, désormais
+active) et n'a rien d'autre à connaître.
 
-En attendant, c'est **le seul endroit où les demandes sont conservées** : c'est
-donc à l'agence de le consulter régulièrement et de relayer les demandes.
+Le KV reste l'**archive** de l'agence : il garde tout, même si un e-mail se
+perd ou part en indésirables.
 
 **Procédure, pas à pas :**
 
@@ -179,19 +179,38 @@ affiche un message d'erreur avec le téléphone, garde les réponses saisies et
 laisse le bouton WhatsApp à portée de clic (`worker/index.js`). Une confirmation
 à l'écran signifie donc toujours qu'une trace existe réellement.
 
-### B. Envoyer les demandes par e-mail à l'artisan
+### B. Envoyer les demandes par e-mail à l'artisan — FAIT
 
-Possible **seulement une fois le domaine définitif en place** (voir la section
-« Passage au domaine définitif ») : Cloudflare n'envoie d'e-mail que depuis un
-domaine qu'il gère.
+Chaque demande part dans la boîte **k.probat01@gmail.com**, avec l'adresse du
+visiteur en `Reply-To` : l'artisan répond directement depuis son téléphone.
 
-1. Cloudflare -> le domaine -> *Email -> Email Routing* -> activer.
-2. *Adresses de destination* -> ajouter `k.probat01@gmail.com` -> l'artisan
-   valide le lien reçu par e-mail.
-3. Dans `wrangler.jsonc`, décommenter les blocs `send_email` et `vars`
-   (adresse `MAIL_FROM` sur le domaine, ex. `site@k-probat.fr`).
-4. `git push`. Chaque demande part alors dans la boîte de l'artisan, avec
-   l'adresse du visiteur en `Reply-To` (il répond directement).
+Ce qui est en place :
+
+- Email Routing actif sur la zone **k-probat.fr** (MX, SPF, DKIM, DMARC).
+- Adresse de destination `k.probat01@gmail.com` **vérifiée** dans le compte.
+- Binding `send_email` et variable `MAIL_FROM` (`site@k-probat.fr`) dans
+  `wrangler.jsonc`.
+
+⚠️ **L'ancien SPF hérité d'Infomaniak (`v=spf1 -all`) a été supprimé** : il
+interdisait tout envoi depuis le domaine. Il ne doit y avoir **qu'un seul**
+enregistrement SPF, celui de Cloudflare. Si un jour les e-mails cessent
+d'arriver, c'est la première chose à revérifier.
+
+`MAIL_FROM` est l'expéditeur affiché, **pas une boîte à relever** : personne ne
+lit `site@k-probat.fr`, les réponses partent vers le visiteur.
+
+### B bis. Vérifier que la chaîne fonctionne (contrôle de bout en bout)
+
+Onglet **Actions** du dépôt → **« Vérifier le formulaire (demande de test) »** →
+*Run workflow*.
+
+Le contrôle envoie une vraie demande marquée `TEST IPPYX`, puis prouve son
+arrivée : réponse du site, ligne du journal du Worker indiquant si l'e-mail est
+parti, et relecture de l'entrée réellement écrite dans le KV. Il échoue si l'un
+des maillons est rompu.
+
+Ce contrôle **n'est pas automatique** : on ne veut pas d'une fausse demande à
+chaque déploiement. Penser à supprimer l'entrée `TEST IPPYX` du KV après coup.
 
 ### C. Accusé de réception au visiteur — limite à connaître
 
@@ -228,11 +247,20 @@ Déploiement **automatique** à chaque push sur `main` par
 
 ---
 
-## 5) PASSAGE AU DOMAINE DÉFINITIF (ex. k-probat.fr) — procédure exacte
+## 5) PASSAGE AU DOMAINE DÉFINITIF — FAIT (k-probat.fr)
 
-Aujourd'hui le site répond sur l'adresse `workers.dev` indiquée dans
-`site.config.json`. Le jour du vrai domaine, **une seule ligne de code
-change**. Suivez les étapes dans l'ordre.
+**État actuel :** le site répond sur **https://k-probat.fr** (et
+`www.k-probat.fr`). La zone `kilicyasar.fr` redirige en 301 vers `k-probat.fr`.
+`siteUrl` vaut `https://k-probat.fr` dans `site.config.json` : toutes les
+adresses du site (canonical, Open Graph, JSON-LD, sitemap, robots, llms.txt)
+en découlent automatiquement.
+
+L'adresse `.workers.dev` reste active **en secours**. Elle pourra être coupée
+(Cloudflare → Workers → `k-probat-site` → *Paramètres → Domaines et routes*)
+une fois le fonctionnement confirmé dans la durée. Tant qu'elle existe, ne
+jamais la déclarer à Google : le site n'a qu'une adresse officielle.
+
+La procédure ci-dessous est conservée pour un futur site de l'agence.
 
 **Pré-requis** : le domaine est géré dans le compte Cloudflare **K-ProBat**
 (*Domaines → Ajouter un domaine*, puis pointer les serveurs de noms chez le

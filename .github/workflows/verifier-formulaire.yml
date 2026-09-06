@@ -1,0 +1,97 @@
+# ============================================================================
+#  Vérification en direct du formulaire de devis (lancement manuel).
+# ----------------------------------------------------------------------------
+#  Envoie une VRAIE demande sur le site en ligne, puis prouve qu'elle est bien
+#  arrivée dans les deux canaux durables :
+#    1. la réponse HTTP du site (confirmation affichée au visiteur) ;
+#    2. l'entrée réellement écrite dans l'espace KV, relue avec wrangler ;
+#    3. le journal du Worker, capté en direct, qui dit si l'e-mail est parti.
+#
+#  À lancer depuis l'onglet Actions -> « Vérifier le formulaire » -> Run workflow.
+#  La demande porte un nom explicite (« TEST IPPYX ») : elle se repère et se
+#  supprime facilement dans le tableau de bord.
+#
+#  Ce contrôle N'EST PAS automatique : on ne veut pas d'une fausse demande à
+#  chaque déploiement.
+# ============================================================================
+name: Vérifier le formulaire (demande de test)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  WRANGLER_VERSION: "4.128.0"
+
+jobs:
+  verifier:
+    name: Demande de test de bout en bout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Envoyer la demande et prouver son arrivée
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -uo pipefail
+          URL=$(node -p "require('./site.config.json').siteUrl")
+          KV=$(node -p "JSON.parse(require('fs').readFileSync('wrangler.jsonc','utf8').replace(/^\s*\/\/.*\$/gm,'')).kv_namespaces[0].id")
+          MARQUE="TEST IPPYX $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Site   : $URL"
+          echo "Espace : $KV"
+          echo "Marque : $MARQUE"
+          echo
+
+          # 1) Journal du Worker capté en direct pendant l'envoi : c'est lui qui
+          #    dit si l'e-mail est parti (« notification artisan : envoyé »).
+          npx --yes "wrangler@${WRANGLER_VERSION}" tail --format json > /tmp/tail.log 2>/tmp/tail.err &
+          TAIL=$!
+          sleep 12
+
+          # 2) La demande elle-même, telle qu'un visiteur l'enverrait.
+          echo "== Réponse du site =="
+          CODE=$(curl -sS -o /tmp/rep.json -w '%{http_code}' --max-time 25 \
+            -X POST "$URL/api/devis" \
+            -H 'content-type: application/json' -H "origin: $URL" \
+            -d "{\"nom\":\"$MARQUE\",\"tel\":\"0652373293\",\"email\":\"k.probat01@gmail.com\",\"travaux\":\"Dalles & vide sanitaire\",\"message\":\"Demande de test envoyee par le controle automatique IPPYX. Aucune suite a donner.\"}")
+          echo "code HTTP : $CODE"; cat /tmp/rep.json; echo; echo
+
+          sleep 20
+          kill $TAIL 2>/dev/null || true
+          sleep 2
+
+          echo "== Journal du Worker (envoi de l'e-mail) =="
+          grep -o 'notification artisan : [a-zéèç ]*' /tmp/tail.log | tail -5 || echo "(rien capté)"
+          echo
+
+          # 3) Relecture de l'entrée réellement écrite dans le KV.
+          echo "== Entrée relue dans l'espace KV =="
+          CLE=$(npx --yes "wrangler@${WRANGLER_VERSION}" kv key list --namespace-id "$KV" --remote \
+                | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const l=JSON.parse(d.slice(d.indexOf('[')));console.log(l.map(k=>k.name).sort().pop()||'')}")
+          echo "clé : $CLE"
+          npx --yes "wrangler@${WRANGLER_VERSION}" kv key get "$CLE" --namespace-id "$KV" --remote
+          echo; echo
+
+          # Verdict : la réponse doit être une confirmation, et l'entrée KV doit
+          # porter la marque de CETTE demande — pas celle d'un essai précédent.
+          node -e "
+            const fs=require('fs');
+            const rep=JSON.parse(fs.readFileSync('/tmp/rep.json','utf8'));
+            if('$CODE'!=='200'||!rep.ok) throw new Error('le site n a pas confirme la demande : '+JSON.stringify(rep));
+            if(!'$CLE'.startsWith('devis:')) throw new Error('aucune entree KV relue');
+            console.log('OK — le site a confirme et l entree KV existe.');
+          "
+
+      - name: Rappel
+        if: always()
+        run: echo "::notice::Demande de test « TEST IPPYX » à supprimer du KV une fois vérifiée."

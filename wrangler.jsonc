@@ -28,13 +28,16 @@
   //    kprobat-leads → onglet « Paires KV ».
   "kv_namespaces": [
     { "binding": "LEADS", "id": "458b94871dec4018b304b024d66e28a0" }
-  ]
-  //
-  // 2) Envoyer les demandes par e-mail à l'artisan (nécessite un domaine
-  //    avec Email Routing actif et l'adresse de destination vérifiée) :
-  // "send_email": [
-  //   { "name": "SEND_EMAIL", "destination_address": "k.probat01@gmail.com" }
-  // ],
-  // "vars": { "MAIL_FROM": "site@k-probat.fr" }
+  ],
+
+  // 2) Envoyer les demandes par e-mail à l'artisan — BRANCHÉ.
+  //    Email Routing est actif sur k-probat.fr et l'adresse de destination
+  //    k.probat01@gmail.com est vérifiée dans le compte Cloudflare.
+  //    MAIL_FROM doit appartenir à une zone du compte : c'est l'expéditeur
+  //    affiché, pas une boîte à relever.
+  "send_email": [
+    { "name": "SEND_EMAIL", "destination_address": "k.probat01@gmail.com" }
+  ],
+  "vars": { "MAIL_FROM": "site@k-probat.fr" }
   // ---------------------------------------------------------------------
 }

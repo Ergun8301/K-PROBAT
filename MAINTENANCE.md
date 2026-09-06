@@ -120,7 +120,7 @@ WhatsApp et e-mail restent à côté, comme raccourcis facultatifs.
 | Canal | Durable ? | État | Ce qu'il faut faire |
 |---|---|---|---|
 | **Enregistrement (KV)** | oui | **actif** | rien — voir A : où lire les demandes |
-| **E-mail à l'artisan** | oui | **actif** | rien — arrive dans la boîte `k.probat01@gmail.com` |
+| **E-mail à l'artisan** | oui | **actif** | rien — arrive dans `k.probat01@gmail.com`, expéditeur « K-ProBat » |
 | **Journal du Worker** | **non** | actif | dépannage seulement : il ne se lit qu'en direct et s'efface. Cloudflare -> Workers -> `k-probat-site` -> *Logs* |
 
 **La règle du site :** le visiteur ne voit « votre demande est bien reçue » que
@@ -210,7 +210,17 @@ parti, et relecture de l'entrée réellement écrite dans le KV. Il échoue si l
 des maillons est rompu.
 
 Ce contrôle **n'est pas automatique** : on ne veut pas d'une fausse demande à
-chaque déploiement. Penser à supprimer l'entrée `TEST IPPYX` du KV après coup.
+chaque déploiement.
+
+Pour retirer les demandes de test du KV : onglet **Actions** →
+**« Nettoyer les demandes de test »** → *Run workflow*. Il relit chaque entrée
+avant de la supprimer et n'efface que celles dont le nom commence par
+`TEST IPPYX` — une vraie demande de client ne peut pas partir par erreur.
+
+**Chaîne vérifiée de bout en bout le 6 septembre 2026** : réponse du site
+`200`, journal du Worker `notification artisan : envoyé`, entrée relue dans le
+KV, et réception confirmée dans la boîte de l'artisan — en boîte de réception
+principale, pas en indésirables.
 
 ### C. Accusé de réception au visiteur — limite à connaître
 
@@ -249,16 +259,30 @@ Déploiement **automatique** à chaque push sur `main` par
 
 ## 5) PASSAGE AU DOMAINE DÉFINITIF — FAIT (k-probat.fr)
 
-**État actuel :** le site répond sur **https://k-probat.fr** (et
-`www.k-probat.fr`). La zone `kilicyasar.fr` redirige en 301 vers `k-probat.fr`.
-`siteUrl` vaut `https://k-probat.fr` dans `site.config.json` : toutes les
-adresses du site (canonical, Open Graph, JSON-LD, sitemap, robots, llms.txt)
-en découlent automatiquement.
+### État de la production
 
-L'adresse `.workers.dev` reste active **en secours**. Elle pourra être coupée
-(Cloudflare → Workers → `k-probat-site` → *Paramètres → Domaines et routes*)
-une fois le fonctionnement confirmé dans la durée. Tant qu'elle existe, ne
-jamais la déclarer à Google : le site n'a qu'une adresse officielle.
+| Élément | État |
+|---|---|
+| Adresse officielle | **https://k-probat.fr** (et `www.k-probat.fr`) |
+| `kilicyasar.fr` | zone active, **redirection 301** vers `k-probat.fr` |
+| `siteUrl` (`site.config.json`) | `https://k-probat.fr` |
+| Worker | `k-probat-site`, servi sur les deux noms |
+| Enregistrement des demandes | espace KV `kprobat-leads` |
+| E-mail des demandes | Email Routing → `k.probat01@gmail.com` |
+| Adresse `.workers.dev` | encore active — **à couper**, voir ci-dessous |
+
+`siteUrl` est la source unique : canonical, Open Graph, JSON-LD, sitemap,
+robots.txt et llms.txt en découlent. Le build échoue si une adresse traîne en
+dur ou si une adresse `.workers.dev` subsiste dans le résultat.
+
+**Couper l'adresse `.workers.dev`** — Cloudflare → *Workers* → `k-probat-site`
+→ *Paramètres* → *Domaines et routes* → désactiver le sous-domaine
+`workers.dev`. Le site continue de répondre sur `k-probat.fr` : c'est une
+adresse en plus, pas l'hébergement. À faire maintenant que la chaîne est
+vérifiée : deux adresses servant le même contenu diluent le référencement, et
+celle-ci n'a plus d'utilité.
+
+Ne jamais déclarer une autre adresse que `https://k-probat.fr` à Google.
 
 La procédure ci-dessous est conservée pour un futur site de l'agence.
 

@@ -1,0 +1,73 @@
+# ============================================================================
+#  Suppression des demandes de test dans l'espace KV (lancement manuel).
+# ----------------------------------------------------------------------------
+#  Le contrôle « Vérifier le formulaire » dépose une demande marquée
+#  « TEST IPPYX … ». Ce nettoyage les retire, et RIEN d'autre : chaque entrée
+#  est relue avant suppression, et seules celles dont le champ « nom » commence
+#  par TEST IPPYX sont effacées. Une vraie demande de client ne peut donc pas
+#  être supprimée par erreur.
+#
+#  À lancer depuis l'onglet Actions -> « Nettoyer les demandes de test ».
+# ============================================================================
+name: Nettoyer les demandes de test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  WRANGLER_VERSION: "4.128.0"
+
+jobs:
+  nettoyer:
+    name: Retirer les entrées TEST IPPYX
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Supprimer les entrées de test
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -uo pipefail
+          W="npx --yes wrangler@${WRANGLER_VERSION}"
+          KV=$(node -p "JSON.parse(require('fs').readFileSync('wrangler.jsonc','utf8').replace(/^\s*\/\/.*\$/gm,'')).kv_namespaces[0].id")
+          echo "Espace : $KV"; echo
+
+          $W kv key list --namespace-id "$KV" --remote | sed -n '/^\[/,$p' \
+            | jq -r '.[].name' > /tmp/cles.txt
+          echo "$(wc -l < /tmp/cles.txt) entrée(s) au total"; echo
+
+          SUPPRIMEES=0
+          GARDEES=0
+          while IFS= read -r CLE; do
+            [ -z "$CLE" ] && continue
+            NOM=$($W kv key get "$CLE" --namespace-id "$KV" --remote 2>/dev/null | jq -r '.nom // ""')
+            case "$NOM" in
+              "TEST IPPYX"*)
+                $W kv key delete "$CLE" --namespace-id "$KV" --remote >/dev/null 2>&1 \
+                  && { echo "supprimée : $CLE  ($NOM)"; SUPPRIMEES=$((SUPPRIMEES+1)); } \
+                  || echo "ÉCHEC de suppression : $CLE"
+                ;;
+              *)
+                echo "conservée  : $CLE  ($NOM)"
+                GARDEES=$((GARDEES+1))
+                ;;
+            esac
+          done < /tmp/cles.txt
+
+          echo
+          echo "$SUPPRIMEES entrée(s) de test supprimée(s), $GARDEES vraie(s) demande(s) conservée(s)."
+
+          echo
+          echo "== Contrôle : ce qui reste dans l'espace KV =="
+          $W kv key list --namespace-id "$KV" --remote | sed -n '/^\[/,$p' | jq -r '.[].name' || true

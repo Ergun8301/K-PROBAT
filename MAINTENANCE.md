@@ -408,15 +408,19 @@ Le bouton *Revoir la version en ligne* recharge la page publiée pour comparer.
 Le site en ligne, lui, met une à deux minutes à se reconstruire après
 publication — mais on n'a plus besoin d'attendre pour voir.
 
-### Les trois réglages à faire une fois, dans Cloudflare
+### Les deux réglages à faire une fois, dans Cloudflare
 
 Cloudflare → *Workers* → `k-probat-site` → *Paramètres* → *Variables et secrets*.
+**Deux Secrets, et rien d'autre :**
 
 | Nom | Type | Valeur |
 |---|---|---|
 | `ADMIN_MOT_DE_PASSE` | **Secret** | le mot de passe de la page /admin |
 | `GITHUB_TOKEN` | **Secret** | jeton GitHub (voir ci-dessous) |
-| `GITHUB_DEPOT` | Variable | `Ergun8301/K-PROBAT` |
+
+La troisième valeur, `GITHUB_DEPOT` = `Ergun8301/K-PROBAT`, n'est **pas** à
+créer dans le tableau de bord : elle est déclarée dans `wrangler.jsonc`
+(`"vars"`). Voir l'avertissement ci-dessous — c'est important.
 
 **Créer le jeton GitHub** : github.com → photo de profil → *Settings* →
 *Developer settings* → *Personal access tokens* → **Fine-grained tokens** →
@@ -425,8 +429,36 @@ Cloudflare → *Workers* → `k-probat-site` → *Paramètres* → *Variables et
 - *Permissions* → *Repository permissions* → **Contents : Read and write**
 - Rien d'autre. Ce jeton ne peut donc RIEN faire en dehors de ce dépôt.
 
-Tant que ces trois valeurs manquent, `/admin` l'annonce clairement au lieu
+Tant que ces valeurs manquent, `/admin` l'annonce clairement au lieu
 d'échouer en silence.
+
+### ⚠️ Ne JAMAIS créer une variable Texte à la main dans Cloudflare
+
+**Toute variable de type « Texte » créée à la main dans le tableau de bord
+Cloudflare sera effacée au déploiement suivant.**
+
+Pourquoi : chaque déploiement passe par `wrangler deploy`, qui **réécrit
+intégralement** la liste des variables Texte du Worker à partir du bloc
+`"vars"` de `wrangler.jsonc`. Ce qui n'y figure pas disparaît.
+
+Les **Secrets** ne sont pas concernés : `wrangler` n'y touche pas.
+
+La règle, donc :
+
+| Type de valeur | Où elle vit | Exemple |
+|---|---|---|
+| non sensible | `"vars"` dans `wrangler.jsonc` | `MAIL_FROM`, `GITHUB_DEPOT` |
+| sensible | **Secret** Cloudflare, jamais dans le dépôt | `ADMIN_MOT_DE_PASSE`, `GITHUB_TOKEN` |
+
+C'est exactement ce qui s'est passé une fois : `GITHUB_DEPOT` avait été créé
+à la main en variable Texte, le déploiement suivant l'a effacé, et `/admin`
+répondait « L'administration n'est pas encore configurée dans Cloudflare ».
+
+Le déploiement contrôle maintenant ce point tout seul : après chaque mise en
+ligne, il envoie un mauvais mot de passe sur `/api/admin/connexion` et exige
+la réponse « Mot de passe incorrect » (401). Si une variable manquait, la
+réponse serait une erreur de configuration (503) et le déploiement
+échouerait en rouge.
 
 ### Sécurité
 

@@ -202,6 +202,21 @@ jobs:
           if [ "$code" = "400" ]; then line="✓ formulaire /api/devis : demande incomplète refusée (400)";
           else ok=0; line="✗ formulaire /api/devis : demande incomplète non refusée (reçu $code)"; fi
           echo "$line"; out="$out%0A$line"
+          # /admin : on envoie un MAUVAIS mot de passe. La bonne réponse est un
+          # refus (401 « Mot de passe incorrect »). Si une variable manquait
+          # côté Cloudflare, le Worker répondrait 503 « pas encore configurée »
+          # — c'est exactement la panne qu'on veut voir en rouge ici.
+          rep=$(curl -sS --max-time 20 -X POST "$URL/api/admin/connexion" \
+                -H 'content-type: application/json' \
+                -d '{"motDePasse":"mot-de-passe-volontairement-faux-controle-deploiement"}' \
+                -w '|%{http_code}' || echo '|000')
+          if printf '%s' "$rep" | grep -q '|401$' && printf '%s' "$rep" | grep -q 'Mot de passe incorrect'; then
+            line="✓ /admin : mauvais mot de passe refusé (401), configuration complète"
+          elif printf '%s' "$rep" | grep -q '|503$'; then
+            ok=0; line="✗ /admin : variable manquante côté Cloudflare (503) — $rep"
+          else ok=0; line="✗ /admin : réponse inattendue — $rep"; fi
+          echo "$line"; out="$out%0A$line"
+
           if [ "$ok" = 1 ]; then echo "::notice title=Site en ligne vérifié::$URL$out"; else echo "::error title=Contrôle en ligne échoué::$URL$out"; exit 1; fi
 
       # Échec : la sortie COMPLÈTE de wrangler (stderr + stdout) est réécrite

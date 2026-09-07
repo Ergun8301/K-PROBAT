@@ -67,6 +67,14 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
   [data-contact-actions]{max-width:none}
   /* le fil à plomb décoratif touchait la bulle WhatsApp : masqué sur mobile */
   [data-plumb]{display:none}
+  /* Savoir-faire : la maquette incline le bandeau et l'agrandit (scale 1.12)
+     pour qu'il déborde — bel effet sur grand écran, mais sur téléphone les
+     deux colonnes sortent de l'écran et les intitulés des cartes sont coupés
+     à gauche et à droite (« OS ŒUVRE & », « CLÔTURES & PILIER »).
+     Sur mobile : plus d'agrandissement, inclinaison réduite, et le bandeau
+     tient dans la largeur. L'effet reste, le texte redevient lisible. */
+  [data-svtrack]{transform:rotate(-2deg) !important;width:100%}
+  [data-svtrack] > *{min-width:0}
 }
 
 /* Appareils sans survol : mêmes réglages photo, quelle que soit la largeur. */

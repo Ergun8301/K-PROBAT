@@ -371,6 +371,7 @@ lui-même, sans développeur et sans toucher à GitHub.
 
 | Onglet | Ce qui se modifie |
 |---|---|
+| **Bandeau d'accueil** | les 6 photos de la mosaïque du haut + l'image de partage |
 | **Accueil** | les 8 métiers (photo, titre, sous-titre) + la section béton cellulaire |
 | **Réalisations** | les 8 chantiers (photo, titre, lieu et année) |
 | **Page Siporex** | les 3 photos et leurs légendes |
@@ -388,8 +389,24 @@ habituel reconstruit le site — avec **tous ses contrôles**. Une modification
 faite depuis `/admin` est donc aussi sûre qu'une modification faite par un
 développeur, et elle s'annule comme n'importe quel commit.
 
-Conséquence à connaître : **le site met une à deux minutes** à afficher la
-modification. L'aperçu de droite montre le site EN LIGNE, pas le brouillon.
+### L'aperçu est direct
+
+Chaque élément modifiable du site porte un attribut `data-champ` dont la valeur
+est le chemin exact dans `contenu.json` (`savoirFaire.2.t`, `bandeau.0.img`…).
+L'aperçu est une iframe de la même origine : l'interface y retrouve l'élément
+par ce chemin et le met à jour **à la frappe**. Pas d'attente.
+
+Ces attributs sont posés par `tools/transpose-maquette.mjs` et `build.mjs`. Un
+attribut `data-*` n'a aucun effet visuel et n'est pas lu par les moteurs :
+vérifié en comparant le site généré avec et sans — **identique octet pour
+octet** une fois les `data-champ` retirés.
+
+Le libellé au-dessus de l'aperçu dit toujours ce qu'on regarde :
+« Aperçu de vos modifications (non publiées) » ou « Version en ligne ».
+Le bouton *Revoir la version en ligne* recharge la page publiée pour comparer.
+
+Le site en ligne, lui, met une à deux minutes à se reconstruire après
+publication — mais on n'a plus besoin d'attendre pour voir.
 
 ### Les trois réglages à faire une fois, dans Cloudflare
 

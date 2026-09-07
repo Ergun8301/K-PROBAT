@@ -96,7 +96,8 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
   </header>
 
   <nav id="onglets">
-    <button data-vue="accueil" aria-selected="true">Accueil</button>
+    <button data-vue="bandeau" aria-selected="true">Bandeau d'accueil</button>
+    <button data-vue="accueil" aria-selected="false">Accueil</button>
     <button data-vue="realisations" aria-selected="false">Réalisations</button>
     <button data-vue="siporex" aria-selected="false">Page Siporex</button>
     <button data-vue="villes" aria-selected="false">Pages villes</button>
@@ -106,9 +107,9 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
     <div id="editeur"></div>
     <div id="apercu">
       <div class="barre">
-        <span id="apercuTitre">Aperçu du site en ligne</span>
+        <span id="apercuTitre">Aperçu</span>
         <span style="flex:1"></span>
-        <button class="btn-2" style="color:var(--ink);border-color:var(--bord);padding:5px 10px;font-size:12px" id="rafraichir">Rafraîchir</button>
+        <button class="btn-2" style="color:var(--ink);border-color:var(--bord);padding:5px 10px;font-size:12px" id="rafraichir">Revoir la version en ligne</button>
       </div>
       <iframe id="cadre" title="Aperçu du site"></iframe>
     </div>
@@ -134,9 +135,10 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
 (function () {
   'use strict';
   var D = null;            // les données chargées depuis le dépôt
-  var vue = 'accueil';
+  var vue = 'bandeau';
   var modifie = false;
   var ciblePhoto = null;   // fonction appelée quand une photo est choisie
+  var cheminPhoto = null;  // chemin JSON de cette photo, pour l'aperçu direct
 
   var $ = function (s) { return document.querySelector(s); };
   var ech = function (s) {
@@ -162,6 +164,84 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
     modifie = true;
     $('#publier').disabled = false;
     $('#compteur').textContent = 'modifications non publiées';
+    majTitreApercu();
+  }
+
+  /* ---- APERÇU DIRECT ---------------------------------------------------
+     L'aperçu est une iframe de la MÊME origine : son document est donc
+     accessible, et on peut y écrire. Chaque élément modifiable du site porte
+     un attribut data-champ dont la valeur est le chemin exact dans le JSON
+     (« savoirFaire.2.t », « bandeau.0.img »…). On retrouve l'élément par ce
+     chemin et on le met à jour à la frappe : plus besoin d'attendre la
+     reconstruction du site pour voir sa modification.
+     Un champ « …alt » n'a pas d'élément à lui : il décrit la photo, donc il
+     modifie l'attribut alt de l'élément marqué « …img » correspondant. */
+  function elementsPour(champ) {
+    var doc = $('#cadre').contentDocument;
+    if (!doc) return { doc: null, els: [], attribut: null };
+    var cible = champ, attribut = null;
+    if (/\.alt$/.test(champ)) { cible = champ.replace(/\.alt$/, '.img'); attribut = 'alt'; }
+    else if (champ === 'betonCellulaire.imgAlt') { cible = 'betonCellulaire.img'; attribut = 'alt'; }
+    return {
+      doc: doc,
+      els: [].slice.call(doc.querySelectorAll('[data-champ="' + cible + '"]')),
+      attribut: attribut,
+    };
+  }
+
+  function patcher(champ, valeur) {
+    var t;
+    try { t = elementsPour(champ); } catch (e) { return; } // iframe pas encore prête
+    if (!t.doc) return;
+    t.els.forEach(function (el) {
+      if (t.attribut === 'alt') { el.setAttribute('alt', valeur); return; }
+      if (el.tagName === 'IMG') {
+        var dossier = champ === 'partage.img' ? '/assets/og/' : '/assets/img/';
+        el.setAttribute('src', dossier + valeur);
+        return;
+      }
+      // Les paragraphes de la section béton cellulaire contiennent du gras :
+      // on garde donc le HTML pour ces champs, du texte simple pour les autres.
+      if (/[<>]/.test(valeur)) el.innerHTML = valeur; else el.textContent = valeur;
+    });
+  }
+
+  // Réapplique TOUTES les valeurs courantes : après un changement de page
+  // dans l'aperçu, le document est neuf et ne connaît pas le brouillon.
+  function rejouerToutLeBrouillon() {
+    if (!D) return;
+    var c = D.contenu;
+    (c.bandeau || []).forEach(function (b, i) {
+      patcher('bandeau.' + i + '.img', b.img); patcher('bandeau.' + i + '.alt', b.alt);
+    });
+    c.savoirFaire.forEach(function (m, i) {
+      patcher('savoirFaire.' + i + '.img', m.img);
+      patcher('savoirFaire.' + i + '.t', m.t);
+      patcher('savoirFaire.' + i + '.tech', m.tech);
+    });
+    c.realisations.forEach(function (r, i) {
+      patcher('realisations.' + i + '.img', r.img);
+      patcher('realisations.' + i + '.t', r.t);
+      patcher('realisations.' + i + '.meta', r.meta);
+    });
+    var bc = c.betonCellulaire;
+    ['p1', 'p2', 'p3', 'chiffre', 'chiffreTexte', 'img'].forEach(function (k) {
+      patcher('betonCellulaire.' + k, bc[k]);
+    });
+    patcher('betonCellulaire.imgAlt', bc.imgAlt);
+    ['photo1', 'photo2', 'photo3'].forEach(function (k) {
+      var ph = c.pagePilier[k];
+      patcher('pagePilier.' + k + '.img', ph.img);
+      patcher('pagePilier.' + k + '.legende', ph.legende);
+      patcher('pagePilier.' + k + '.alt', ph.alt);
+    });
+  }
+
+  function majTitreApercu() {
+    $('#apercuTitre').textContent = modifie
+      ? 'Aperçu de vos modifications (non publiées)'
+      : 'Version en ligne';
+    $('#apercuTitre').style.color = modifie ? 'var(--acc)' : '';
   }
 
   /* ---- connexion ------------------------------------------------------- */
@@ -188,17 +268,32 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
       if (!r.d.ok) { dire(r.d.erreur || 'Chargement impossible.', 'mal'); return; }
       D = r.d;
       dessiner();
-      $('#cadre').src = '/?apercu=' + Date.now();
+      $('#cadre').src = '/';
     });
   }
 
+  // Recharger la page remet la version PUBLIÉE : on réapplique donc aussitôt
+  // le brouillon, sinon l'utilisateur verrait ses modifications disparaître.
+  $('#cadre').addEventListener('load', function () {
+    if (/[?&]enligne=/.test($('#cadre').src)) return; // comparaison volontaire
+    setTimeout(rejouerToutLeBrouillon, 60);
+  });
+
+  // « Revoir la version en ligne » : on recharge SANS réappliquer, pour
+  // comparer avec ce qui est réellement publié.
   $('#rafraichir').addEventListener('click', function () {
-    $('#cadre').src = ($('#cadre').src.split('?')[0]) + '?apercu=' + Date.now();
+    var garde = modifie;
+    modifie = false;
+    $('#cadre').src = $('#cadre').src.split('?')[0] + '?enligne=' + Date.now();
+    setTimeout(function () { modifie = garde; majTitreApercu(); }, 1200);
+    $('#apercuTitre').textContent = 'Version en ligne';
+    $('#apercuTitre').style.color = '';
   });
 
   /* ---- sélecteur de photo --------------------------------------------- */
-  function ouvrirPhotos(surChoix) {
+  function ouvrirPhotos(surChoix, chemin) {
     ciblePhoto = surChoix;
+    cheminPhoto = chemin || null;
     $('#grillePhotos').innerHTML = D.photos.map(function (n) {
       return '<figure data-nom="' + ech(n) + '"><img src="/assets/img/' + encodeURIComponent(n) +
         '" alt="" loading="lazy"><figcaption>' + ech(n) + '</figcaption></figure>';
@@ -210,6 +305,7 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
     var f = ev.target.closest('figure');
     if (!f || !ciblePhoto) return;
     ciblePhoto(f.dataset.nom);
+    if (cheminPhoto) patcher(cheminPhoto, f.dataset.nom);
     $('#choixPhoto').close();
     marquerModifie();
     dessiner();
@@ -264,12 +360,16 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
   });
 
   /* ---- champs ---------------------------------------------------------- */
-  function champ(etiquette, valeur, surChangement, multiligne) {
+  function champ(etiquette, valeur, surChangement, multiligne, chemin) {
     var id = 'c' + Math.random().toString(36).slice(2);
     setTimeout(function () {
       var el = document.getElementById(id);
       if (!el) return;
-      el.addEventListener('input', function () { surChangement(el.value); marquerModifie(); });
+      el.addEventListener('input', function () {
+        surChangement(el.value);
+        if (chemin) patcher(chemin, el.value);
+        marquerModifie();
+      });
     });
     return '<label for="' + id + '">' + ech(etiquette) + '</label>' +
       (multiligne
@@ -281,36 +381,59 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
     return '<div class="bloc"><h2>' + ech(titre) + '</h2><p class="aide">' + ech(aide) + '</p>' + corps + '</div>';
   }
 
-  function vignette(nomPhoto, surChoix) {
+  function vignette(nomPhoto, surChoix, chemin) {
     var id = 'v' + Math.random().toString(36).slice(2);
     setTimeout(function () {
       var el = document.getElementById(id);
-      if (el) el.addEventListener('click', function () { ouvrirPhotos(surChoix); });
+      if (el) el.addEventListener('click', function () { ouvrirPhotos(surChoix, chemin); });
     });
     return '<div><img class="vignette" id="' + id + '" src="/assets/img/' + encodeURIComponent(nomPhoto) +
       '" alt=""><div class="sous" onclick="document.getElementById(\'' + id + '\').click()">changer</div></div>';
   }
 
   /* ---- vues ------------------------------------------------------------ */
+  function vueBandeau() {
+    var c = D.contenu;
+    var photos = c.bandeau.map(function (b, i) {
+      return '<div class="carte">' + vignette(b.img, function (n) { b.img = n; }, 'bandeau.' + i + '.img') +
+        '<div><span class="num">PHOTO ' + (i + 1) + '</span>' +
+        champ('Description de la photo (pour Google et les malvoyants)', b.alt,
+          function (v) { b.alt = v; }, true, 'bandeau.' + i + '.alt') +
+        '</div></div>';
+    }).join('');
+
+    var pa = c.partage;
+    var partage = '<div class="carte">' +
+      '<div><img class="vignette" id="vPartage" src="/assets/og/' + encodeURIComponent(pa.img) + '" alt="">' +
+      '<div class="sous">image fixe</div></div>' +
+      '<div>' + champ('Texte affiché avec l\'aperçu', pa.alt, function (v) { pa.alt = v; }, true, 'partage.alt') +
+      '<p class="aide" style="margin-top:10px">Cette image apparaît quand on partage un lien du site sur WhatsApp, Facebook ou LinkedIn. Elle a un format particulier (1200 × 630) : pour la remplacer, passez par le développeur.</p>' +
+      '</div></div>';
+
+    return bloc('Les 6 photos du bandeau d\'accueil',
+      'La mosaïque derrière le titre K-PROBAT, tout en haut du site. Cliquez sur une photo pour la remplacer.', photos) +
+      bloc('Aperçu de partage', 'Ce que voient WhatsApp et les réseaux sociaux quand on partage un lien.', partage);
+  }
+
   function vueAccueil() {
     var c = D.contenu;
     var metiers = c.savoirFaire.map(function (m, i) {
-      return '<div class="carte">' + vignette(m.img, function (n) { m.img = n; }) +
+      return '<div class="carte">' + vignette(m.img, function (n) { m.img = n; }, 'savoirFaire.' + i + '.img') +
         '<div><span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
-        champ('Titre (court — un titre long est coupé)', m.t, function (v) { m.t = v; }) +
-        champ('Sous-titre', m.tech, function (v) { m.tech = v; }) +
+        champ('Titre (court — un titre long est coupé)', m.t, function (v) { m.t = v; }, false, 'savoirFaire.' + i + '.t') +
+        champ('Sous-titre', m.tech, function (v) { m.tech = v; }, false, 'savoirFaire.' + i + '.tech') +
         '</div></div>';
     }).join('');
 
     var bc = c.betonCellulaire;
-    var section = '<div class="carte">' + vignette(bc.img, function (n) { bc.img = n; }) + '<div>' +
-      champ('Description de la photo (pour Google et les malvoyants)', bc.imgAlt, function (v) { bc.imgAlt = v; }, true) +
+    var section = '<div class="carte">' + vignette(bc.img, function (n) { bc.img = n; }, 'betonCellulaire.img') + '<div>' +
+      champ('Description de la photo (pour Google et les malvoyants)', bc.imgAlt, function (v) { bc.imgAlt = v; }, true, 'betonCellulaire.imgAlt') +
       '</div></div>' +
-      champ('Paragraphe 1', bc.p1, function (v) { bc.p1 = v; }, true) +
-      champ('Paragraphe 2 — phrase partenaires (validée, à ne pas reformuler)', bc.p2, function (v) { bc.p2 = v; }, true) +
-      champ('Paragraphe 3 — phrase 15 ans (validée, à ne pas reformuler)', bc.p3, function (v) { bc.p3 = v; }, true) +
-      champ('Grand chiffre', bc.chiffre, function (v) { bc.chiffre = v; }) +
-      champ('Phrase sous le chiffre', bc.chiffreTexte, function (v) { bc.chiffreTexte = v; }, true);
+      champ('Paragraphe 1', bc.p1, function (v) { bc.p1 = v; }, true, 'betonCellulaire.p1') +
+      champ('Paragraphe 2 — phrase partenaires (validée, à ne pas reformuler)', bc.p2, function (v) { bc.p2 = v; }, true, 'betonCellulaire.p2') +
+      champ('Paragraphe 3 — phrase 15 ans (validée, à ne pas reformuler)', bc.p3, function (v) { bc.p3 = v; }, true, 'betonCellulaire.p3') +
+      champ('Grand chiffre', bc.chiffre, function (v) { bc.chiffre = v; }, false, 'betonCellulaire.chiffre') +
+      champ('Phrase sous le chiffre', bc.chiffreTexte, function (v) { bc.chiffreTexte = v; }, true, 'betonCellulaire.chiffreTexte');
 
     return bloc('Les 8 métiers', 'Cliquez sur une photo pour la remplacer. L\'ordre des cartes est l\'ordre de la liste.', metiers) +
       bloc('Section béton cellulaire', 'Le bloc de l\'accueil qui renvoie vers la page Siporex.', section);
@@ -318,10 +441,10 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
 
   function vueRealisations() {
     var lignes = D.contenu.realisations.map(function (r, i) {
-      return '<div class="carte">' + vignette(r.img, function (n) { r.img = n; }) +
+      return '<div class="carte">' + vignette(r.img, function (n) { r.img = n; }, 'realisations.' + i + '.img') +
         '<div><span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
-        champ('Titre du chantier', r.t, function (v) { r.t = v; }) +
-        champ('Lieu et année', r.meta, function (v) { r.meta = v; }) +
+        champ('Titre du chantier', r.t, function (v) { r.t = v; }, false, 'realisations.' + i + '.t') +
+        champ('Lieu et année', r.meta, function (v) { r.meta = v; }, false, 'realisations.' + i + '.meta') +
         '</div></div>';
     }).join('');
     return bloc('Galerie des réalisations',
@@ -332,10 +455,10 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
     var p = D.contenu.pagePilier;
     var corps = ['photo1', 'photo2', 'photo3'].map(function (cle, i) {
       var ph = p[cle];
-      return '<div class="carte">' + vignette(ph.img, function (n) { ph.img = n; }) +
+      return '<div class="carte">' + vignette(ph.img, function (n) { ph.img = n; }, 'pagePilier.' + cle + '.img') +
         '<div><span class="num">PHOTO ' + (i + 1) + '</span>' +
-        champ('Légende affichée sous la photo', ph.legende, function (v) { ph.legende = v; }) +
-        champ('Description de la photo (pour Google et les malvoyants)', ph.alt, function (v) { ph.alt = v; }, true) +
+        champ('Légende affichée sous la photo', ph.legende, function (v) { ph.legende = v; }, false, 'pagePilier.' + cle + '.legende') +
+        champ('Description de la photo (pour Google et les malvoyants)', ph.alt, function (v) { ph.alt = v; }, true, 'pagePilier.' + cle + '.alt') +
         '</div></div>';
     }).join('');
     return bloc('Page Siporex & Ytong', 'Les trois photos de la page. Le texte de la page se modifie avec le développeur.', corps);
@@ -355,13 +478,15 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
 
   function dessiner() {
     if (!D) return;
-    var rendus = { accueil: vueAccueil, realisations: vueRealisations, siporex: vueSiporex, villes: vueVilles };
+    var rendus = {
+      bandeau: vueBandeau, accueil: vueAccueil, realisations: vueRealisations,
+      siporex: vueSiporex, villes: vueVilles,
+    };
     $('#editeur').innerHTML = rendus[vue]();
-    var page = vue === 'siporex' ? '/maconnerie-beton-cellulaire-siporex-ytong'
-      : vue === 'villes' ? '/maconnerie-' + D.villes.villes[0].slug : '/';
+    var page = vue === 'siporex' ? '/maconnerie-beton-cellulaire-siporex-ytong' : '/';
     var cadre = $('#cadre');
-    if (cadre.src.split('?')[0].replace(location.origin, '') !== page) cadre.src = page + '?apercu=' + Date.now();
-    $('#apercuTitre').textContent = 'Aperçu du site en ligne — ' + page;
+    if (cadre.src.split('?')[0].replace(location.origin, '') !== page) cadre.src = page;
+    majTitreApercu();
   }
 
   $('#onglets').addEventListener('click', function (ev) {
@@ -386,9 +511,7 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
         modifie = false;
         $('#compteur').textContent = 'à jour';
         dire(r.d.message, 'bien');
-        // Le site met une à deux minutes à se reconstruire : on rafraîchit
-        // l'aperçu après, sinon on regarderait encore l'ancienne version.
-        setTimeout(function () { $('#rafraichir').click(); }, 100000);
+        majTitreApercu();
       })
       .catch(function () { b.textContent = 'Publier'; b.disabled = false; dire('Le site ne répond pas.', 'mal'); });
   });

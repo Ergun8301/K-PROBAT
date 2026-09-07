@@ -1,5 +1,19 @@
 {
-  "_commentaire": "CONTENU MODIFIABLE DU SITE. Ce fichier est la source unique des textes et photos que le client peut changer lui-même depuis /admin. tools/transpose-maquette.mjs le lit pour construire l'accueil. Modifier ce fichier à la main marche aussi : relancer node tools/transpose-maquette.mjs puis node build.mjs.",
+  "_commentaire": "CONTENU MODIFIABLE DU SITE. « bandeau » = les six photos de la mosaïque d'accueil, derrière le titre. « partage » = l'image affichée quand on partage un lien (elle vit dans src/assets/og/). Ce fichier est la source unique des textes et photos que le client peut changer lui-même depuis /admin. tools/transpose-maquette.mjs le lit pour construire l'accueil. Modifier ce fichier à la main marche aussi : relancer node tools/transpose-maquette.mjs puis node build.mjs.",
+
+  "bandeau": [
+    { "img": "briques-elevation.jpg", "alt": "Élévation en briques" },
+    { "img": "siporex-2.jpg", "alt": "Villa neuve en béton cellulaire" },
+    { "img": "escalier-spirale.jpg", "alt": "Escalier béton en colimaçon" },
+    { "img": "dalle-bassin.jpg", "alt": "Dalle et bassin en béton brut" },
+    { "img": "cloture-grillage.jpg", "alt": "Clôture et piliers maçonnés" },
+    { "img": "siporex-1.jpg", "alt": "Murs en béton cellulaire" }
+  ],
+
+  "partage": {
+    "img": "k-probat-og.jpg",
+    "alt": "K-ProBat — Maçonnerie générale à Montagnat, dans l'Ain"
+  },
 
   "savoirFaire": [
     { "t": "Gros œuvre & fondations", "tech": "SOUBASSEMENT — RÉSEAUX", "img": "soubassement-reseaux-vide-sanitaire.jpg" },

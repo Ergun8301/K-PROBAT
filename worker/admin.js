@@ -112,6 +112,10 @@ const depuisBase64 = b64 => new TextDecoder().decode(
 function verifierContenu(c) {
   const e = [];
   const texte = (v, ou) => { if (typeof v !== 'string' || !v.trim()) e.push(`${ou} : texte vide`); };
+  if (!Array.isArray(c.bandeau) || c.bandeau.length !== 6) e.push('bandeau : il faut exactement 6 photos');
+  else c.bandeau.forEach((b, i) => { texte(b.img, `bandeau ${i + 1} (photo)`); texte(b.alt, `bandeau ${i + 1} (description)`); });
+  texte((c.partage || {}).img, 'aperçu de partage (image)');
+  texte((c.partage || {}).alt, 'aperçu de partage (texte)');
   if (!Array.isArray(c.savoirFaire) || c.savoirFaire.length !== 8) e.push('savoirFaire : il en faut exactement 8');
   else c.savoirFaire.forEach((x, i) => { texte(x.t, `métier ${i + 1} (titre)`); texte(x.tech, `métier ${i + 1} (sous-titre)`); texte(x.img, `métier ${i + 1} (photo)`); });
   if (!Array.isArray(c.realisations) || c.realisations.length !== 8) e.push('realisations : il en faut exactement 8');

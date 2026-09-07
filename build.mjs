@@ -39,6 +39,7 @@ const fail = () => { if (errors.length) { console.error('✗ build annulé :\n -
 // contenir le jeton {{BREADCRUMB}}.
 const PAGE_NAMES = {
   'mentions-legales.html': 'Mentions légales', 'confidentialite.html': 'Politique de confidentialité',
+  'maconnerie-beton-cellulaire-siporex-ytong.html': 'Béton cellulaire, Siporex & Ytong',
 };
 const pagePath = f => (f === 'index.html' ? '/' : '/' + f.replace(/\.html$/, ''));
 const TEXT_FILES = ['robots.txt', 'llms.txt', '_headers', 'manifest.webmanifest', 'sw.js'];
@@ -90,6 +91,7 @@ const jsonText = s => JSON.stringify(s).slice(1, -1);
 // aux messages d'erreur ; `chemin` est l'URL propre de la page.
 function assemble(source, brut, nom, chemin) {
   let html = brut
+    .replace(/\{\{ZONE_VILLES\}\}/g, () => VILLES.map(v => `<a href="${villeFile(v)}">${v.nom}</a>`).join('\n    '))
     .replace(/\{\{ZONES\}\}/g, () => 'ZONE D\'INTERVENTION — ' + VILLES.map(v => `<a href="${villeFile(v)}" style="color:inherit;text-decoration:none">${v.nom.toUpperCase()}</a>`).join(' · '))
     .replace(/\{\{SIGNATURE\}\}/g, () => signature)
     .replace(/\{\{JSONLD\}\}/g, () => jsonld)

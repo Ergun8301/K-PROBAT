@@ -51,6 +51,10 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
   [data-ltr][style*="text-stroke"]{color:#EAE3D4 !important}
 }
 
+/* Le bandeau savoir-faire ne doit jamais déborder de la page : l'inclinaison
+   fait sortir ses coins, la marge intérieure les rattrape. */
+[data-svtrack]{width:100%;padding:0 clamp(6px,1vw,18px)}
+
 /* ---- 3. responsive : bascule à 860 px (SPECS-TECHNIQUES.md §4) -----------
    Le JS bascule sur innerWidth < 860 ; l'équivalent CSS est donc 859 px.
    Le regroupement des colonnes savoir-faire (4 → 2) est fait par le JS. */
@@ -67,13 +71,12 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
   [data-contact-actions]{max-width:none}
   /* le fil à plomb décoratif touchait la bulle WhatsApp : masqué sur mobile */
   [data-plumb]{display:none}
-  /* Savoir-faire : la maquette incline le bandeau et l'agrandit (scale 1.12)
-     pour qu'il déborde — bel effet sur grand écran, mais sur téléphone les
-     deux colonnes sortent de l'écran et les intitulés des cartes sont coupés
-     à gauche et à droite (« OS ŒUVRE & », « CLÔTURES & PILIER »).
-     Sur mobile : plus d'agrandissement, inclinaison réduite, et le bandeau
-     tient dans la largeur. L'effet reste, le texte redevient lisible. */
-  [data-svtrack]{transform:rotate(-2deg) !important;width:100%}
+  /* Savoir-faire : sur téléphone l'inclinaison suffit à faire sortir les
+     cartes de l'écran. On la réduit encore et on borne la largeur.
+     (L'agrandissement de la maquette, lui, est supprimé pour tous les
+     écrans par tools/transpose-maquette.mjs — il coupait aussi les
+     intitulés sur ordinateur.) */
+  [data-svtrack]{transform:rotate(-1deg) !important}
   [data-svtrack] > *{min-width:0}
 }
 

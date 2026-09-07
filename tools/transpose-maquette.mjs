@@ -33,14 +33,17 @@ const menuItems = [['Accueil', '#hero'], ['Savoir-faire', '#savoirfaire'], ['Ré
   .map((a, i) => ({ label: a[0], href: a[1], n: '0' + (i + 1), delay: '0s' }));
 
 const sv = [
+  // Ordre voulu par le client : du plus structurant au plus secondaire, avec
+  // la spécialité en 02. Les intitulés restent COURTS — un titre long est
+  // tronqué dans la carte (« Terrasses, dalles & VS » ne tenait pas).
   { n: '01', t: 'Gros œuvre & fondations', tech: 'FOUILLES — SEMELLES', img: 'fondations-reseaux.jpg' },
-  { n: '02', t: 'Coffrage & béton armé', tech: 'FERRAILLAGE — LINTEAUX', img: 'ferraillage-fondations.jpg' },
+  { n: '02', t: 'Siporex & Ytong', tech: 'BÉTON CELLULAIRE — MURS', img: 'siporex-1.jpg' },
   { n: '03', t: 'Briques & parpaings', tech: 'POROTHERM — WIENERBERGER', img: 'porotherm-chantier.jpg' },
-  { n: '04', t: 'Béton cellulaire — Siporex', tech: 'MURS — CLOISONS', img: 'siporex-1.jpg' },
+  { n: '04', t: 'Coffrage & béton armé', tech: 'FERRAILLAGE — LINTEAUX', img: 'ferraillage-fondations.jpg' },
   { n: '05', t: 'Escaliers béton', tech: 'SUR MESURE', img: 'escalier-coffrage.jpg' },
-  { n: '06', t: 'Piscines maçonnées', tech: 'RADIER — PAROIS', img: 'piscine-parpaings.jpg' },
+  { n: '06', t: 'Dalles & vide sanitaire', tech: 'PLANCHERS ISOLÉS', img: 'plancher-isole.jpg' },
   { n: '07', t: 'Clôtures & piliers', tech: 'MURETS — PORTAILS', img: 'cloture-composite.jpg' },
-  { n: '08', t: 'Terrasses, dalles & VS', tech: 'VS — VIDE SANITAIRE', img: 'plancher-isole.jpg' },
+  { n: '08', t: 'Rénovation & reprise', tech: 'EXISTANT — SOUTÈNEMENT', img: 'mur-blanc.jpg' },
 ].map((x, i) => ({ ...x, k: 's' + i }));
 
 // Desktop : 4 colonnes de 2 cartes (le JS regroupe en 2 colonnes sous 860 px).
@@ -325,7 +328,7 @@ const HEAD = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>K-ProBat — Maçonnerie générale à Montagnat (01) — Devis gratuit</title>
-<meta name="description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Fondations, murs, dalles, escaliers, piscines — dans les règles de l'art, depuis 1991.">
+<meta name="description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Béton cellulaire (Siporex, Ytong), fondations, murs, dalles, escaliers — dans les règles de l'art, depuis 1991.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=League+Spartan:wght@300..900&amp;display=swap">
@@ -343,7 +346,7 @@ const HEAD = `<!DOCTYPE html>
 <meta property="og:site_name" content="K-ProBat">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="K-ProBat — Maçonnerie générale à Montagnat (01)">
-<meta property="og:description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Fondations, murs, dalles, escaliers, piscines — dans les règles de l'art, depuis 1991.">
+<meta property="og:description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Béton cellulaire (Siporex, Ytong), fondations, murs, dalles, escaliers — dans les règles de l'art, depuis 1991.">
 <meta property="og:url" content="{{SITE_URL}}/">
 <meta property="og:image" content="{{SITE_URL}}/assets/og/k-probat-og.jpg">
 <meta property="og:image:width" content="1200">
@@ -351,7 +354,7 @@ const HEAD = `<!DOCTYPE html>
 <meta property="og:image:alt" content="K-ProBat — Maçonnerie générale à Montagnat, dans l'Ain">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="K-ProBat — Maçonnerie générale à Montagnat (01)">
-<meta name="twitter:description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Fondations, murs, dalles, escaliers, piscines — dans les règles de l'art, depuis 1991.">
+<meta name="twitter:description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Béton cellulaire (Siporex, Ytong), fondations, murs, dalles, escaliers — dans les règles de l'art, depuis 1991.">
 <meta name="twitter:image" content="{{SITE_URL}}/assets/og/k-probat-og.jpg">
 {{JSONLD}}
 <link rel="stylesheet" href="assets/css/style.css">
@@ -364,6 +367,26 @@ const HEAD = `<!DOCTYPE html>
 // orphelines et les moteurs les exploreraient très mal. build.mjs le remplit.
 html = html.replace('  {{SIGNATURE}}\n</footer>',
   '  <span data-zones style="flex-basis:100%;color:rgba(234,227,212,.38);letter-spacing:.1em;line-height:2">{{ZONES}}</span>\n  {{SIGNATURE}}\n</footer>');
+
+// ── Recentrage sur les vraies spécialités ────────────────────────────────
+// La maquette mettait « piscines » en avant (accroche, bandeau défilant,
+// liste du formulaire). Le client n'en fait plus : on les remplace par ce
+// qu'il veut vendre — le béton cellulaire et la rénovation. Fait ici, et
+// pas dans tools/maquette-body.html, pour garder la maquette intacte.
+// Le bandeau savoir-faire : la maquette l'inclinait de 3° ET l'agrandissait
+// de 12 % pour qu'il déborde. Résultat mesuré : sur 1440 px, 4 titres de
+// carte sur 8 sortaient de l'écran (« ...os œuvre & fondations »,
+// « Clôtures & pilier... »), et pire encore sur téléphone. L'effet mangeait
+// le contenu qu'il était censé mettre en valeur.
+// On garde l'inclinaison, plus discrète, et on supprime l'agrandissement :
+// le bandeau reste vivant, mais les huit intitulés se lisent en entier.
+html = html.replace('transform:rotate(-3deg) scale(1.12)', 'transform:rotate(-1.5deg)');
+
+html = html
+  .replace("Fondations, murs, dalles, escaliers, piscines — dans les règles de l'art, depuis 1991.",
+           "Béton cellulaire, fondations, murs, dalles, escaliers — dans les règles de l'art, depuis 1991.")
+  .replace(/PISCINES(&nbsp;)/g, 'YTONG$1')
+  .replace(/>Piscine maçonnée</g, '>Rénovation, reprise de maçonnerie<');
 
 // ── Section « béton cellulaire / Siporex / Ytong » ────────────────────────
 // Elle ne vient PAS de la maquette : c'est la spécialité que le client met en

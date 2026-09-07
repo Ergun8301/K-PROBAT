@@ -79,6 +79,19 @@ jobs:
           [ "$ok" = 1 ] || exit 1
           echo "Secrets présents — longueurs : jeton=${#CLOUDFLARE_API_TOKEN} caractères, compte=${#CLOUDFLARE_ACCOUNT_ID} caractères (32 attendus)"
 
+      # ÉTAPE INDISPENSABLE, ne jamais la retirer.
+      #
+      # src/index.html est un fichier GÉNÉRÉ : il est reconstruit à partir de
+      # tools/maquette-body.html ET de src/contenu.json. Or contenu.json est
+      # précisément le fichier que /admin modifie. Sans cette étape, une photo
+      # ou un titre changé depuis /admin est bien enregistré dans le dépôt,
+      # mais ne rejoint JAMAIS la page servie au visiteur.
+      #
+      # C'est exactement la panne qu'on a eue : le déploiement ne lançait que
+      # build.mjs, donc /admin écrivait dans le vide.
+      - name: Régénérer l'accueil depuis contenu.json (/admin)
+        run: node tools/transpose-maquette.mjs
+
       # Génère site/ à partir de src/ et de site.config.json. Échoue si une URL
       # du site est écrite en dur dans les sources (voir build.mjs).
       - name: Générer le site (src/ → site/) et contrôler les URLs
@@ -222,6 +235,18 @@ jobs:
       # Échec : la sortie COMPLÈTE de wrangler (stderr + stdout) est réécrite
       # ici en clair et remontée en annotation, pour ne jamais rester avec un
       # simple « exit code 1 ».
+      # LE contrôle qui aurait attrapé la panne de /admin.
+      #
+      # Il ne regarde ni le dépôt ni le dossier construit : il télécharge les
+      # pages RÉELLEMENT SERVIES au visiteur et compare, valeur par valeur, à
+      # src/contenu.json. Photo, description, titre, texte : le moindre écart
+      # fait échouer le déploiement en rouge.
+      #
+      # Un déploiement vert veut donc désormais dire quelque chose de précis :
+      # ce que le client a écrit dans /admin est visible en ligne.
+      - name: Le site en ligne dit-il bien ce que dit contenu.json ?
+        run: node tools/verifier-contenu-en-ligne.mjs
+
       - name: Erreur complète de wrangler (annotation)
         if: failure() && steps.deploy.outcome == 'failure'
         env:

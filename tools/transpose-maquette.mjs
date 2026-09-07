@@ -172,6 +172,19 @@ function marquer(html, jeton, champ) {
 html = html.replace(/<img([^>]*?)data-ki="(h[0-5])"([^>]*?)src="data:image\/gif;base64,[^"]*"/g,
   (m, a, k, b) => `<img${a}data-ki="${k}"${b}src="${IMG}${imgByKey[k]}"`);
 
+// La description (alt) vient elle aussi de contenu.json : c'est un champ que
+// le client modifie depuis /admin. Sans cette reprise il la changerait dans le
+// vide, et la maquette continuerait de parler à sa place. L'attribut alt est
+// écrit APRÈS le src dans la maquette : il faut donc une passe sur la balise
+// entière, pas sur le seul début.
+html = html.replace(/<img[^>]*data-ki="h[0-5]"[^>]*>/g, balise => {
+  const i = Number(/data-ki="h(\d)"/.exec(balise)[1]);
+  const alt = CONTENU.bandeau[i] && CONTENU.bandeau[i].alt;
+  if (alt === undefined) throw new Error(`contenu.json : bandeau[${i}].alt manquant`);
+  if (!/\salt="/.test(balise)) throw new Error(`maquette : <img data-ki="h${i}"> sans attribut alt`);
+  return balise.replace(/\salt="[^"]*"/, ` alt="${esc(alt)}"`);
+});
+
 // ---- 4. gestionnaires de clic ----------------------------------------------
 for (const [handler, href] of Object.entries(anchors)) {
   html = html.replace(new RegExp(`sc-camel-on-click="\\{\\{ ${handler} \\}\\}"`, 'g'), `href="${href}" data-go="${href}"`);

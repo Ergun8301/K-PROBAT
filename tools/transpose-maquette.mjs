@@ -36,14 +36,14 @@ const sv = [
   // Ordre voulu par le client : du plus structurant au plus secondaire, avec
   // la spécialité en 02. Les intitulés restent COURTS — un titre long est
   // tronqué dans la carte (« Terrasses, dalles & VS » ne tenait pas).
-  { n: '01', t: 'Gros œuvre & fondations', tech: 'FOUILLES — SEMELLES', img: 'fondations-reseaux.jpg' },
-  { n: '02', t: 'Siporex & Ytong', tech: 'BÉTON CELLULAIRE — MURS', img: 'siporex-1.jpg' },
+  { n: '01', t: 'Gros œuvre & fondations', tech: 'SOUBASSEMENT — RÉSEAUX', img: 'soubassement-reseaux-vide-sanitaire.jpg' },
+  { n: '02', t: 'Siporex & Ytong', tech: 'BÉTON CELLULAIRE — MURS', img: 'beton-cellulaire-maison-habitat-libre.jpg' },
   { n: '03', t: 'Briques & parpaings', tech: 'POROTHERM — WIENERBERGER', img: 'porotherm-chantier.jpg' },
   { n: '04', t: 'Coffrage & béton armé', tech: 'FERRAILLAGE — LINTEAUX', img: 'ferraillage-fondations.jpg' },
   { n: '05', t: 'Escaliers béton', tech: 'SUR MESURE', img: 'escalier-coffrage.jpg' },
   { n: '06', t: 'Dalles & vide sanitaire', tech: 'PLANCHERS ISOLÉS', img: 'plancher-isole.jpg' },
   { n: '07', t: 'Clôtures & piliers', tech: 'MURETS — PORTAILS', img: 'cloture-composite.jpg' },
-  { n: '08', t: 'Rénovation & reprise', tech: 'EXISTANT — SOUTÈNEMENT', img: 'mur-blanc.jpg' },
+  { n: '08', t: 'Rénovation & reprise', tech: 'EXISTANT — SOUTÈNEMENT', img: 'mur-parpaings-reprise-existant.jpg' },
 ].map((x, i) => ({ ...x, k: 's' + i }));
 
 // Desktop : 4 colonnes de 2 cartes (le JS regroupe en 2 colonnes sous 860 px).
@@ -55,11 +55,11 @@ const svColumns = Array.from({ length: NCOLS }, (_, i) => ({
 
 const projects = [
   { img: 'briques-elevation.jpg', t: 'Maison individuelle — élévation briques', meta: 'AIN (01) — 2020', col: '1 / span 7', ar: '16/10', mt: '0' },
-  { img: 'siporex-2.jpg', t: 'Villa neuve — béton cellulaire', meta: 'AIN (01) — 2022', col: '8 / span 5', ar: '4/5', mt: 'clamp(40px,6vw,110px)' },
+  { img: 'beton-cellulaire-maison-habitat-libre.jpg', t: 'Maison Habitat Libre — béton cellulaire', meta: 'AIN (01) — 2022', col: '8 / span 5', ar: '4/5', mt: 'clamp(40px,6vw,110px)' },
   { img: 'escalier-vue-haut.jpg', t: 'Escalier béton brut', meta: 'AIN (01) — 2020', col: '1 / span 4', ar: '4/5', mt: '0' },
   { img: 'plancher-isole.jpg', t: 'Plancher isolé — vide sanitaire', meta: 'AIN (01) — 2022', col: '5 / span 8', ar: '16/9', mt: 'clamp(30px,4vw,80px)' },
   { img: 'dalle-bassin.jpg', t: 'Dalle & bassin — béton brut', meta: 'AIN (01) — 2021', col: '3 / span 8', ar: '21/9', mt: '0' },
-  { img: 'siporex-1.jpg', t: 'Murs Siporex — béton cellulaire', meta: 'AIN (01) — 2023', col: '1 / span 6', ar: '16/10', mt: '0' },
+  { img: 'beton-cellulaire-premiers-rangs.jpg', t: 'Élévation Ytong — premiers rangs', meta: 'AIN (01) — 2023', col: '1 / span 6', ar: '16/10', mt: '0' },
   { img: 'mur-soutenement.jpg', t: 'Murs de soutènement — enduit blanc', meta: 'AIN (01) — 2020', col: '7 / span 6', ar: '16/10', mt: 'clamp(30px,4vw,80px)' },
   { img: 'porotherm-chantier.jpg', t: 'Élévation briques & poutres', meta: 'AIN (01) — 2015', col: '4 / span 6', ar: '3/2', mt: '0' },
 ].map((p, i) => ({ ...p, k: 'p' + i }));
@@ -416,7 +416,7 @@ const SECTION_BC = `
         <span style="font-size:14px;line-height:1.6;color:rgba(34,30,25,.7)">Plus de 100 maisons en béton cellulaire réalisées dans l'Ain.</span>
       </div>
       <figure data-reveal="" style="margin:0;background:#EAE3D4;padding:0;overflow:hidden">
-        <img src="assets/img/siporex-1.jpg" alt="Murs en béton cellulaire (Siporex) montés sur un chantier de maison individuelle dans l'Ain" loading="lazy" width="1195" height="896" style="width:100%;height:auto;display:block">
+        <img src="assets/img/beton-cellulaire-maison-elevation.jpg" alt="Maison individuelle en béton cellulaire (Ytong) en cours d'élévation sur un chantier K-ProBat dans l'Ain" loading="lazy" width="1600" height="900" style="width:100%;height:auto;display:block">
       </figure>
     </div>
   </div>

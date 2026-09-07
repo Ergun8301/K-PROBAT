@@ -38,6 +38,14 @@
   "send_email": [
     { "name": "SEND_EMAIL", "destination_address": "k.probat01@gmail.com" }
   ],
-  "vars": { "MAIL_FROM": "site@k-probat.fr" }
+  // 3) Administration du site (/admin) — BRANCHÉ.
+  //    GITHUB_DEPOT n'est PAS une donnée sensible : sa place est ici, dans la
+  //    configuration du dépôt. Une variable Texte créée à la main dans le
+  //    tableau de bord Cloudflare serait effacée au déploiement suivant.
+  //    Seuls ADMIN_MOT_DE_PASSE et GITHUB_TOKEN restent des Secrets.
+  "vars": {
+    "MAIL_FROM": "site@k-probat.fr",
+    "GITHUB_DEPOT": "Ergun8301/K-PROBAT"
+  }
   // ---------------------------------------------------------------------
 }

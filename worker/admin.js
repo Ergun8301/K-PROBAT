@@ -15,11 +15,17 @@
  *  modification faite par un développeur, et elle est annulable — c'est un
  *  commit comme un autre.
  *
- *  CE QU'IL FAUT DANS LE COMPTE CLOUDFLARE (voir MAINTENANCE.md) :
- *    ADMIN_MOT_DE_PASSE  secret — le mot de passe de la page /admin
- *    GITHUB_TOKEN        secret — jeton GitHub à portée « Contents: read/write »
- *                                 sur le seul dépôt du site
- *    GITHUB_DEPOT        variable — « proprietaire/depot »
+ *  CE QU'IL FAUT (voir MAINTENANCE.md) :
+ *    ADMIN_MOT_DE_PASSE  Secret Cloudflare — le mot de passe de la page /admin
+ *    GITHUB_TOKEN        Secret Cloudflare — jeton GitHub à portée
+ *                        « Contents: read/write » sur le seul dépôt du site
+ *    GITHUB_DEPOT        « vars » de wrangler.jsonc — « proprietaire/depot »
+ *
+ *  ATTENTION : GITHUB_DEPOT ne doit PAS être créé à la main dans le tableau
+ *  de bord Cloudflare. Un déploiement wrangler réécrit la liste des variables
+ *  Texte à partir de wrangler.jsonc et effacerait la valeur saisie à la main.
+ *  Les Secrets, eux, ne sont pas touchés.
+ *
  *  Sans ces trois valeurs, /admin refuse poliment de fonctionner plutôt que
  *  d'échouer en silence.
  * ========================================================================== */

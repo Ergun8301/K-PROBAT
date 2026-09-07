@@ -141,6 +141,7 @@ jobs:
           check /robots.txt 'text/plain; ?charset=utf-8'
           check /llms.txt 'text/plain; ?charset=utf-8'
           check /assets/og/k-probat-og.jpg 'image/jpeg'
+          check /maconnerie-beton-cellulaire-siporex-ytong 'text/html'
           n=$(curl -sS --max-time 20 "$URL/" | grep -c 'application/ld+json' || true)
           if [ "$n" -ge 1 ]; then line="✓ JSON-LD servi sur / ($n bloc)"; else ok=0; line="✗ JSON-LD absent de /"; fi
           echo "$line"; out="$out%0A$line"
@@ -150,6 +151,40 @@ jobs:
             if printf '%s' "$body" | grep -q 'href="mentions-legales.html"' && printf '%s' "$body" | grep -q 'href="confidentialite.html"'; then line="✓ liens légaux présents sur $p"; else ok=0; line="✗ liens légaux absents sur $p"; fi
             echo "$line"; out="$out%0A$line"
           done
+          # Page pilier « béton cellulaire » : elle doit être dans le sitemap,
+          # servir un JSON-LD FAQPage VALIDE (pas seulement présent), renvoyer
+          # vers les 12 pages communes, et être atteignable depuis l'accueil.
+          curl -sS --max-time 20 "$URL/maconnerie-beton-cellulaire-siporex-ytong" > /tmp/pilier.html || true
+          curl -sS --max-time 20 "$URL/sitemap.xml" > /tmp/sitemap.xml || true
+          curl -sS --max-time 20 "$URL/" > /tmp/accueil.html || true
+          verdicts=$(node -e '
+            const fs = require("fs");
+            const pil = fs.readFileSync("/tmp/pilier.html", "utf8");
+            const acc = fs.readFileSync("/tmp/accueil.html", "utf8");
+            const map = fs.readFileSync("/tmp/sitemap.xml", "utf8");
+            const L = [];
+            const dire = (bon, txt) => L.push((bon ? "\u2713 " : "\u2717 ") + txt);
+            dire(map.includes("/maconnerie-beton-cellulaire-siporex-ytong<"),
+                 "page pilier presente dans le sitemap");
+            let faq = null;
+            for (const m of pil.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+              try { const d = JSON.parse(m[1]); if (d["@type"] === "FAQPage") faq = d; } catch (e) { L.push("\u2717 bloc JSON-LD invalide : " + e.message); }
+            }
+            dire(faq && Array.isArray(faq.mainEntity) && faq.mainEntity.length >= 6
+                 && faq.mainEntity.every(q => q.name && q.acceptedAnswer && q.acceptedAnswer.text),
+                 "JSON-LD FAQPage valide (" + (faq ? faq.mainEntity.length : 0) + " questions, 6 minimum)");
+            const villes = new Set([...pil.matchAll(/href="(maconnerie-[a-z-]+\.html)"/g)].map(m => m[1]));
+            dire(villes.size === 12, "liens vers les pages communes : " + villes.size + "/12");
+            dire(acc.includes("maconnerie-beton-cellulaire-siporex-ytong.html"),
+                 "accueil : lien vers la page pilier");
+            const interdits = pil.match(/certifi|agr\u00e9\u00e9|labellis|officiel/i);
+            dire(!interdits, "vocabulaire : aucun terme interdit sur la page pilier");
+            console.log(L.join("\n"));
+            if (L.some(l => l.startsWith("\u2717"))) process.exit(1);
+          ') || ok=0
+          echo "$verdicts"
+          out="$out%0A$(printf '%s' "$verdicts" | sed 's/$/%0A/' | tr -d '\n')"
+
           # Formulaire de devis : l'endpoint doit accepter une demande et
           # refuser une demande incomplète. On envoie le champ « piège à
           # robots » rempli : le Worker répond OK mais n'enregistre RIEN,

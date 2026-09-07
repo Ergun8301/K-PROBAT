@@ -362,6 +362,74 @@ groupe `*`. Toute exclusion doit être répétée dans chaque groupe.
 contenu, et que le JSON-LD est servi (annotation « Site en ligne vérifié »
 sur le run).
 
+## Page béton cellulaire (page pilier) — règles strictes
+
+Adresse : `/maconnerie-beton-cellulaire-siporex-ytong`.
+Source : `src/maconnerie-beton-cellulaire-siporex-ytong.html`.
+
+**Une seule page pour les trois mots.** « Béton cellulaire » est le nom du
+matériau ; « Siporex » et « Ytong » sont deux marques du groupe Xella. Trois
+pages séparées seraient du contenu dupliqué et se pénaliseraient entre elles :
+tout tient sur cette page, et c'est justement pour ça qu'elle se positionne sur
+les trois recherches.
+
+⚠️ **Siporex n'a PAS été renommé Ytong.** Les deux marques appartiennent au même
+groupe et existent toujours en parallèle, sur des circuits de distribution
+différents. Ne jamais écrire le contraire.
+
+### Vocabulaire verrouillé
+
+| Interdit | À écrire |
+|---|---|
+| certifié, agréé, labellisé, officiel | **partenaire** |
+
+Aucun de ces organismes — Habitat Libre, Maisons Axial, Siporex, Ytong, Xella —
+ne délivre de certification à l'entreprise. Écrire le contraire serait faux et
+juridiquement risqué.
+
+**Pas de logo** Habitat Libre, Maisons Axial, Siporex, Ytong ni Xella.
+
+### Les trois phrases validées par le client — à reprendre au mot près
+
+- « Maçon partenaire d'Habitat Libre et de Maisons Axial, constructeurs de maisons individuelles dans l'Ain. »
+- « Nous réalisons le gros œuvre en béton cellulaire des maisons Habitat Libre depuis plus de 15 ans. »
+- « Plus de 100 maisons en béton cellulaire réalisées dans l'Ain. »
+
+**N'inventer aucun autre chiffre, aucune autre durée, aucun autre nom
+d'entreprise.** Pas même une reformulation « équivalente » : ces phrases
+engagent le client.
+
+### La section de l'accueil
+
+Elle n'est PAS écrite dans `src/index.html` : elle est ajoutée par
+`tools/transpose-maquette.mjs` (constante `SECTION_BC`), avec l'entrée de menu
+et la renumérotation des sections suivantes. C'est le seul endroit à modifier —
+une retouche directe dans `src/index.html` serait effacée à la prochaine
+régénération.
+
+### Photos de la page béton cellulaire
+
+Deux emplacements sont marqués `data-photo-a-remplacer` dans la source et
+utilisent pour l'instant des photos de chantier existantes.
+
+**Où déposer les nouvelles photos :** `src/assets/img/`, puis remplacer le
+`src` (et le `alt`) dans la source de la page.
+
+| Critère | Valeur |
+|---|---|
+| Format | JPEG (`.jpg`) |
+| Largeur | 1600 px environ (1200 px minimum) |
+| Poids | 250 Ko maximum par photo — au-delà, la page rame sur mobile |
+| Cadrage | horizontal (paysage) |
+| Nom de fichier | en minuscules, sans accent ni espace : `beton-cellulaire-<sujet>-<commune>.jpg` |
+
+Penser à mettre `width` et `height` à jour dans la balise `<img>` : ce sont ces
+deux valeurs qui empêchent la page de sauter pendant le chargement.
+
+**Le texte `alt` décrit la photo, pas la page** : ce qu'on voit, le matériau et
+la commune quand c'est pertinent. Exemple : « Élévation de murs en béton
+cellulaire sur un chantier de maison individuelle à Péronnas ».
+
 ## Pages par commune (référencement local)
 
 Douze pages, une par commune : `/maconnerie-bourg-en-bresse`, `/maconnerie-montagnat`, etc.

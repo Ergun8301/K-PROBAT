@@ -29,7 +29,7 @@ const OUT_CSS = join(ROOT, 'src', 'assets', 'css', 'hover.css');
 
 // ---- données réelles, reprises telles quelles du composant de la maquette ----
 const IMG = 'assets/img/';
-const menuItems = [['Accueil', '#hero'], ['Savoir-faire', '#savoirfaire'], ['Réalisations', '#realisations'], ["L'artisan", '#artisan'], ['Contact', '#contact']]
+const menuItems = [['Accueil', '#hero'], ['Savoir-faire', '#savoirfaire'], ['Réalisations', '#realisations'], ['Béton cellulaire', '#beton-cellulaire'], ["L'artisan", '#artisan'], ['Contact', '#contact']]
   .map((a, i) => ({ label: a[0], href: a[1], n: '0' + (i + 1), delay: '0s' }));
 
 const sv = [
@@ -364,6 +364,43 @@ const HEAD = `<!DOCTYPE html>
 // orphelines et les moteurs les exploreraient très mal. build.mjs le remplit.
 html = html.replace('  {{SIGNATURE}}\n</footer>',
   '  <span data-zones style="flex-basis:100%;color:rgba(234,227,212,.38);letter-spacing:.1em;line-height:2">{{ZONES}}</span>\n  {{SIGNATURE}}\n</footer>');
+
+// ── Section « béton cellulaire / Siporex / Ytong » ────────────────────────
+// Elle ne vient PAS de la maquette : c'est la spécialité que le client met en
+// avant. Elle est ajoutée ICI, par l'outil de transposition, et non à la main
+// dans src/index.html — sinon la prochaine régénération l'effacerait.
+// Le lien pointe vers la page pilier, qui porte tout le contenu détaillé.
+// Vocabulaire verrouillé : « partenaire », jamais « certifié », « agréé »,
+// « labellisé » ni « officiel ». Aucun logo de marque. Aucun chiffre inventé.
+// La section s'intercale en 03 : les deux suivantes sont donc renumérotées.
+html = html.replace("03 / L'ARTISAN", "04 / L'ARTISAN")
+           .replace('04 / CONTACT', '05 / CONTACT');
+
+const SECTION_BC = `
+<section id="beton-cellulaire" data-screen-label="Béton cellulaire" style="background:#EAE3D4;padding:clamp(70px,10vw,150px) clamp(18px,4vw,48px);display:flex;flex-direction:column;gap:clamp(24px,3vw,40px)">
+  <span data-reveal="" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.3em;color:var(--acc,#D93916)">03 / SPÉCIALITÉ — BÉTON CELLULAIRE</span>
+  <h2 data-reveal="" style="margin:0;font-weight:900;font-size:clamp(30px,5vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:-.015em;max-width:15ch">Béton cellulaire, <span style="color:var(--acc,#D93916)">Siporex &amp; Ytong</span></h2>
+  <div style="display:flex;flex-wrap:wrap;gap:clamp(30px,5vw,80px);align-items:flex-start">
+    <div style="flex:1 1 440px;min-width:290px;display:flex;flex-direction:column;gap:22px">
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">Trois mots pour un seul matériau. <strong>Béton cellulaire</strong> est son nom ; <strong>Siporex</strong> et <strong>Ytong</strong> sont deux marques du groupe Xella, distribuées sur des circuits différents et toujours présentes toutes les deux.</p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">Maçon partenaire d'Habitat Libre et de Maisons Axial, constructeurs de maisons individuelles dans l'Ain.</p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">Nous réalisons le gros œuvre en béton cellulaire des maisons Habitat Libre depuis plus de 15 ans.</p>
+      <a data-reveal="" href="maconnerie-beton-cellulaire-siporex-ytong.html" style="display:inline-flex;align-items:center;justify-content:center;width:fit-content;min-width:260px;min-height:52px;padding:0 26px;font-family:'League Spartan',sans-serif;font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;background:var(--acc,#D93916);color:#EAE3D4;text-decoration:none;transition:filter .3s" data-bc-cta>Tout savoir sur le béton cellulaire</a>
+    </div>
+    <div style="flex:1 1 320px;min-width:280px;display:flex;flex-direction:column;gap:3px;background:rgba(34,30,25,.14);border:1px solid rgba(34,30,25,.14)">
+      <div data-reveal="" style="background:#EAE3D4;padding:clamp(20px,2vw,30px);display:flex;flex-direction:column;gap:8px">
+        <span data-count="100" style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">100</span>
+        <span style="font-size:14px;line-height:1.6;color:rgba(34,30,25,.7)">Plus de 100 maisons en béton cellulaire réalisées dans l'Ain.</span>
+      </div>
+      <figure data-reveal="" style="margin:0;background:#EAE3D4;padding:0;overflow:hidden">
+        <img src="assets/img/siporex-1.jpg" alt="Murs en béton cellulaire (Siporex) montés sur un chantier de maison individuelle dans l'Ain" loading="lazy" width="1195" height="896" style="width:100%;height:auto;display:block">
+      </figure>
+    </div>
+  </div>
+</section>
+
+`;
+html = html.replace('<section id="artisan"', SECTION_BC.trim() + '\n\n<section id="artisan"');
 
 const TAIL = `
 <!-- Librairies servies EN LOCAL (jamais depuis un CDN) : si un CDN tombe ou est

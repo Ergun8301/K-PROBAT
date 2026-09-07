@@ -114,3 +114,8 @@ select{line-height:1.5;min-height:48px}
    300 px de vide sous une photo — d'où l'impression de photos « décalées »
    et de trous. Chaque figure reprend désormais la hauteur de son contenu. */
 .rea-grid,[data-rea]{align-self:start}
+
+/* 3) Section « béton cellulaire » de l'accueil : elle ne vient pas de la
+   maquette (elle est ajoutée par tools/transpose-maquette.mjs), donc son
+   survol n'est pas dans hover.css — il est défini ici. */
+[data-bc-cta]:hover{filter:brightness(.92);color:#EAE3D4}

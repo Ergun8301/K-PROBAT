@@ -401,6 +401,40 @@ attribut `data-*` n'a aucun effet visuel et n'est pas lu par les moteurs :
 vérifié en comparant le site généré avec et sans — **identique octet pour
 octet** une fois les `data-champ` retirés.
 
+### ⚠️ La chaîne complète : contenu.json → site en ligne
+
+`/admin` écrit dans `src/contenu.json`, et **rien d'autre**. Entre ce fichier
+et la page vue par le visiteur, il y a **deux** moulinettes, dans cet ordre :
+
+```
+src/contenu.json
+   ↓  node tools/transpose-maquette.mjs     ← régénère src/index.html
+src/index.html  (fichier GÉNÉRÉ, jamais à modifier à la main)
+   ↓  node build.mjs                        ← src/ → site/
+site/  → déployé sur Cloudflare
+```
+
+**Oublier la première étape casse tout `/admin` en silence** : le commit part,
+le déploiement passe au vert, et le site ne bouge pas. C'est exactement la
+panne qu'on a eue — le déploiement ne lançait que `build.mjs`.
+
+Deux garde-fous sont en place depuis :
+
+1. Le déploiement lance `tools/transpose-maquette.mjs` **avant** `build.mjs`.
+2. Après la mise en ligne, `tools/verifier-contenu-en-ligne.mjs` télécharge les
+   pages réellement servies et compare **chaque valeur** à `contenu.json`.
+   Le moindre écart fait échouer le déploiement en rouge.
+
+Ce second contrôle vérifie aussi la couverture : un champ modifiable servi par
+le site mais inconnu du contrôle est un échec. On ne peut donc pas ajouter un
+champ éditable en oubliant de le faire vérifier.
+
+Pour l'essayer sans réseau, après `node tools/transpose-maquette.mjs && node build.mjs` :
+
+```
+node tools/verifier-contenu-en-ligne.mjs --local site
+```
+
 Le libellé au-dessus de l'aperçu dit toujours ce qu'on regarde :
 « Aperçu de vos modifications (non publiées) » ou « Version en ligne ».
 Le bouton *Revoir la version en ligne* recharge la page publiée pour comparer.

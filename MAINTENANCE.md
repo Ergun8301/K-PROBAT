@@ -362,6 +362,82 @@ groupe `*`. Toute exclusion doit être répétée dans chaque groupe.
 contenu, et que le JSON-LD est servi (annotation « Site en ligne vérifié »
 sur le run).
 
+## L'administration du site : /admin
+
+**https://k-probat.fr/admin** — le client change ses photos et ses textes
+lui-même, sans développeur et sans toucher à GitHub.
+
+### Ce qu'on peut y faire
+
+| Onglet | Ce qui se modifie |
+|---|---|
+| **Accueil** | les 8 métiers (photo, titre, sous-titre) + la section béton cellulaire |
+| **Réalisations** | les 8 chantiers (photo, titre, lieu et année) |
+| **Page Siporex** | les 3 photos et leurs légendes |
+| **Pages villes** | les 12 communes (intro, bâti local, chantier, question/réponse) |
+
+On y ajoute aussi des photos depuis un téléphone ou un ordinateur : elles sont
+**redimensionnées et compressées dans le navigateur** avant l'envoi, donc une
+photo de 8 Mo devient une photo de 250 Ko sans intervention.
+
+### Comment ça marche
+
+`/admin` n'écrit PAS dans le site en direct. Elle écrit dans le dépôt GitHub
+(`src/contenu.json`, `src/villes.json`, `src/assets/img/`), et le déploiement
+habituel reconstruit le site — avec **tous ses contrôles**. Une modification
+faite depuis `/admin` est donc aussi sûre qu'une modification faite par un
+développeur, et elle s'annule comme n'importe quel commit.
+
+Conséquence à connaître : **le site met une à deux minutes** à afficher la
+modification. L'aperçu de droite montre le site EN LIGNE, pas le brouillon.
+
+### Les trois réglages à faire une fois, dans Cloudflare
+
+Cloudflare → *Workers* → `k-probat-site` → *Paramètres* → *Variables et secrets*.
+
+| Nom | Type | Valeur |
+|---|---|---|
+| `ADMIN_MOT_DE_PASSE` | **Secret** | le mot de passe de la page /admin |
+| `GITHUB_TOKEN` | **Secret** | jeton GitHub (voir ci-dessous) |
+| `GITHUB_DEPOT` | Variable | `Ergun8301/K-PROBAT` |
+
+**Créer le jeton GitHub** : github.com → photo de profil → *Settings* →
+*Developer settings* → *Personal access tokens* → **Fine-grained tokens** →
+*Generate new token*.
+- *Repository access* : **Only select repositories** → `K-PROBAT`
+- *Permissions* → *Repository permissions* → **Contents : Read and write**
+- Rien d'autre. Ce jeton ne peut donc RIEN faire en dehors de ce dépôt.
+
+Tant que ces trois valeurs manquent, `/admin` l'annonce clairement au lieu
+d'échouer en silence.
+
+### Sécurité
+
+- La page est en `noindex` : elle n'apparaîtra jamais dans Google.
+- Sans mot de passe, aucun point d'entrée ne répond.
+- La session dure 8 heures, dans un cookie signé (`HttpOnly`, `Secure`).
+- Le mot de passe est comparé à durée constante : le temps de réponse ne
+  trahit pas combien de caractères sont corrects.
+- Le serveur **revérifie tout** avant d'écrire : 8 métiers, 8 réalisations,
+  aucun champ vide, et les mots interdits (« certifié », « agréé »,
+  « labellisé », « officiel ») sont refusés là aussi.
+
+### Donner l'accès au client
+
+Il suffit de lui donner l'adresse et le mot de passe. Pour le lui retirer :
+changer `ADMIN_MOT_DE_PASSE` dans Cloudflare.
+
+⚠️ Le client peut modifier les phrases partenaires validées. Elles sont
+signalées comme telles dans l'interface, mais rien ne l'empêche techniquement
+de les réécrire : c'est un choix, il est chez lui.
+
+### Réutiliser sur un autre site de l'agence
+
+`worker/admin.js` et `src/admin.html` sont génériques. Pour un nouveau client :
+copier ces deux fichiers, créer un `src/contenu.json` avec les champs de SON
+site, adapter les quatre fonctions de vue de `admin.html`, poser les trois
+réglages Cloudflare. Compter une heure, pas une journée.
+
 ## Page béton cellulaire (page pilier) — règles strictes
 
 Adresse : `/maconnerie-beton-cellulaire-siporex-ytong`.

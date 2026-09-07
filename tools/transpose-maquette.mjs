@@ -32,19 +32,13 @@ const IMG = 'assets/img/';
 const menuItems = [['Accueil', '#hero'], ['Savoir-faire', '#savoirfaire'], ['Réalisations', '#realisations'], ['Béton cellulaire', '#beton-cellulaire'], ["L'artisan", '#artisan'], ['Contact', '#contact']]
   .map((a, i) => ({ label: a[0], href: a[1], n: '0' + (i + 1), delay: '0s' }));
 
-const sv = [
-  // Ordre voulu par le client : du plus structurant au plus secondaire, avec
-  // la spécialité en 02. Les intitulés restent COURTS — un titre long est
-  // tronqué dans la carte (« Terrasses, dalles & VS » ne tenait pas).
-  { n: '01', t: 'Gros œuvre & fondations', tech: 'SOUBASSEMENT — RÉSEAUX', img: 'soubassement-reseaux-vide-sanitaire.jpg' },
-  { n: '02', t: 'Siporex & Ytong', tech: 'BÉTON CELLULAIRE — MURS', img: 'beton-cellulaire-maison-habitat-libre.jpg' },
-  { n: '03', t: 'Briques & parpaings', tech: 'POROTHERM — WIENERBERGER', img: 'porotherm-chantier.jpg' },
-  { n: '04', t: 'Coffrage & béton armé', tech: 'FERRAILLAGE — LINTEAUX', img: 'ferraillage-fondations.jpg' },
-  { n: '05', t: 'Escaliers béton', tech: 'SUR MESURE', img: 'escalier-coffrage.jpg' },
-  { n: '06', t: 'Dalles & vide sanitaire', tech: 'PLANCHERS ISOLÉS', img: 'plancher-isole.jpg' },
-  { n: '07', t: 'Clôtures & piliers', tech: 'MURETS — PORTAILS', img: 'cloture-composite.jpg' },
-  { n: '08', t: 'Rénovation & reprise', tech: 'EXISTANT — SOUTÈNEMENT', img: 'mur-parpaings-reprise-existant.jpg' },
-].map((x, i) => ({ ...x, k: 's' + i }));
+// Les huit métiers et les huit réalisations viennent de src/contenu.json :
+// c'est le fichier que le client modifie lui-même depuis /admin. Ordre, titres,
+// sous-titres et photos s'y changent sans toucher au code.
+const CONTENU = JSON.parse(readFileSync(new URL('../src/contenu.json', import.meta.url), 'utf8'));
+const sv = CONTENU.savoirFaire.map((x, i) => ({
+  ...x, n: String(i + 1).padStart(2, '0'), k: 's' + i,
+}));
 
 // Desktop : 4 colonnes de 2 cartes (le JS regroupe en 2 colonnes sous 860 px).
 const NCOLS = 4, PER = sv.length / NCOLS;
@@ -53,16 +47,22 @@ const svColumns = Array.from({ length: NCOLS }, (_, i) => ({
   cards: sv.slice(i * PER, (i + 1) * PER),
 }));
 
-const projects = [
-  { img: 'briques-elevation.jpg', t: 'Maison individuelle — élévation briques', meta: 'AIN (01) — 2020', col: '1 / span 7', ar: '16/10', mt: '0' },
-  { img: 'beton-cellulaire-maison-habitat-libre.jpg', t: 'Maison Habitat Libre — béton cellulaire', meta: 'AIN (01) — 2022', col: '8 / span 5', ar: '4/5', mt: 'clamp(40px,6vw,110px)' },
-  { img: 'escalier-vue-haut.jpg', t: 'Escalier béton brut', meta: 'AIN (01) — 2020', col: '1 / span 4', ar: '4/5', mt: '0' },
-  { img: 'plancher-isole.jpg', t: 'Plancher isolé — vide sanitaire', meta: 'AIN (01) — 2022', col: '5 / span 8', ar: '16/9', mt: 'clamp(30px,4vw,80px)' },
-  { img: 'dalle-bassin.jpg', t: 'Dalle & bassin — béton brut', meta: 'AIN (01) — 2021', col: '3 / span 8', ar: '21/9', mt: '0' },
-  { img: 'beton-cellulaire-premiers-rangs.jpg', t: 'Élévation Ytong — premiers rangs', meta: 'AIN (01) — 2023', col: '1 / span 6', ar: '16/10', mt: '0' },
-  { img: 'mur-soutenement.jpg', t: 'Murs de soutènement — enduit blanc', meta: 'AIN (01) — 2020', col: '7 / span 6', ar: '16/10', mt: 'clamp(30px,4vw,80px)' },
-  { img: 'porotherm-chantier.jpg', t: 'Élévation briques & poutres', meta: 'AIN (01) — 2015', col: '4 / span 6', ar: '3/2', mt: '0' },
-].map((p, i) => ({ ...p, k: 'p' + i }));
+// La MISE EN PAGE de la galerie (colonnes, proportions, décalages) reste ici :
+// elle vient de la maquette et n'a pas à être touchée depuis /admin. Seuls la
+// photo, le titre et l'année sont éditables — ils viennent de contenu.json.
+const REA_MISE_EN_PAGE = [
+  { col: '1 / span 7', ar: '16/10', mt: '0' },
+  { col: '8 / span 5', ar: '4/5', mt: 'clamp(40px,6vw,110px)' },
+  { col: '1 / span 4', ar: '4/5', mt: '0' },
+  { col: '5 / span 8', ar: '16/9', mt: 'clamp(30px,4vw,80px)' },
+  { col: '3 / span 8', ar: '21/9', mt: '0' },
+  { col: '1 / span 6', ar: '16/10', mt: '0' },
+  { col: '7 / span 6', ar: '16/10', mt: 'clamp(30px,4vw,80px)' },
+  { col: '4 / span 6', ar: '3/2', mt: '0' },
+];
+const projects = CONTENU.realisations
+  .slice(0, REA_MISE_EN_PAGE.length)
+  .map((p, i) => ({ ...REA_MISE_EN_PAGE[i], ...p, k: 'p' + i }));
 
 // Photos de la mosaïque d'accueil (valeurs par défaut des réglages de la maquette).
 const heroImgs = {
@@ -405,18 +405,18 @@ const SECTION_BC = `
   <h2 data-reveal="" style="margin:0;font-weight:900;font-size:clamp(30px,5vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:-.015em;max-width:15ch">Béton cellulaire, <span style="color:var(--acc,#D93916)">Siporex &amp; Ytong</span></h2>
   <div style="display:flex;flex-wrap:wrap;gap:clamp(30px,5vw,80px);align-items:flex-start">
     <div style="flex:1 1 440px;min-width:290px;display:flex;flex-direction:column;gap:22px">
-      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">Trois mots pour un seul matériau. <strong>Béton cellulaire</strong> est son nom ; <strong>Siporex</strong> et <strong>Ytong</strong> sont deux marques du groupe Xella, distribuées sur des circuits différents et toujours présentes toutes les deux.</p>
-      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">Maçon partenaire d'Habitat Libre et de Maisons Axial, constructeurs de maisons individuelles dans l'Ain.</p>
-      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">Nous réalisons le gros œuvre en béton cellulaire des maisons Habitat Libre depuis plus de 15 ans.</p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p1}</p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p2}</p>
+      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p3}</p>
       <a data-reveal="" href="maconnerie-beton-cellulaire-siporex-ytong.html" style="display:inline-flex;align-items:center;justify-content:center;width:fit-content;min-width:260px;min-height:52px;padding:0 26px;font-family:'League Spartan',sans-serif;font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;background:var(--acc,#D93916);color:#EAE3D4;text-decoration:none;transition:filter .3s" data-bc-cta>Tout savoir sur le béton cellulaire</a>
     </div>
     <div style="flex:1 1 320px;min-width:280px;display:flex;flex-direction:column;gap:3px;background:rgba(34,30,25,.14);border:1px solid rgba(34,30,25,.14)">
       <div data-reveal="" style="background:#EAE3D4;padding:clamp(20px,2vw,30px);display:flex;flex-direction:column;gap:8px">
-        <span data-count="100" style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">100</span>
-        <span style="font-size:14px;line-height:1.6;color:rgba(34,30,25,.7)">Plus de 100 maisons en béton cellulaire réalisées dans l'Ain.</span>
+        <span data-count="${CONTENU.betonCellulaire.chiffre}" style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">${CONTENU.betonCellulaire.chiffre}</span>
+        <span style="font-size:14px;line-height:1.6;color:rgba(34,30,25,.7)">${CONTENU.betonCellulaire.chiffreTexte}</span>
       </div>
       <figure data-reveal="" style="margin:0;background:#EAE3D4;padding:0;overflow:hidden">
-        <img src="assets/img/beton-cellulaire-maison-elevation.jpg" alt="Maison individuelle en béton cellulaire (Ytong) en cours d'élévation sur un chantier K-ProBat dans l'Ain" loading="lazy" width="1600" height="900" style="width:100%;height:auto;display:block">
+        <img src="assets/img/${CONTENU.betonCellulaire.img}" alt="${CONTENU.betonCellulaire.imgAlt}" loading="lazy" width="1600" height="900" style="width:100%;height:auto;display:block">
       </figure>
     </div>
   </div>

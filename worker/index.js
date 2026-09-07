@@ -20,6 +20,8 @@
  *  Étapes de configuration : voir MAINTENANCE.md.
  * ========================================================================== */
 
+import { routerAdmin } from './admin.js';
+
 const ARTISAN_EMAIL = 'k.probat01@gmail.com';
 const MAX_FIELD = 2000;
 
@@ -138,6 +140,18 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api/devis') return handleDevis(request, env);
+
+    // Administration : l'interface et ses points d'entrée. Elle n'est pas
+    // indexée (en-tête ci-dessous) et n'expose rien sans mot de passe.
+    if (url.pathname.startsWith('/api/admin/')) return routerAdmin(request, env, url);
+    if (url.pathname === '/admin' || url.pathname === '/admin/') {
+      const page = await env.ASSETS.fetch(new URL('/admin.html', url));
+      const r = new Response(page.body, page);
+      r.headers.set('x-robots-tag', 'noindex, nofollow');
+      r.headers.set('cache-control', 'no-store');
+      return r;
+    }
+
     return env.ASSETS.fetch(request);
   },
 };

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<!-- ══════════════════════════════════════════════════════════════════════
+     INTERFACE D'ADMINISTRATION — page privée, jamais indexée.
+     Elle ne fait rien toute seule : elle parle à worker/admin.js, qui écrit
+     dans le dépôt GitHub. Le déploiement habituel fait le reste.
+     Pas de bibliothèque externe : tout est dans ce fichier.
+     ══════════════════════════════════════════════════════════════════════ -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Administration — K-ProBat</title>
+<link rel="icon" href="/assets/icons/favicon.svg" type="image/svg+xml">
+<style>
+:root{--ink:#221E19;--cream:#EAE3D4;--acc:#D93916;--ok:#25D366;--bord:rgba(34,30,25,.16)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+button{font:inherit;cursor:pointer;border:none;border-radius:3px}
+input,textarea,select{font:inherit;width:100%;padding:9px 11px;border:1px solid var(--bord);border-radius:3px;background:#fff;color:var(--ink)}
+textarea{min-height:88px;resize:vertical}
+label{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(34,30,25,.6);margin:12px 0 5px}
+
+/* --- connexion --- */
+#connexion{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+#connexion form{width:100%;max-width:340px;background:#fff;padding:30px;border-radius:5px;box-shadow:0 10px 40px rgba(34,30,25,.12)}
+#connexion h1{margin:0 0 4px;font-size:21px}
+#connexion p{margin:0 0 20px;font-size:13px;color:rgba(34,30,25,.6)}
+
+/* --- cadre --- */
+header{position:sticky;top:0;z-index:20;background:var(--ink);color:var(--cream);display:flex;align-items:center;gap:14px;padding:11px 16px;flex-wrap:wrap}
+header b{font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+header .grandit{flex:1}
+.btn{padding:10px 18px;background:var(--acc);color:#fff;font-weight:700}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-2{background:transparent;color:var(--cream);border:1px solid rgba(234,227,212,.4);padding:9px 14px}
+
+nav{display:flex;gap:4px;padding:10px 16px 0;flex-wrap:wrap;background:var(--cream);position:sticky;top:52px;z-index:19}
+nav button{padding:9px 15px;background:transparent;border:1px solid transparent;color:rgba(34,30,25,.62);font-weight:600}
+nav button[aria-selected=true]{background:#fff;border-color:var(--bord);color:var(--ink)}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:16px;align-items:start}
+@media (max-width:1000px){main{grid-template-columns:1fr}#apercu{display:none}}
+#apercu{position:sticky;top:104px;height:calc(100dvh - 128px);background:#fff;border:1px solid var(--bord);border-radius:5px;overflow:hidden;display:flex;flex-direction:column}
+#apercu .barre{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--bord);font-size:12px;color:rgba(34,30,25,.6)}
+#apercu iframe{flex:1;border:0;width:100%}
+
+.bloc{background:#fff;border:1px solid var(--bord);border-radius:5px;padding:16px;margin-bottom:14px}
+.bloc h2{margin:0 0 4px;font-size:16px}
+.bloc .aide{margin:0 0 14px;font-size:13px;color:rgba(34,30,25,.6)}
+.carte{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--bord)}
+.carte:first-of-type{border-top:0}
+.vignette{width:112px;height:112px;object-fit:cover;border-radius:3px;background:#eee;display:block;cursor:pointer;border:1px solid var(--bord)}
+.vignette:hover{outline:2px solid var(--acc);outline-offset:2px}
+.sous{font-size:11px;color:rgba(34,30,25,.5);text-align:center;margin-top:5px;cursor:pointer;text-decoration:underline}
+.num{font-weight:800;color:var(--acc);font-size:12px;letter-spacing:.1em}
+
+/* --- sélecteur de photo --- */
+dialog{border:0;border-radius:6px;padding:0;max-width:820px;width:94vw;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(34,30,25,.55)}
+.tete{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--bord)}
+.tete h3{margin:0;font-size:16px;flex:1}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;padding:16px;max-height:62vh;overflow:auto}
+.grille figure{margin:0;cursor:pointer;border:2px solid transparent;border-radius:4px;overflow:hidden}
+.grille figure:hover{border-color:var(--acc)}
+.grille img{width:100%;height:96px;object-fit:cover;display:block}
+.grille figcaption{font-size:10px;padding:4px 5px;color:rgba(34,30,25,.6);word-break:break-all}
+.pied{padding:14px 18px;border-top:1px solid var(--bord);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+#etat{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:60;max-width:min(560px,92vw);padding:14px 18px;border-radius:4px;background:var(--ink);color:var(--cream);box-shadow:0 10px 30px rgba(0,0,0,.25);white-space:pre-line;display:none}
+#etat.bien{background:#12421f}
+#etat.mal{background:#7d1d0c}
+.cache{display:none !important}
+</style>
+</head>
+<body>
+
+<section id="connexion">
+  <form id="formConnexion">
+    <h1>K-ProBat</h1>
+    <p>Administration du site</p>
+    <label for="mdp">Mot de passe</label>
+    <input id="mdp" type="password" autocomplete="current-password" required>
+    <button class="btn" style="width:100%;margin-top:16px" type="submit">Entrer</button>
+    <p id="erreurConnexion" style="color:var(--acc);margin:12px 0 0"></p>
+  </form>
+</section>
+
+<div id="app" class="cache">
+  <header>
+    <b>K-ProBat — Administration</b>
+    <span class="grandit"></span>
+    <span id="compteur" style="font-size:12.5px;opacity:.75"></span>
+    <button class="btn" id="publier" disabled>Publier</button>
+    <button class="btn-2" id="deconnexion">Quitter</button>
+  </header>
+
+  <nav id="onglets">
+    <button data-vue="accueil" aria-selected="true">Accueil</button>
+    <button data-vue="realisations" aria-selected="false">Réalisations</button>
+    <button data-vue="siporex" aria-selected="false">Page Siporex</button>
+    <button data-vue="villes" aria-selected="false">Pages villes</button>
+  </nav>
+
+  <main>
+    <div id="editeur"></div>
+    <div id="apercu">
+      <div class="barre">
+        <span id="apercuTitre">Aperçu du site en ligne</span>
+        <span style="flex:1"></span>
+        <button class="btn-2" style="color:var(--ink);border-color:var(--bord);padding:5px 10px;font-size:12px" id="rafraichir">Rafraîchir</button>
+      </div>
+      <iframe id="cadre" title="Aperçu du site"></iframe>
+    </div>
+  </main>
+</div>
+
+<dialog id="choixPhoto">
+  <div class="tete">
+    <h3>Choisir une photo</h3>
+    <button class="btn-2" style="color:var(--ink);border-color:var(--bord)" onclick="choixPhoto.close()">Fermer</button>
+  </div>
+  <div class="grille" id="grillePhotos"></div>
+  <div class="pied">
+    <button class="btn" id="boutonEnvoi">Ajouter une photo depuis mon appareil</button>
+    <input type="file" id="fichier" accept="image/jpeg,image/png,image/webp" class="cache">
+    <span style="font-size:12.5px;color:rgba(34,30,25,.6)">JPEG, 4 Mo maximum. Redimensionnée automatiquement.</span>
+  </div>
+</dialog>
+
+<div id="etat"></div>
+
+<script>
+(function () {
+  'use strict';
+  var D = null;            // les données chargées depuis le dépôt
+  var vue = 'accueil';
+  var modifie = false;
+  var ciblePhoto = null;   // fonction appelée quand une photo est choisie
+
+  var $ = function (s) { return document.querySelector(s); };
+  var ech = function (s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+
+  function dire(msg, genre) {
+    var e = $('#etat');
+    e.textContent = msg;
+    e.className = genre || '';
+    e.style.display = 'block';
+    clearTimeout(dire.t);
+    dire.t = setTimeout(function () { e.style.display = 'none'; }, genre === 'mal' ? 12000 : 6000);
+  }
+
+  function api(chemin, options) {
+    return fetch('/api/admin/' + chemin, Object.assign({ headers: { 'content-type': 'application/json' } }, options || {}))
+      .then(function (r) { return r.json().then(function (d) { return { http: r.status, d: d }; }); });
+  }
+
+  function marquerModifie() {
+    modifie = true;
+    $('#publier').disabled = false;
+    $('#compteur').textContent = 'modifications non publiées';
+  }
+
+  /* ---- connexion ------------------------------------------------------- */
+  $('#formConnexion').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    api('connexion', { method: 'POST', body: JSON.stringify({ motDePasse: $('#mdp').value }) })
+      .then(function (r) {
+        if (!r.d.ok) { $('#erreurConnexion').textContent = r.d.erreur || 'Connexion impossible.'; return; }
+        $('#connexion').classList.add('cache');
+        $('#app').classList.remove('cache');
+        charger();
+      })
+      .catch(function () { $('#erreurConnexion').textContent = 'Le site ne répond pas.'; });
+  });
+
+  $('#deconnexion').addEventListener('click', function () {
+    if (modifie && !confirm('Des modifications ne sont pas publiées. Quitter quand même ?')) return;
+    api('deconnexion', { method: 'POST' }).then(function () { location.reload(); });
+  });
+
+  /* ---- chargement ------------------------------------------------------ */
+  function charger() {
+    api('contenu').then(function (r) {
+      if (!r.d.ok) { dire(r.d.erreur || 'Chargement impossible.', 'mal'); return; }
+      D = r.d;
+      dessiner();
+      $('#cadre').src = '/?apercu=' + Date.now();
+    });
+  }
+
+  $('#rafraichir').addEventListener('click', function () {
+    $('#cadre').src = ($('#cadre').src.split('?')[0]) + '?apercu=' + Date.now();
+  });
+
+  /* ---- sélecteur de photo --------------------------------------------- */
+  function ouvrirPhotos(surChoix) {
+    ciblePhoto = surChoix;
+    $('#grillePhotos').innerHTML = D.photos.map(function (n) {
+      return '<figure data-nom="' + ech(n) + '"><img src="/assets/img/' + encodeURIComponent(n) +
+        '" alt="" loading="lazy"><figcaption>' + ech(n) + '</figcaption></figure>';
+    }).join('');
+    $('#choixPhoto').showModal();
+  }
+
+  $('#grillePhotos').addEventListener('click', function (ev) {
+    var f = ev.target.closest('figure');
+    if (!f || !ciblePhoto) return;
+    ciblePhoto(f.dataset.nom);
+    $('#choixPhoto').close();
+    marquerModifie();
+    dessiner();
+  });
+
+  $('#boutonEnvoi').addEventListener('click', function () { $('#fichier').click(); });
+
+  // Redimensionne et compresse dans le navigateur : une photo de téléphone
+  // fait 4 à 8 Mo, elle rendrait le site lent et dépasserait la limite.
+  function preparer(fichier) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var max = 1600;
+        var l = img.width, h = img.height;
+        if (l > max) { h = Math.round(h * max / l); l = max; }
+        var c = document.createElement('canvas');
+        c.width = l; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, l, h);
+        var q = 0.85, url;
+        do { url = c.toDataURL('image/jpeg', q); q -= 0.07; }
+        while (url.length * 0.75 > 250 * 1024 && q > 0.5);
+        resolve(url);
+      };
+      img.onerror = function () { reject(new Error('image illisible')); };
+      img.src = URL.createObjectURL(fichier);
+    });
+  }
+
+  $('#fichier').addEventListener('change', function (ev) {
+    var f = ev.target.files[0];
+    if (!f) return;
+    var nom = prompt(
+      'Nom du fichier ?\n\nMinuscules, chiffres et tirets, sans accent. Exemple :\nbeton-cellulaire-elevation-peronnas.jpg',
+      f.name.toLowerCase().replace(/\.(jpe?g|png|webp)$/i, '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) + '.jpg');
+    if (!nom) return;
+    dire('Préparation de la photo…');
+    preparer(f)
+      .then(function (donnees) {
+        return api('photo', { method: 'POST', body: JSON.stringify({ nom: nom, donnees: donnees }) });
+      })
+      .then(function (r) {
+        if (!r.d.ok) { dire(r.d.erreur || 'Envoi impossible.', 'mal'); return; }
+        if (D.photos.indexOf(r.d.nom) === -1) D.photos.push(r.d.nom);
+        D.photos.sort();
+        dire('Photo ajoutée. Choisissez-la dans la liste pour l\'utiliser.', 'bien');
+        ouvrirPhotos(ciblePhoto);
+      })
+      .catch(function (e) { dire('Échec : ' + e.message, 'mal'); });
+    ev.target.value = '';
+  });
+
+  /* ---- champs ---------------------------------------------------------- */
+  function champ(etiquette, valeur, surChangement, multiligne) {
+    var id = 'c' + Math.random().toString(36).slice(2);
+    setTimeout(function () {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function () { surChangement(el.value); marquerModifie(); });
+    });
+    return '<label for="' + id + '">' + ech(etiquette) + '</label>' +
+      (multiligne
+        ? '<textarea id="' + id + '">' + ech(valeur) + '</textarea>'
+        : '<input id="' + id + '" value="' + ech(valeur) + '">');
+  }
+
+  function bloc(titre, aide, corps) {
+    return '<div class="bloc"><h2>' + ech(titre) + '</h2><p class="aide">' + ech(aide) + '</p>' + corps + '</div>';
+  }
+
+  function vignette(nomPhoto, surChoix) {
+    var id = 'v' + Math.random().toString(36).slice(2);
+    setTimeout(function () {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('click', function () { ouvrirPhotos(surChoix); });
+    });
+    return '<div><img class="vignette" id="' + id + '" src="/assets/img/' + encodeURIComponent(nomPhoto) +
+      '" alt=""><div class="sous" onclick="document.getElementById(\'' + id + '\').click()">changer</div></div>';
+  }
+
+  /* ---- vues ------------------------------------------------------------ */
+  function vueAccueil() {
+    var c = D.contenu;
+    var metiers = c.savoirFaire.map(function (m, i) {
+      return '<div class="carte">' + vignette(m.img, function (n) { m.img = n; }) +
+        '<div><span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
+        champ('Titre (court — un titre long est coupé)', m.t, function (v) { m.t = v; }) +
+        champ('Sous-titre', m.tech, function (v) { m.tech = v; }) +
+        '</div></div>';
+    }).join('');
+
+    var bc = c.betonCellulaire;
+    var section = '<div class="carte">' + vignette(bc.img, function (n) { bc.img = n; }) + '<div>' +
+      champ('Description de la photo (pour Google et les malvoyants)', bc.imgAlt, function (v) { bc.imgAlt = v; }, true) +
+      '</div></div>' +
+      champ('Paragraphe 1', bc.p1, function (v) { bc.p1 = v; }, true) +
+      champ('Paragraphe 2 — phrase partenaires (validée, à ne pas reformuler)', bc.p2, function (v) { bc.p2 = v; }, true) +
+      champ('Paragraphe 3 — phrase 15 ans (validée, à ne pas reformuler)', bc.p3, function (v) { bc.p3 = v; }, true) +
+      champ('Grand chiffre', bc.chiffre, function (v) { bc.chiffre = v; }) +
+      champ('Phrase sous le chiffre', bc.chiffreTexte, function (v) { bc.chiffreTexte = v; }, true);
+
+    return bloc('Les 8 métiers', 'Cliquez sur une photo pour la remplacer. L\'ordre des cartes est l\'ordre de la liste.', metiers) +
+      bloc('Section béton cellulaire', 'Le bloc de l\'accueil qui renvoie vers la page Siporex.', section);
+  }
+
+  function vueRealisations() {
+    var lignes = D.contenu.realisations.map(function (r, i) {
+      return '<div class="carte">' + vignette(r.img, function (n) { r.img = n; }) +
+        '<div><span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
+        champ('Titre du chantier', r.t, function (v) { r.t = v; }) +
+        champ('Lieu et année', r.meta, function (v) { r.meta = v; }) +
+        '</div></div>';
+    }).join('');
+    return bloc('Galerie des réalisations',
+      'Huit chantiers. La disposition en quinconce est fixe : seuls la photo, le titre et l\'année changent.', lignes);
+  }
+
+  function vueSiporex() {
+    var p = D.contenu.pagePilier;
+    var corps = ['photo1', 'photo2', 'photo3'].map(function (cle, i) {
+      var ph = p[cle];
+      return '<div class="carte">' + vignette(ph.img, function (n) { ph.img = n; }) +
+        '<div><span class="num">PHOTO ' + (i + 1) + '</span>' +
+        champ('Légende affichée sous la photo', ph.legende, function (v) { ph.legende = v; }) +
+        champ('Description de la photo (pour Google et les malvoyants)', ph.alt, function (v) { ph.alt = v; }, true) +
+        '</div></div>';
+    }).join('');
+    return bloc('Page Siporex & Ytong', 'Les trois photos de la page. Le texte de la page se modifie avec le développeur.', corps);
+  }
+
+  function vueVilles() {
+    return D.villes.villes.map(function (v) {
+      return bloc(v.nom + ' (' + v.cp + ')', 'Page /maconnerie-' + v.slug,
+        champ('Distance depuis Montagnat', v.distance, function (x) { v.distance = x; }) +
+        champ('Introduction', v.intro, function (x) { v.intro = x; }, true) +
+        champ('Le bâti local', v.contexte, function (x) { v.contexte = x; }, true) +
+        champ('Un chantier du secteur', v.chantier, function (x) { v.chantier = x; }, true) +
+        champ('Question fréquente', v.question, function (x) { v.question = x; }) +
+        champ('Réponse', v.reponse, function (x) { v.reponse = x; }, true));
+    }).join('');
+  }
+
+  function dessiner() {
+    if (!D) return;
+    var rendus = { accueil: vueAccueil, realisations: vueRealisations, siporex: vueSiporex, villes: vueVilles };
+    $('#editeur').innerHTML = rendus[vue]();
+    var page = vue === 'siporex' ? '/maconnerie-beton-cellulaire-siporex-ytong'
+      : vue === 'villes' ? '/maconnerie-' + D.villes.villes[0].slug : '/';
+    var cadre = $('#cadre');
+    if (cadre.src.split('?')[0].replace(location.origin, '') !== page) cadre.src = page + '?apercu=' + Date.now();
+    $('#apercuTitre').textContent = 'Aperçu du site en ligne — ' + page;
+  }
+
+  $('#onglets').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-vue]');
+    if (!b) return;
+    vue = b.dataset.vue;
+    [].forEach.call(this.querySelectorAll('button'), function (x) {
+      x.setAttribute('aria-selected', String(x === b));
+    });
+    dessiner();
+  });
+
+  /* ---- publication ----------------------------------------------------- */
+  $('#publier').addEventListener('click', function () {
+    var b = $('#publier');
+    b.disabled = true;
+    b.textContent = 'Publication…';
+    api('enregistrer', { method: 'POST', body: JSON.stringify({ contenu: D.contenu, villes: D.villes }) })
+      .then(function (r) {
+        b.textContent = 'Publier';
+        if (!r.d.ok) { dire(r.d.erreur || 'Publication refusée.', 'mal'); b.disabled = false; return; }
+        modifie = false;
+        $('#compteur').textContent = 'à jour';
+        dire(r.d.message, 'bien');
+        // Le site met une à deux minutes à se reconstruire : on rafraîchit
+        // l'aperçu après, sinon on regarderait encore l'ancienne version.
+        setTimeout(function () { $('#rafraichir').click(); }, 100000);
+      })
+      .catch(function () { b.textContent = 'Publier'; b.disabled = false; dire('Le site ne répond pas.', 'mal'); });
+  });
+
+  window.addEventListener('beforeunload', function (ev) {
+    if (modifie) { ev.preventDefault(); ev.returnValue = ''; }
+  });
+})();
+</script>
+</body>
+</html>

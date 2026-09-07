@@ -49,6 +49,8 @@ const TEXT_FILES = ['robots.txt', 'llms.txt', '_headers', 'manifest.webmanifest'
 // dans la navigation de l'accueil ; seul un bloc discret en pied de page leur
 // donne le lien entrant nécessaire à leur exploration par les moteurs.
 const VILLES = JSON.parse(readFileSync(join(SRC, 'villes.json'), 'utf8')).villes;
+// Contenu modifiable depuis /admin (photos et légendes de la page pilier).
+const CONTENU = JSON.parse(readFileSync(join(SRC, 'contenu.json'), 'utf8'));
 const villeFile = v => `maconnerie-${v.slug}.html`;
 
 // ---- 1. configuration -------------------------------------------------------
@@ -66,7 +68,11 @@ const URL_RE = /https?:\/\/[^\s"'<>)]+/g;
 const foreign = h => /\.(workers|pages)\.dev$/i.test(h) && h !== SITE_HOST;
 
 // ---- 2. contrôle : rien en dur dans les sources ----------------------------
-const pages = readdirSync(SRC).filter(f => f.endsWith('.html')).sort();
+// admin.html est l'interface d'administration : ce n'est pas une page du site
+// public. Elle n'a ni canonical, ni JSON-LD, ni signature — elle est donc
+// exclue des contrôles et copiée telle quelle, en noindex.
+const ADMIN = 'admin.html';
+const pages = readdirSync(SRC).filter(f => f.endsWith('.html') && f !== ADMIN).sort();
 const partials = readdirSync(join(SRC, 'partials')).filter(f => f.endsWith('.html'));
 const sources = [...pages.map(p => join('src', p)), ...partials.map(p => join('src', 'partials', p)), ...TEXT_FILES.filter(f => existsSync(join(SRC, f))).map(f => join('src', f)), join('src', 'villes.json')];
 for (const f of sources) {
@@ -91,6 +97,12 @@ const jsonText = s => JSON.stringify(s).slice(1, -1);
 // aux messages d'erreur ; `chemin` est l'URL propre de la page.
 function assemble(source, brut, nom, chemin) {
   let html = brut
+    .replace(/\{\{PHOTO([123])_(SRC|ALT|LEG)\}\}/g, (_, n, champ) => {
+      const ph = CONTENU.pagePilier['photo' + n] || {};
+      const v = { SRC: ph.img, ALT: ph.alt, LEG: ph.legende }[champ];
+      if (!v) { errors.push(`${source} : contenu.json → pagePilier.photo${n}.${champ.toLowerCase()} manquant`); return ''; }
+      return champ === 'SRC' ? v : v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    })
     .replace(/\{\{ZONE_VILLES\}\}/g, () => VILLES.map(v => `<a href="${villeFile(v)}">${v.nom}</a>`).join('\n    '))
     .replace(/\{\{ZONES\}\}/g, () => 'ZONE D\'INTERVENTION — ' + VILLES.map(v => `<a href="${villeFile(v)}" style="color:inherit;text-decoration:none">${v.nom.toUpperCase()}</a>`).join(' · '))
     .replace(/\{\{SIGNATURE\}\}/g, () => signature)
@@ -133,6 +145,7 @@ fail();
 const allPages = [...pages, ...villePages];
 
 cpSync(join(SRC, 'assets'), join(OUT, 'assets'), { recursive: true });
+if (existsSync(join(SRC, ADMIN))) writeFileSync(join(OUT, ADMIN), readFileSync(join(SRC, ADMIN), 'utf8'));
 
 // Fichiers texte : robots.txt, llms.txt, _headers (adresse du site injectée).
 for (const f of TEXT_FILES) {

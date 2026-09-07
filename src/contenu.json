@@ -1,0 +1,41 @@
+{
+  "_commentaire": "CONTENU MODIFIABLE DU SITE. Ce fichier est la source unique des textes et photos que le client peut changer lui-même depuis /admin. tools/transpose-maquette.mjs le lit pour construire l'accueil. Modifier ce fichier à la main marche aussi : relancer node tools/transpose-maquette.mjs puis node build.mjs.",
+
+  "savoirFaire": [
+    { "t": "Gros œuvre & fondations", "tech": "SOUBASSEMENT — RÉSEAUX", "img": "soubassement-reseaux-vide-sanitaire.jpg" },
+    { "t": "Siporex & Ytong", "tech": "BÉTON CELLULAIRE — MURS", "img": "beton-cellulaire-maison-habitat-libre.jpg" },
+    { "t": "Briques & parpaings", "tech": "POROTHERM — WIENERBERGER", "img": "porotherm-chantier.jpg" },
+    { "t": "Coffrage & béton armé", "tech": "FERRAILLAGE — LINTEAUX", "img": "ferraillage-fondations.jpg" },
+    { "t": "Escaliers béton", "tech": "SUR MESURE", "img": "escalier-coffrage.jpg" },
+    { "t": "Dalles & vide sanitaire", "tech": "PLANCHERS ISOLÉS", "img": "plancher-isole.jpg" },
+    { "t": "Clôtures & piliers", "tech": "MURETS — PORTAILS", "img": "cloture-composite.jpg" },
+    { "t": "Rénovation & reprise", "tech": "EXISTANT — SOUTÈNEMENT", "img": "mur-parpaings-reprise-existant.jpg" }
+  ],
+
+  "realisations": [
+    { "img": "briques-elevation.jpg", "t": "Maison individuelle — élévation briques", "meta": "AIN (01) — 2020" },
+    { "img": "beton-cellulaire-maison-habitat-libre.jpg", "t": "Maison Habitat Libre — béton cellulaire", "meta": "AIN (01) — 2022" },
+    { "img": "escalier-vue-haut.jpg", "t": "Escalier béton brut", "meta": "AIN (01) — 2020" },
+    { "img": "plancher-isole.jpg", "t": "Plancher isolé — vide sanitaire", "meta": "AIN (01) — 2022" },
+    { "img": "dalle-bassin.jpg", "t": "Dalle & bassin — béton brut", "meta": "AIN (01) — 2021" },
+    { "img": "beton-cellulaire-premiers-rangs.jpg", "t": "Élévation Ytong — premiers rangs", "meta": "AIN (01) — 2023" },
+    { "img": "mur-soutenement.jpg", "t": "Murs de soutènement — enduit blanc", "meta": "AIN (01) — 2020" },
+    { "img": "porotherm-chantier.jpg", "t": "Élévation briques & poutres", "meta": "AIN (01) — 2015" }
+  ],
+
+  "betonCellulaire": {
+    "p1": "Trois mots pour un seul matériau. <strong>Béton cellulaire</strong> est son nom ; <strong>Siporex</strong> et <strong>Ytong</strong> sont deux marques du groupe Xella, distribuées sur des circuits différents et toujours présentes toutes les deux.",
+    "p2": "Maçon partenaire d'Habitat Libre et de Maisons Axial, constructeurs de maisons individuelles dans l'Ain.",
+    "p3": "Nous réalisons le gros œuvre en béton cellulaire des maisons Habitat Libre depuis plus de 15 ans.",
+    "chiffre": "100",
+    "chiffreTexte": "Plus de 100 maisons en béton cellulaire réalisées dans l'Ain.",
+    "img": "beton-cellulaire-maison-elevation.jpg",
+    "imgAlt": "Maison individuelle en béton cellulaire (Ytong) en cours d'élévation sur un chantier K-ProBat dans l'Ain"
+  },
+
+  "pagePilier": {
+    "photo1": { "img": "beton-cellulaire-maison-elevation.jpg", "alt": "Maison individuelle en béton cellulaire en cours d'élévation : murs montés, ouvertures et linteaux en place, chantier K-ProBat dans l'Ain", "legende": "Élévation en béton cellulaire — maison individuelle, Ain (01)" },
+    "photo2": { "img": "beton-cellulaire-premiers-rangs.jpg", "alt": "Premiers rangs de blocs de béton cellulaire montés au mortier-colle sur la dalle, chantier de maison individuelle dans l'Ain", "legende": "Premiers rangs montés en joints minces — chantier K-ProBat, Ain (01)" },
+    "photo3": { "img": "beton-cellulaire-maison-habitat-libre.jpg", "alt": "Maison Habitat Libre en béton cellulaire, gros œuvre terminé : murs, pignons et ouvertures achevés, dans l'Ain", "legende": "Maison Habitat Libre — gros œuvre en béton cellulaire achevé, Ain (01)" }
+  }
+}

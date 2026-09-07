@@ -64,11 +64,9 @@ const projects = CONTENU.realisations
   .slice(0, REA_MISE_EN_PAGE.length)
   .map((p, i) => ({ ...REA_MISE_EN_PAGE[i], ...p, k: 'p' + i }));
 
-// Photos de la mosaïque d'accueil (valeurs par défaut des réglages de la maquette).
-const heroImgs = {
-  h0: 'briques-elevation.jpg', h1: 'siporex-2.jpg', h2: 'escalier-spirale.jpg',
-  h3: 'dalle-bassin.jpg', h4: 'cloture-grillage.jpg', h5: 'siporex-1.jpg',
-};
+// Photos de la mosaïque d'accueil — éditables depuis /admin (contenu.json).
+const heroImgs = {};
+CONTENU.bandeau.forEach((b, i) => { heroImgs['h' + i] = b.img; });
 const imgByKey = { ...heroImgs };
 sv.forEach(c => { imgByKey[c.k] = c.img; });
 projects.forEach(p => { imgByKey[p.k] = p.img; });
@@ -113,6 +111,15 @@ function loopBlock(src, listName) {
   throw new Error(`boucle non fermée : ${listName}`);
 }
 
+// Pose data-champ sur la balise ouvrante qui précède immédiatement un jeton.
+// Le gabarit met chaque valeur seule dans son <span>, donc la balise juste
+// avant « >{{ jeton }}< » est bien celle qui porte le texte à modifier.
+function marquer(html, jeton, champ) {
+  const re = new RegExp('(<[a-z]+[^>]*?)(>\\s*\\{\\{ ' + jeton.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' \\}\\}\\s*<)');
+  if (!re.test(html)) throw new Error(`marquer : jeton {{ ${jeton} }} introuvable`);
+  return html.replace(re, `$1 data-champ="${champ}"$2`);
+}
+
 // menuItems
 {
   const { full, inner } = loopBlock(html, 'menuItems');
@@ -132,7 +139,7 @@ function loopBlock(src, listName) {
   const { full, inner } = loopBlock(html, 'svColumns');
   const card = loopBlock(inner, 'col.cards');
   const out = svColumns.map(col => {
-    const cards = col.cards.map(c => card.inner
+    const cards = col.cards.map(c => marquer(marquer(card.inner, 'c.t', `savoirFaire.${c.k.slice(1)}.t`), 'c.tech', `savoirFaire.${c.k.slice(1)}.tech`)
       .replace(/<img([^>]*?)data-ki="\{\{ c\.k \}\}"([^>]*?)src="data:image\/gif;base64,[^"]*"/g,
         `<img$1data-ki="${c.k}"$2src="${IMG}${imgByKey[c.k]}" loading="lazy"`)
       .replace(/\{\{ c\.t \}\}/g, esc(c.t))
@@ -149,7 +156,7 @@ function loopBlock(src, listName) {
 // projects
 {
   const { full, inner } = loopBlock(html, 'projects');
-  const out = projects.map(p => inner
+  const out = projects.map(p => marquer(marquer(inner, 'p.t', `realisations.${p.k.slice(1)}.t`), 'p.meta', `realisations.${p.k.slice(1)}.meta`)
     .replace(/<img([^>]*?)data-ki="\{\{ p\.k \}\}"([^>]*?)src="data:image\/gif;base64,[^"]*"/g,
       `<img$1data-ki="${p.k}"$2src="${IMG}${imgByKey[p.k]}" loading="lazy"`)
     .replace(/\{\{ p\.col \}\}/g, p.col)
@@ -348,14 +355,14 @@ const HEAD = `<!DOCTYPE html>
 <meta property="og:title" content="K-ProBat — Maçonnerie générale à Montagnat (01)">
 <meta property="og:description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Béton cellulaire (Siporex, Ytong), fondations, murs, dalles, escaliers — dans les règles de l'art, depuis 1991.">
 <meta property="og:url" content="{{SITE_URL}}/">
-<meta property="og:image" content="{{SITE_URL}}/assets/og/k-probat-og.jpg">
+<meta property="og:image" content="{{SITE_URL}}/assets/og/{{PARTAGE_IMG}}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="K-ProBat — Maçonnerie générale à Montagnat, dans l'Ain">
+<meta property="og:image:alt" content="{{PARTAGE_ALT}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="K-ProBat — Maçonnerie générale à Montagnat (01)">
 <meta name="twitter:description" content="Maçonnerie générale &amp; gros œuvre à Montagnat, dans l'Ain. Béton cellulaire (Siporex, Ytong), fondations, murs, dalles, escaliers — dans les règles de l'art, depuis 1991.">
-<meta name="twitter:image" content="{{SITE_URL}}/assets/og/k-probat-og.jpg">
+<meta name="twitter:image" content="{{SITE_URL}}/assets/og/{{PARTAGE_IMG}}">
 {{JSONLD}}
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/hover.css">
@@ -405,18 +412,18 @@ const SECTION_BC = `
   <h2 data-reveal="" style="margin:0;font-weight:900;font-size:clamp(30px,5vw,68px);line-height:.95;text-transform:uppercase;letter-spacing:-.015em;max-width:15ch">Béton cellulaire, <span style="color:var(--acc,#D93916)">Siporex &amp; Ytong</span></h2>
   <div style="display:flex;flex-wrap:wrap;gap:clamp(30px,5vw,80px);align-items:flex-start">
     <div style="flex:1 1 440px;min-width:290px;display:flex;flex-direction:column;gap:22px">
-      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p1}</p>
-      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p2}</p>
-      <p data-reveal="" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p3}</p>
+      <p data-reveal="" data-champ="betonCellulaire.p1" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p1}</p>
+      <p data-reveal="" data-champ="betonCellulaire.p2" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p2}</p>
+      <p data-reveal="" data-champ="betonCellulaire.p3" style="margin:0;font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:rgba(34,30,25,.78);max-width:560px">${CONTENU.betonCellulaire.p3}</p>
       <a data-reveal="" href="maconnerie-beton-cellulaire-siporex-ytong.html" style="display:inline-flex;align-items:center;justify-content:center;width:fit-content;min-width:260px;min-height:52px;padding:0 26px;font-family:'League Spartan',sans-serif;font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;background:var(--acc,#D93916);color:#EAE3D4;text-decoration:none;transition:filter .3s" data-bc-cta>Tout savoir sur le béton cellulaire</a>
     </div>
     <div style="flex:1 1 320px;min-width:280px;display:flex;flex-direction:column;gap:3px;background:rgba(34,30,25,.14);border:1px solid rgba(34,30,25,.14)">
       <div data-reveal="" style="background:#EAE3D4;padding:clamp(20px,2vw,30px);display:flex;flex-direction:column;gap:8px">
-        <span data-count="${CONTENU.betonCellulaire.chiffre}" style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">${CONTENU.betonCellulaire.chiffre}</span>
-        <span style="font-size:14px;line-height:1.6;color:rgba(34,30,25,.7)">${CONTENU.betonCellulaire.chiffreTexte}</span>
+        <span data-count="${CONTENU.betonCellulaire.chiffre}" data-champ="betonCellulaire.chiffre" style="font-weight:900;font-size:clamp(38px,4.5vw,64px);line-height:1">${CONTENU.betonCellulaire.chiffre}</span>
+        <span data-champ="betonCellulaire.chiffreTexte" style="font-size:14px;line-height:1.6;color:rgba(34,30,25,.7)">${CONTENU.betonCellulaire.chiffreTexte}</span>
       </div>
       <figure data-reveal="" style="margin:0;background:#EAE3D4;padding:0;overflow:hidden">
-        <img src="assets/img/${CONTENU.betonCellulaire.img}" alt="${CONTENU.betonCellulaire.imgAlt}" loading="lazy" width="1600" height="900" style="width:100%;height:auto;display:block">
+        <img data-champ="betonCellulaire.img" src="assets/img/${CONTENU.betonCellulaire.img}" alt="${CONTENU.betonCellulaire.imgAlt}" loading="lazy" width="1600" height="900" style="width:100%;height:auto;display:block">
       </figure>
     </div>
   </div>
@@ -424,6 +431,20 @@ const SECTION_BC = `
 
 `;
 html = html.replace('<section id="artisan"', SECTION_BC.trim() + '\n\n<section id="artisan"');
+
+// ── Repères pour l'aperçu direct de /admin ────────────────────────────────
+// Chaque élément modifiable reçoit un attribut data-champ dont la valeur est
+// le CHEMIN exact dans src/contenu.json. L'interface d'administration s'en
+// sert pour retrouver l'élément dans l'aperçu et le mettre à jour à la frappe,
+// sans attendre la reconstruction du site.
+// Un attribut data-* n'a aucun effet visuel et n'est pas lu par les moteurs :
+// le rendu et le référencement sont strictement inchangés.
+const CHAMP_PAR_CLE = {};
+CONTENU.bandeau.forEach((_, i) => { CHAMP_PAR_CLE['h' + i] = `bandeau.${i}.img`; });
+sv.forEach((_, i) => { CHAMP_PAR_CLE['s' + i] = `savoirFaire.${i}.img`; });
+projects.forEach((_, i) => { CHAMP_PAR_CLE['p' + i] = `realisations.${i}.img`; });
+html = html.replace(/data-ki="([a-z]\d+)"/g,
+  (m, cle) => (CHAMP_PAR_CLE[cle] ? `${m} data-champ="${CHAMP_PAR_CLE[cle]}"` : m));
 
 const TAIL = `
 <!-- Librairies servies EN LOCAL (jamais depuis un CDN) : si un CDN tombe ou est

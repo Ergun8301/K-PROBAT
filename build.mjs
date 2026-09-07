@@ -111,6 +111,10 @@ function assemble(source, brut, nom, chemin) {
       if (!nom) { errors.push(`${source} : jeton {{BREADCRUMB}} mais page sans nom de fil d'Ariane (PAGE_NAMES dans build.mjs)`); return ''; }
       return crumbTpl.replace(/\{\{PAGE_NAME\}\}/g, jsonText(nom)).replace(/\{\{PAGE_PATH\}\}/g, chemin);
     })
+    // Après l'injection des partials : le JSON-LD contient lui aussi l'image
+    // de partage, il faut donc la résoudre une fois le partial en place.
+    .replace(/\{\{PARTAGE_IMG\}\}/g, () => CONTENU.partage.img)
+    .replace(/\{\{PARTAGE_ALT\}\}/g, () => CONTENU.partage.alt.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
     .replace(/\{\{SITE_URL\}\}/g, SITE_URL);
   const left = [...new Set([...html.matchAll(/\{\{[A-Z_]+\}\}/g)].map(m => m[0]))];
   if (left.length) errors.push(`${source} : jeton(s) non résolu(s) : ${left.join(', ')}`);

@@ -521,6 +521,26 @@ copier ces deux fichiers, créer un `src/contenu.json` avec les champs de SON
 site, adapter les quatre fonctions de vue de `admin.html`, poser les trois
 réglages Cloudflare. Compter une heure, pas une journée.
 
+## Prévisualisation d'une PR, avant de mettre en ligne
+
+Chaque *pull request* publie automatiquement une **prévisualisation** :
+`.github/workflows/preview.yml` construit le site de la branche et l'envoie à
+Cloudflare comme *Version* (`wrangler versions upload`), **jamais** comme
+*Deploy*. Concrètement :
+
+- k-probat.fr **n'est pas concerné**, jamais — aucun trafic n'est routé vers
+  cette version tant que personne ne fait `wrangler versions deploy`.
+- L'adresse de prévisualisation (`…workers.dev`) est déposée en commentaire
+  sur la PR, mise à jour à chaque nouveau commit.
+- Rien à régler dans le tableau de bord Cloudflare : cette étape utilise les
+  deux mêmes secrets que le vrai déploiement.
+
+⚠️ La prévisualisation partage le même espace KV et la même adresse
+d'envoi que le site en ligne. Le formulaire de devis n'y est donc **pas**
+testé automatiquement (ce serait une vraie demande) — seul le contenu
+affiché (textes, photos) est vérifié, avec le même contrôle que le site en
+ligne (`tools/verifier-contenu-en-ligne.mjs`).
+
 ## Page béton cellulaire (page pilier) — règles strictes
 
 Adresse : `/maconnerie-beton-cellulaire-siporex-ytong`.

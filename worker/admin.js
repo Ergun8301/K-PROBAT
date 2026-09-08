@@ -210,18 +210,42 @@ async function enregistrer(request, env) {
 }
 
 async function envoyerPhoto(request, env) {
-  const { nom, donnees } = await request.json().catch(() => ({}));
+  const { nom, donnees, ecraser } = await request.json().catch(() => ({}));
   if (!nomImageValide(String(nom || '')))
     return json({ ok: false, erreur: 'Nom de fichier refusé. Minuscules, chiffres et tirets uniquement, en .jpg' }, 400);
-  const b64 = String(donnees || '').replace(/^data:[^,]+,/, '');
-  if (!b64) return json({ ok: false, erreur: 'photo vide' }, 400);
+
+  // Le navigateur doit envoyer un vrai JPEG encodé en base64. Un canvas qui
+  // échoue renvoie « data:, » : sans ce contrôle, cette chaîne partait vers
+  // GitHub comme si c'était une photo, et l'échec ressortait en « GitHub 422 »
+  // incompréhensible pour le client. On refuse ici, avec une phrase lisible.
+  const brut = String(donnees || '');
+  const m = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(brut);
+  if (!m) {
+    return json({ ok: false, erreur:
+      'La photo reçue est vide ou abîmée : le navigateur n\'a pas réussi à la '
+      + 'convertir. Réessayez avec une photo plus légère.' }, 400);
+  }
+  const b64 = m[2];
+  if (b64.length < 512)
+    return json({ ok: false, erreur: 'La photo reçue est vide ou abîmée. Réessayez.' }, 400);
   if (b64.length * 0.75 > MAX_IMAGE)
     return json({ ok: false, erreur: 'Photo trop lourde (4 Mo maximum).' }, 400);
 
   const chemin = `${DOSSIER_IMG}/${nom}`;
   let sha;
   try { sha = (await lire(env, chemin)).sha; } catch { /* nouvelle photo */ }
-  await ecrire(env, chemin, b64, `Photo ajoutée depuis /admin : ${nom}`, sha);
+
+  // Écraser une photo existante change le site PARTOUT où elle est utilisée.
+  // Cela ne se fait donc que si l'interface a explicitement demandé et fait
+  // confirmer le remplacement — jamais par défaut.
+  if (sha && ecraser !== true) {
+    return json({ ok: false, erreur:
+      `Une photo nommée « ${nom} » existe déjà. Choisissez un autre nom, ou `
+      + 'confirmez le remplacement.' }, 409);
+  }
+
+  await ecrire(env, chemin, b64,
+    sha ? `Photo remplacée depuis /admin : ${nom}` : `Photo ajoutée depuis /admin : ${nom}`, sha);
   return json({ ok: true, nom, remplacee: Boolean(sha) });
 }
 

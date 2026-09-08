@@ -10,6 +10,100 @@ modifie avec un éditeur de texte (VS Code recommandé, gratuit).
 
 ---
 
+## ÉTAT DES LIEUX — à lire en premier (08/09/2026)
+
+Résumé de départ pour reprendre le projet sans rien redécouvrir. Le détail de
+chaque point est plus bas dans ce fichier.
+
+### La chaîne, de bout en bout
+
+```
+src/contenu.json          ← le SEUL fichier que /admin modifie
+   ↓  node tools/transpose-maquette.mjs    régénère src/index.html
+src/index.html            ← fichier GÉNÉRÉ, ne jamais l'éditer à la main
+   ↓  node build.mjs                       src/ → site/, résout les jetons
+site/
+   ↓  wrangler deploy (GitHub Actions, sur push vers main)
+k-probat.fr
+```
+
+**Sauter la première étape casse tout `/admin` en silence** : le commit part,
+le déploiement passe au vert, le site ne bouge pas. C'est la panne qu'on a eue
+le 07/09. Les deux étapes sont maintenant dans `.github/workflows/deploy.yml`.
+
+### Variables Cloudflare : la règle
+
+| Type de valeur | Où elle vit | Exemples |
+|---|---|---|
+| non sensible | `"vars"` de `wrangler.jsonc` | `MAIL_FROM`, `GITHUB_DEPOT` |
+| sensible | **Secret** Cloudflare | `ADMIN_MOT_DE_PASSE`, `GITHUB_TOKEN` |
+
+**Ne JAMAIS créer une variable Texte à la main dans le tableau de bord
+Cloudflare** : `wrangler deploy` réécrit toute la liste des variables Texte à
+partir du dépôt, donc elle sera effacée au déploiement suivant. Les Secrets,
+eux, ne sont pas touchés. C'est ce qui a cassé `/admin` le 07/09.
+
+### Ce que le déploiement vérifie tout seul
+
+Chaque push sur `main` (`.github/workflows/deploy.yml`) :
+
+| Contrôle | Ce qu'il vérifie |
+|---|---|
+| build | aucune URL du site écrite en dur dans les sources |
+| dry-run wrangler | `wrangler.jsonc` valide, avant tout envoi |
+| pages en ligne | 200 + type de contenu sur chaque page, JSON-LD, liens légaux, 12/12 liens communes, vocabulaire interdit absent de la page pilier |
+| formulaire | `/api/devis` accepte une demande (avec pot de miel, donc rien n'est enregistré) et refuse une demande incomplète (400) |
+| `/admin` | un mauvais mot de passe répond **401**, jamais un 503 de configuration — c'est le témoin que les variables Cloudflare sont bien lues |
+| contenu | `tools/verifier-contenu-en-ligne.mjs` : chaque valeur de `contenu.json` comparée à ce que le site SERT vraiment (76 valeurs, 2 pages). Vérifie aussi qu'aucun champ modifiable n'échappe au contrôle |
+
+**En attente, non fusionné :** la PR #20 ajoute une **prévisualisation** par PR
+(`.github/workflows/preview.yml`, `wrangler versions upload` — jamais un
+`deploy`) : une adresse `…workers.dev` déposée en commentaire sur la PR, sans
+que k-probat.fr soit concerné. Testée, verte, laissée ouverte à la demande du
+client.
+
+### Problèmes ouverts
+
+1. **Téléversement de photos depuis `/admin` — le plus important.**
+   Certaines photos ne montent pas. Causes identifiées par lecture du code,
+   **non corrigées** :
+   - **HEIC/HEIF (format par défaut de l'iPhone) non géré.** `preparer()`
+     décode via `new Image()` ; un HEIC échoue → message « image illisible ».
+     Cause la plus probable des échecs constatés.
+   - **Aucune limite de taille avant la compression.** Une photo très lourde
+     est décodée telle quelle : sur mobile, l'onglet peut se fermer sans aucun
+     message.
+   - **Sortie canvas vide non détectée.** Si `toDataURL` échoue, il renvoie
+     `"data:,"`. Le garde-fou serveur (`replace(/^data:[^,]+,/)`) ne reconnaît
+     pas cette forme : la chaîne `data:,` part vers GitHub comme si c'était du
+     base64, et l'erreur remonte en « GitHub 422 », incompréhensible.
+   - **Un nom de fichier déjà existant écrase la photo en place, sans
+     prévenir.** Le serveur renvoie `remplacee: true`, l'interface ignore ce
+     champ et affiche « Photo ajoutée ». Une photo utilisée ailleurs sur le
+     site peut être remplacée sans que personne s'en aperçoive.
+   - **Le téléversement publie tout de suite.** La photo est un commit sur
+     `main`, donc un déploiement, même si on ne clique jamais sur « Publier ».
+     Comportement surprenant, non annoncé dans l'interface.
+   - **Les messages d'erreur s'effacent au bout de 12 s**, en haut de page :
+     dans le sélecteur de photos, on peut ne jamais les voir. D'où
+     l'impression d'échec silencieux.
+   - Un PNG transparent est ré-encodé en JPEG : les zones transparentes
+     deviennent noires.
+   - À l'inverse, accents, espaces et majuscules dans le nom **sont bien
+     gérés** (nettoyage côté navigateur, puis refus serveur en 400 avec un
+     message lisible). Ce n'est pas la cause des échecs.
+
+2. **Ergonomie de `/admin`** — jugée bancale par le client, « il manque des
+   choses ». À préciser avec lui avant toute correction.
+
+3. **Tiret du titre `K-PROBAT`** — le tiret orange du gros titre d'accueil
+   n'est pas centré sur la hauteur des majuscules. Correctif chiffré et testé
+   (`position:relative;top:-0.087em`, centres à 398.5 des deux côtés) mais
+   **abandonné à la demande du client** (PR #19 fermée). Ne pas le ressortir
+   sans qu'il le redemande.
+
+---
+
 ## Arborescence du projet
 
 ```

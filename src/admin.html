@@ -70,6 +70,13 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
 #etat{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:60;max-width:min(560px,92vw);padding:14px 18px;border-radius:4px;background:var(--ink);color:var(--cream);box-shadow:0 10px 30px rgba(0,0,0,.25);white-space:pre-line;display:none}
 #etat.bien{background:#12421f}
 #etat.mal{background:#7d1d0c}
+/* Message DANS le sélecteur de photo : il ne disparaît jamais tout seul.
+   Une erreur de téléversement doit rester lisible là où on l'a déclenchée. */
+#etatPhoto{display:none;margin:0;padding:12px 18px;border-top:1px solid var(--bord);
+  font-size:13.5px;line-height:1.5;white-space:pre-line}
+#etatPhoto.mal{display:block;background:#fdecea;color:#7d1d0c}
+#etatPhoto.bien{display:block;background:#eaf4ec;color:#12421f}
+#etatPhoto.info{display:block;background:#f3f0ea;color:var(--ink)}
 .cache{display:none !important}
 </style>
 </head>
@@ -124,9 +131,11 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
   <div class="grille" id="grillePhotos"></div>
   <div class="pied">
     <button class="btn" id="boutonEnvoi">Ajouter une photo depuis mon appareil</button>
-    <input type="file" id="fichier" accept="image/jpeg,image/png,image/webp" class="cache">
-    <span style="font-size:12.5px;color:rgba(34,30,25,.6)">JPEG, 4 Mo maximum. Redimensionnée automatiquement.</span>
+    <input type="file" id="fichier"
+           accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" class="cache">
+    <span style="font-size:12.5px;color:rgba(34,30,25,.6)">JPEG, PNG ou HEIC (iPhone). Redimensionnée automatiquement.</span>
   </div>
+  <p id="etatPhoto"></p>
 </dialog>
 
 <div id="etat"></div>
@@ -298,7 +307,10 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
       return '<figure data-nom="' + ech(n) + '"><img src="/assets/img/' + encodeURIComponent(n) +
         '" alt="" loading="lazy"><figcaption>' + ech(n) + '</figcaption></figure>';
     }).join('');
-    $('#choixPhoto').showModal();
+    direPhoto('');                       // on repart d'un message vide
+    // showModal() sur une boîte déjà ouverte lève une erreur : après un envoi,
+    // on ne fait que rafraîchir la grille.
+    if (!$('#choixPhoto').open) $('#choixPhoto').showModal();
   }
 
   $('#grillePhotos').addEventListener('click', function (ev) {
@@ -313,25 +325,81 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
 
   $('#boutonEnvoi').addEventListener('click', function () { $('#fichier').click(); });
 
+  /* ---- téléversement d'une photo --------------------------------------
+     Message affiché DANS le sélecteur, et qui ne s'efface jamais tout seul :
+     une erreur ici doit rester lisible sous les yeux, à l'endroit où on l'a
+     déclenchée. C'est `dire()` qui sert aux messages fugaces de la page. */
+  function direPhoto(msg, genre) {
+    var e = $('#etatPhoto');
+    e.textContent = msg || '';
+    e.className = msg ? (genre || 'info') : '';
+  }
+
+  var EXT_HEIC = /\.(heic|heif)$/i;
+  var estHeic = function (f) {
+    return EXT_HEIC.test(f.name || '') || /hei[cf]/i.test(f.type || '');
+  };
+
+  // Message d'aide, affiché seulement quand le navigateur ne SAIT PAS lire le
+  // HEIC. Safari (iPhone, Mac récent) le lit ; Chrome et Firefox non.
+  var AIDE_HEIC =
+    'Cette photo est au format HEIC (format par défaut de l\'iPhone) et ce '
+    + 'navigateur ne sait pas l\'ouvrir.\n\n'
+    + 'Trois façons de s\'en sortir, au choix :\n'
+    + '• Ouvrir cette page sur l\'iPhone lui-même (Safari sait lire le HEIC).\n'
+    + '• Se l\'envoyer par WhatsApp ou par e-mail : la photo arrive en JPEG.\n'
+    + '• Sur l\'iPhone : Réglages → Appareil photo → Formats → « Le plus '
+    + 'compatible ». Les photos suivantes seront prises en JPEG.';
+
+  // Décode le fichier en quelque chose que le canvas sait dessiner.
+  // createImageBitmap d'abord : c'est LUI qui sait lire le HEIC là où le
+  // système le sait (Safari). <img> ensuite, pour les navigateurs plus âgés.
+  function decoder(fichier) {
+    var parImage = function () {
+      return new Promise(function (resolve, reject) {
+        var img = new Image();
+        var url = URL.createObjectURL(fichier);
+        img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = function () {
+          URL.revokeObjectURL(url);
+          reject(new Error(estHeic(fichier) ? AIDE_HEIC : 'Photo illisible : le format n\'est pas reconnu.'));
+        };
+        img.src = url;
+      });
+    };
+    if (typeof createImageBitmap !== 'function') return parImage();
+    return createImageBitmap(fichier).catch(parImage);
+  }
+
   // Redimensionne et compresse dans le navigateur : une photo de téléphone
   // fait 4 à 8 Mo, elle rendrait le site lent et dépasserait la limite.
   function preparer(fichier) {
-    return new Promise(function (resolve, reject) {
-      var img = new Image();
-      img.onload = function () {
-        var max = 1600;
-        var l = img.width, h = img.height;
-        if (l > max) { h = Math.round(h * max / l); l = max; }
-        var c = document.createElement('canvas');
-        c.width = l; c.height = h;
-        c.getContext('2d').drawImage(img, 0, 0, l, h);
-        var q = 0.85, url;
-        do { url = c.toDataURL('image/jpeg', q); q -= 0.07; }
-        while (url.length * 0.75 > 250 * 1024 && q > 0.5);
-        resolve(url);
-      };
-      img.onerror = function () { reject(new Error('image illisible')); };
-      img.src = URL.createObjectURL(fichier);
+    return decoder(fichier).then(function (src) {
+      var max = 1600;
+      var l = src.width, h = src.height;
+      if (!l || !h) throw new Error('Photo illisible : dimensions inconnues.');
+      if (l > max) { h = Math.round(h * max / l); l = max; }
+      var c = document.createElement('canvas');
+      c.width = l; c.height = h;
+      c.getContext('2d').drawImage(src, 0, 0, l, h);
+      if (src.close) src.close();
+      var q = 0.85, url;
+      do { url = c.toDataURL('image/jpeg', q); q -= 0.07; }
+      while (url.length * 0.75 > 250 * 1024 && q > 0.5);
+
+      // Un canvas qui échoue (mémoire, image trop grande sur iOS) ne lève pas
+      // d'erreur : il renvoie « data:, ». Sans ce contrôle, cette chaîne part
+      // vers GitHub comme si c'était une photo, et l'échec est incompréhensible.
+      // 512 caractères : très en dessous de la plus petite photo réelle
+      // (une photo de chantier compressée en fait ~200 000), mais très
+      // au-dessus de ce que produit un canvas en échec.
+      if (!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(url) || url.length < 512) {
+        throw new Error(
+          'Le navigateur n\'a pas réussi à convertir cette photo : le résultat '
+          + 'est vide.\n\nC\'est en général une photo trop grande pour la '
+          + 'mémoire de l\'appareil. Réessayez avec une photo plus légère.');
+      }
+      return url;
     });
   }
 
@@ -343,19 +411,41 @@ dialog::backdrop{background:rgba(34,30,25,.55)}
       f.name.toLowerCase().replace(/\.(jpe?g|png|webp)$/i, '').normalize('NFD').replace(/[̀-ͯ]/g, '')
         .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) + '.jpg');
     if (!nom) return;
-    dire('Préparation de la photo…');
+
+    // Une photo du même nom existe déjà : on ne l'écrase JAMAIS en silence.
+    // Elle peut servir ailleurs sur le site — la remplacer changerait ces
+    // endroits-là aussi, sans que personne ne l'ait demandé.
+    var ecraser = D.photos.indexOf(nom) !== -1;
+    if (ecraser && !confirm(
+        'Une photo nommée « ' + nom + ' » existe déjà.\n\n'
+        + 'La remplacer changera cette photo PARTOUT où elle est utilisée sur '
+        + 'le site.\n\nRemplacer quand même ?\n'
+        + '(Annuler : relancez l\'envoi et choisissez un autre nom.)')) {
+      direPhoto('Envoi annulé. La photo « ' + nom + ' » n\'a pas été touchée.', 'info');
+      ev.target.value = '';
+      return;
+    }
+
+    direPhoto('Préparation de la photo…', 'info');
     preparer(f)
       .then(function (donnees) {
-        return api('photo', { method: 'POST', body: JSON.stringify({ nom: nom, donnees: donnees }) });
+        direPhoto('Envoi en cours…', 'info');
+        return api('photo', {
+          method: 'POST',
+          body: JSON.stringify({ nom: nom, donnees: donnees, ecraser: ecraser }),
+        });
       })
       .then(function (r) {
-        if (!r.d.ok) { dire(r.d.erreur || 'Envoi impossible.', 'mal'); return; }
+        if (!r.d.ok) { direPhoto(r.d.erreur || 'Envoi impossible.', 'mal'); return; }
         if (D.photos.indexOf(r.d.nom) === -1) D.photos.push(r.d.nom);
         D.photos.sort();
-        dire('Photo ajoutée. Choisissez-la dans la liste pour l\'utiliser.', 'bien');
-        ouvrirPhotos(ciblePhoto);
+        var cible = ciblePhoto, chemin = cheminPhoto;
+        ouvrirPhotos(cible, chemin);
+        direPhoto(r.d.remplacee
+          ? 'Photo « ' + r.d.nom + ' » remplacée. Elle est à jour partout où elle est utilisée.'
+          : 'Photo ajoutée. Choisissez-la dans la liste pour l\'utiliser.', 'bien');
       })
-      .catch(function (e) { dire('Échec : ' + e.message, 'mal'); });
+      .catch(function (e) { direPhoto(e.message, 'mal'); });
     ev.target.value = '';
   });
 

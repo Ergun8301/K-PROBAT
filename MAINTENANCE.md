@@ -494,6 +494,24 @@ la réponse « Mot de passe incorrect » (401). Si une variable manquait, la
 réponse serait une erreur de configuration (503) et le déploiement
 échouerait en rouge.
 
+### Téléverser une photo depuis /admin
+
+Le navigateur redimensionne (largeur 1600 px) et compresse la photo avant
+l'envoi : une photo de téléphone de 6 Mo arrive à ~250 Ko. Quatre garde-fous
+encadrent l'opération :
+
+| Situation | Ce qui se passe |
+|---|---|
+| **Photo HEIC** (format par défaut de l'iPhone) | Décodée si le système sait le faire (Safari sur iPhone / Mac récent). Sinon, message expliquant les trois façons de s'en sortir. |
+| **Le navigateur n'arrive pas à convertir** | Un canvas en échec renvoie `data:,` au lieu d'une image. Détecté des deux côtés (navigateur ET serveur), message clair, rien n'est envoyé. |
+| **Une photo du même nom existe déjà** | Confirmation demandée, en disant que le remplacement changera la photo **partout** où elle est utilisée. Le serveur refuse aussi l'écrasement (409) tant que l'interface ne l'a pas explicitement demandé. |
+| **Erreur quelconque** | Le message s'affiche **dans le sélecteur de photo** et **ne disparaît pas tout seul**. |
+
+⚠️ Téléverser une photo **publie immédiatement** : c'est un commit sur `main`,
+donc un déploiement, même sans cliquer sur « Publier ». C'est voulu (la photo
+doit exister avant qu'on puisse la choisir), mais ce n'est pas dit dans
+l'interface.
+
 ### Sécurité
 
 - La page est en `noindex` : elle n'apparaîtra jamais dans Google.

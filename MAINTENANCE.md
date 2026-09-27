@@ -14,7 +14,7 @@ modifie avec un éditeur de texte (VS Code recommandé, gratuit).
 
 ```
 repo/
-├── site.config.json          ← LES 2 VALEURS propres au site : siteUrl, client (+ option ga4Id, vide = désactivé)
+├── site.config.json          ← LES 2 VALEURS propres au site : siteUrl, client (+ ga4Id : Google Analytics 4)
 ├── build.mjs                 ← génère site/ à partir de src/ (+ contrôles)
 ├── wrangler.jsonc             ← config Cloudflare Workers (nom du Worker, dossier publié)
 ├── .github/workflows/
@@ -667,24 +667,24 @@ l'assureur, comme l'exige la loi (art. 22-2 loi 96-603, obligation sur devis
 et factures). Rien à compléter sur le site tant que ces coordonnées ne sont
 pas fournies.
 
-**Cookies** : par défaut, le site n'utilise **aucun** cookie de suivi ni outil
-de mesure d'audience (pas de Google Analytics, pas de pixel), donc **pas de
-bandeau de consentement**. Les polices sont servies par le site lui-même
-(`src/assets/fonts/` + `src/assets/css/fonts.css`) : aucun appel à Google
-avant consentement. Le formulaire ne passe par aucun service tiers : voir la
-section « Le formulaire de devis » ci-dessus.
+**Cookies et mesure d'audience** : deux outils.
+- **Cloudflare Web Analytics** (réglé côté Cloudflare, rien dans le dépôt) :
+  sans cookie, exempté de consentement.
+- **Google Analytics 4 — ACTIF** (`site.config.json` → `"ga4Id": "G-DPF6YMWL4H"`),
+  via le module IPPYX « GA4 + bandeau cookies » (`src/modules/cookies-ga4/` :
+  CookieConsent v3 servi depuis le site, habillage K-ProBat). Le build ajoute
+  sur toutes les pages publiques : Consent Mode v2 tout « denied » par défaut,
+  le bandeau (« Tout refuser » aussi visible que « Tout accepter »), gtag.js
+  chargé seulement après acceptation, et le lien « Gérer les cookies » en pied
+  de page. La politique de confidentialité affiche son bloc
+  `<!-- avec-ga4 -->` (le bloc `<!-- sans-ga4 -->` est retiré au build).
+  Pour désactiver GA4 : vider `ga4Id`, push — bandeau, scripts et lien
+  disparaissent.
 
-**Module IPPYX « GA4 + bandeau cookies » (prêt, DÉSACTIVÉ)** — dans
-`src/modules/cookies-ga4/` (CookieConsent v3 servi depuis le site, habillage
-K-ProBat, Consent Mode v2). Pour l'activer : mettre l'identifiant GA4 dans
-`site.config.json` → `"ga4Id": "G-XXXXXXXXXX"`, puis push. Le build ajoute alors
-sur toutes les pages publiques : Consent Mode v2 tout « denied » par défaut,
-le bandeau (« Tout refuser » aussi visible que « Tout accepter »), gtag.js
-chargé seulement après acceptation, le lien « Gérer mes cookies » en pied de
-page, et bascule la politique de confidentialité sur son paragraphe « avec
-GA4 » (blocs `<!-- sans-ga4 -->` / `<!-- avec-ga4 -->` de
-`src/confidentialite.html`). `ga4Id` vide : rien de tout cela n'est publié.
-Cloudflare Web Analytics n'est pas concerné par ce module.
+Les polices sont servies par le site lui-même (`src/assets/fonts/` +
+`src/assets/css/fonts.css`) : aucun appel à Google avant consentement. Le
+formulaire ne passe par aucun service tiers : voir la section « Le formulaire
+de devis » ci-dessus.
 
 **Date** : la ligne « Dernière mise à jour » en haut de chaque page légale
 est à changer à la main à chaque modification de son contenu.

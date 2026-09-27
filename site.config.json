@@ -1,6 +1,6 @@
 {
-  "_commentaire": "Les deux seules valeurs propres à ce site. siteUrl = adresse publique SANS / final. client = identifiant du client (minuscules, chiffres, tirets) → utm_source de la signature IPPYX. Option ga4Id = identifiant Google Analytics 4 (G-XXXXXXXXXX) : VIDE = module « GA4 + bandeau cookies » désactivé (ni bandeau, ni script, ni lien) ; renseigné = activé au prochain déploiement. Voir MAINTENANCE.md.",
+  "_commentaire": "Les deux seules valeurs propres à ce site. siteUrl = adresse publique SANS / final. client = identifiant du client (minuscules, chiffres, tirets) → utm_source de la signature IPPYX. Option ga4Id = identifiant Google Analytics 4 (G-XXXXXXXXXX) : renseigné = module « GA4 + bandeau cookies » ACTIF ; vide = désactivé (ni bandeau, ni script, ni lien). Voir MAINTENANCE.md.",
   "siteUrl": "https://k-probat.fr",
   "client": "k-probat",
-  "ga4Id": ""
+  "ga4Id": "G-DPF6YMWL4H"
 }

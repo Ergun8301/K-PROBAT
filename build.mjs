@@ -99,11 +99,11 @@ const crumbTpl = partial('jsonld-breadcrumb.html');
 const jsonText = s => JSON.stringify(s).slice(1, -1);
 
 // Module IPPYX « GA4 + bandeau cookies » (src/modules/cookies-ga4/).
-// ga4Id vide → rien : ni bandeau, ni script, ni lien « Gérer mes cookies »,
+// ga4Id vide → rien : ni bandeau, ni script, ni lien « Gérer les cookies »,
 // et la politique de confidentialité garde son texte « sans mesure d'audience ».
 // ga4Id renseigné → Consent Mode v2 tout « denied » en tête de <head>,
 // CookieConsent v3 servi depuis le site, gtag.js chargé après acceptation
-// seulement, lien « Gérer mes cookies » à côté des liens légaux.
+// seulement, lien « Gérer les cookies » à côté des liens légaux.
 const COOKIES_HEAD = `<!-- Module IPPYX « GA4 + bandeau cookies » : actif car "ga4Id" est renseigné dans site.config.json -->
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',functionality_storage:'denied',personalization_storage:'denied',security_storage:'denied'});</script>
 <link rel="stylesheet" href="assets/cookies/cookieconsent.css">
@@ -118,9 +118,9 @@ const avecCookies = html => {
     .replace(/[ \t]*<!-- \/?(?:sans|avec)-ga4 -->\n?/g, '');
   if (!GA4_ID) return html;
   return html.replace('</head>', COOKIES_HEAD + '</head>')
-    .replace(LIEN_CONFIDENTIALITE, LIEN_CONFIDENTIALITE + '<a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog">Gérer mes cookies</a><span class="ippyx-sep" aria-hidden="true">·</span>');
+    .replace(LIEN_CONFIDENTIALITE, LIEN_CONFIDENTIALITE + '<a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog">Gérer les cookies</a><span class="ippyx-sep" aria-hidden="true">·</span>');
 };
-if (!signature.includes(LIEN_CONFIDENTIALITE)) errors.push('src/partials/signature.html : lien « Confidentialité » introuvable (le lien « Gérer mes cookies » s\'insère juste après)');
+if (!signature.includes(LIEN_CONFIDENTIALITE)) errors.push('src/partials/signature.html : lien « Confidentialité » introuvable (le lien « Gérer les cookies » s\'insère juste après)');
 
 // Assemble une page : jetons communs (signature, JSON-LD, fil d'Ariane,
 // adresse du site) + en-tête « fichier généré ». `nom` sert au fil d'Ariane et

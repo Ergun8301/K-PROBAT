@@ -3,7 +3,7 @@
  *
  *  Copié dans site/assets/cookies/ par build.mjs UNIQUEMENT si "ga4Id" est
  *  renseigné dans site.config.json. Sinon : aucun bandeau, aucun script,
- *  aucun lien « Gérer mes cookies ».
+ *  aucun lien « Gérer les cookies ».
  *
  *  Déroulé :
  *    1. le <head> pose Consent Mode v2 avec TOUT à « denied » (script en ligne
@@ -57,14 +57,14 @@
         fr: {
           consentModal: {
             title: 'Cookies',
-            description: 'Avec votre accord, nous mesurons l\'audience du site (Google Analytics) pour l\'améliorer. Rien n\'est déposé tant que vous n\'avez pas choisi. Vous pouvez changer d\'avis à tout moment via « Gérer mes cookies » en bas de page.',
+            description: 'Avec votre accord, nous mesurons l\'audience du site (Google Analytics) pour l\'améliorer. Rien n\'est déposé tant que vous n\'avez pas choisi. Vous pouvez changer d\'avis à tout moment via « Gérer les cookies » en bas de page.',
             acceptAllBtn: 'Tout accepter',
             acceptNecessaryBtn: 'Tout refuser',
             showPreferencesBtn: 'Personnaliser',
             footer: '<a href="confidentialite.html">Politique de confidentialité</a>'
           },
           preferencesModal: {
-            title: 'Gérer mes cookies',
+            title: 'Gérer les cookies',
             acceptAllBtn: 'Tout accepter',
             acceptNecessaryBtn: 'Tout refuser',
             savePreferencesBtn: 'Enregistrer mes choix',
@@ -80,7 +80,7 @@
               },
               {
                 title: 'Mesure d\'audience',
-                description: 'Google Analytics 4 : statistiques de visite anonymisées (pages vues, durée, type d\'appareil). Cookies _ga, conservés 13 mois au plus.',
+                description: 'Google Analytics 4 : statistiques de visite (pages vues, durée, type d\'appareil). Cookies _ga et _ga_*, conservés 13 mois au plus.',
                 linkedCategory: 'analytics'
               },
               {

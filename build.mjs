@@ -5,6 +5,9 @@
 //  Les DEUX seules valeurs propres au site sont dans site.config.json :
 //    siteUrl : adresse publique du site, sans / final  (ex. "https://k-probat.fr")
 //    client  : identifiant du client → utm_source de la signature IPPYX
+//  Option (vide par défaut = module désactivé) :
+//    ga4Id   : identifiant Google Analytics 4 (« G-XXXXXXXXXX ») → active le
+//              module IPPYX « GA4 + bandeau cookies » (src/modules/cookies-ga4/)
 //
 //  Ce que le build produit dans site/ :
 //    - les pages HTML de src/, avec les jetons remplacés :
@@ -59,6 +62,9 @@ if (!/^https:\/\/[a-z0-9.-]+$/i.test(cfg.siteUrl || ''))
   errors.push(`site.config.json → "siteUrl" doit être une adresse https sans chemin ni / final (ex. "https://k-probat.fr") — reçu : ${JSON.stringify(cfg.siteUrl)}`);
 if (!/^[a-z0-9-]+$/.test(cfg.client || ''))
   errors.push(`site.config.json → "client" doit être en minuscules, chiffres et tirets (ex. "k-probat") — reçu : ${JSON.stringify(cfg.client)}`);
+const GA4_ID = (cfg.ga4Id || '').trim();
+if (GA4_ID && !/^G-[A-Z0-9]{4,20}$/.test(GA4_ID))
+  errors.push(`site.config.json → "ga4Id" doit être vide ou un identifiant GA4 (ex. "G-ABC123XYZ9") — reçu : ${JSON.stringify(cfg.ga4Id)}`);
 fail();
 const SITE_URL = cfg.siteUrl, SITE_HOST = new URL(SITE_URL).host;
 const SIGNATURE_URL = `https://ippyx.com/?utm_source=${cfg.client}&utm_medium=signature&utm_campaign=footer`;
@@ -92,6 +98,30 @@ const jsonld = partial('jsonld-localbusiness.html');
 const crumbTpl = partial('jsonld-breadcrumb.html');
 const jsonText = s => JSON.stringify(s).slice(1, -1);
 
+// Module IPPYX « GA4 + bandeau cookies » (src/modules/cookies-ga4/).
+// ga4Id vide → rien : ni bandeau, ni script, ni lien « Gérer mes cookies »,
+// et la politique de confidentialité garde son texte « sans mesure d'audience ».
+// ga4Id renseigné → Consent Mode v2 tout « denied » en tête de <head>,
+// CookieConsent v3 servi depuis le site, gtag.js chargé après acceptation
+// seulement, lien « Gérer mes cookies » à côté des liens légaux.
+const COOKIES_HEAD = `<!-- Module IPPYX « GA4 + bandeau cookies » : actif car "ga4Id" est renseigné dans site.config.json -->
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',functionality_storage:'denied',personalization_storage:'denied',security_storage:'denied'});</script>
+<link rel="stylesheet" href="assets/cookies/cookieconsent.css">
+<link rel="stylesheet" href="assets/cookies/cookies-k-probat.css">
+<script defer src="assets/cookies/cookieconsent.umd.js"></script>
+<script defer src="assets/cookies/cookies-ga4.js" data-ga4="${GA4_ID}"></script>
+`;
+const LIEN_CONFIDENTIALITE = '<a href="confidentialite.html">Confidentialité</a><span class="ippyx-sep" aria-hidden="true">·</span>';
+const avecCookies = html => {
+  // Politique de confidentialité : garde le bloc qui correspond à l'état du module.
+  html = html.replace(GA4_ID ? /[ \t]*<!-- sans-ga4 -->[\s\S]*?<!-- \/sans-ga4 -->\n?/g : /[ \t]*<!-- avec-ga4 -->[\s\S]*?<!-- \/avec-ga4 -->\n?/g, '')
+    .replace(/[ \t]*<!-- \/?(?:sans|avec)-ga4 -->\n?/g, '');
+  if (!GA4_ID) return html;
+  return html.replace('</head>', COOKIES_HEAD + '</head>')
+    .replace(LIEN_CONFIDENTIALITE, LIEN_CONFIDENTIALITE + '<a href="#" data-cc="show-preferencesModal" aria-haspopup="dialog">Gérer mes cookies</a><span class="ippyx-sep" aria-hidden="true">·</span>');
+};
+if (!signature.includes(LIEN_CONFIDENTIALITE)) errors.push('src/partials/signature.html : lien « Confidentialité » introuvable (le lien « Gérer mes cookies » s\'insère juste après)');
+
 // Assemble une page : jetons communs (signature, JSON-LD, fil d'Ariane,
 // adresse du site) + en-tête « fichier généré ». `nom` sert au fil d'Ariane et
 // aux messages d'erreur ; `chemin` est l'URL propre de la page.
@@ -116,6 +146,7 @@ function assemble(source, brut, nom, chemin) {
     .replace(/\{\{PARTAGE_IMG\}\}/g, () => CONTENU.partage.img)
     .replace(/\{\{PARTAGE_ALT\}\}/g, () => CONTENU.partage.alt.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))
     .replace(/\{\{SITE_URL\}\}/g, SITE_URL);
+  html = avecCookies(html);
   const left = [...new Set([...html.matchAll(/\{\{[A-Z_]+\}\}/g)].map(m => m[0]))];
   if (left.length) errors.push(`${source} : jeton(s) non résolu(s) : ${left.join(', ')}`);
   return html.replace(/^<!DOCTYPE html>\s*/i, `<!DOCTYPE html>\n<!-- Fichier GÉNÉRÉ par build.mjs à partir de ${source} — ne pas modifier ici : modifiez la source, puis relancez node build.mjs -->\n`);
@@ -149,6 +180,7 @@ fail();
 const allPages = [...pages, ...villePages];
 
 cpSync(join(SRC, 'assets'), join(OUT, 'assets'), { recursive: true });
+if (GA4_ID) cpSync(join(SRC, 'modules', 'cookies-ga4'), join(OUT, 'assets', 'cookies'), { recursive: true });
 if (existsSync(join(SRC, ADMIN))) writeFileSync(join(OUT, ADMIN), readFileSync(join(SRC, ADMIN), 'utf8'));
 
 // Fichiers texte : robots.txt, llms.txt, _headers (adresse du site injectée).
@@ -183,6 +215,13 @@ for (const p of allPages) {
     catch (e) { errors.push(`site/${p} : bloc JSON-LD invalide (${e.message})`); }
   }
   if (!types.includes('LocalBusiness')) errors.push(`site/${p} : JSON-LD LocalBusiness manquant (jeton {{JSONLD}} dans le <head>)`);
+  // Aucun appel à Google Fonts (polices servies depuis assets/fonts/).
+  if (/fonts\.(googleapis|gstatic)\.com/.test(html)) errors.push(`site/${p} : appel à Google Fonts — les polices doivent venir de assets/css/fonts.css`);
+  // Module cookies : tout ou rien, selon ga4Id.
+  const marques = ['assets/cookies/cookies-ga4.js', 'data-cc="show-preferencesModal"', "gtag('consent','default'"];
+  const presentes = marques.filter(m => html.includes(m));
+  if (GA4_ID && presentes.length !== marques.length) errors.push(`site/${p} : module cookies incomplet (ga4Id renseigné)`);
+  if (!GA4_ID && (presentes.length || /googletagmanager|cookieconsent/i.test(html))) errors.push(`site/${p} : trace du module cookies alors que ga4Id est vide`);
   if (p !== 'index.html' && !types.includes('BreadcrumbList')) errors.push(`site/${p} : JSON-LD BreadcrumbList manquant (jeton {{BREADCRUMB}} dans le <head>)`);
 }
 for (const f of [...TEXT_FILES, 'sitemap.xml']) {
@@ -190,4 +229,4 @@ for (const f of [...TEXT_FILES, 'sitemap.xml']) {
   for (const [u] of txt.matchAll(URL_RE)) if (foreign(hostOf(u))) errors.push(`site/${f} : URL absolue étrangère à siteUrl : ${u}`);
 }
 fail();
-console.log(`✓ site/ généré — ${pages.length} pages + ${villePages.length} pages locales + sitemap.xml, robots.txt, llms.txt, _headers · siteUrl = ${SITE_URL} · signature utm_source = ${cfg.client}`);
+console.log(`✓ site/ généré — ${pages.length} pages + ${villePages.length} pages locales + sitemap.xml, robots.txt, llms.txt, _headers · siteUrl = ${SITE_URL} · signature utm_source = ${cfg.client} · GA4 + bandeau cookies : ${GA4_ID ? 'ACTIF (' + GA4_ID + ')' : 'désactivé (ga4Id vide)'}`);

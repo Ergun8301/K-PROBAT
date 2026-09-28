@@ -1,0 +1,48 @@
+/* ==========================================================================
+   Bandeau cookies — habillage K-ProBat (surcharge les variables de
+   CookieConsent v3). Couleurs et polices du site : crème #EAE3D4, encre
+   #221E19, accent #D93916, League Spartan / IBM Plex Mono, angles droits.
+   « Tout accepter » et « Tout refuser » ont exactement le même style
+   (option equalWeightButtons dans cookies-ga4.js).
+   ========================================================================== */
+#cc-main{
+  --cc-font-family:'League Spartan',sans-serif;
+  --cc-modal-border-radius:0;
+  --cc-btn-border-radius:0;
+  --cc-bg:#EAE3D4;
+  --cc-primary-color:#221E19;
+  --cc-secondary-color:rgba(34,30,25,.78);
+  --cc-link-color:#D93916;
+
+  --cc-btn-primary-bg:#221E19;
+  --cc-btn-primary-color:#EAE3D4;
+  --cc-btn-primary-border-color:#221E19;
+  --cc-btn-primary-hover-bg:#D93916;
+  --cc-btn-primary-hover-color:#EAE3D4;
+  --cc-btn-primary-hover-border-color:#D93916;
+
+  --cc-btn-secondary-bg:transparent;
+  --cc-btn-secondary-color:#221E19;
+  --cc-btn-secondary-border-color:rgba(34,30,25,.35);
+  --cc-btn-secondary-hover-bg:#221E19;
+  --cc-btn-secondary-hover-color:#EAE3D4;
+  --cc-btn-secondary-hover-border-color:#221E19;
+
+  --cc-separator-border-color:rgba(34,30,25,.15);
+  --cc-toggle-on-bg:#D93916;
+  --cc-toggle-off-bg:rgba(34,30,25,.45);
+  --cc-toggle-readonly-bg:rgba(34,30,25,.2);
+  --cc-cookie-category-block-bg:rgba(34,30,25,.04);
+  --cc-cookie-category-block-border:rgba(34,30,25,.12);
+  --cc-cookie-category-block-hover-bg:rgba(34,30,25,.07);
+  --cc-cookie-category-block-hover-border:rgba(34,30,25,.18);
+  --cc-cookie-category-expanded-block-bg:transparent;
+  --cc-cookie-category-expanded-block-hover-bg:rgba(34,30,25,.04);
+  --cc-footer-bg:#221E19;
+  --cc-footer-color:rgba(234,227,212,.75);
+  --cc-footer-border-color:#221E19;
+  --cc-overlay-bg:rgba(34,30,25,.6);
+}
+#cc-main .cm__title,#cc-main .pm__title{font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+#cc-main .cm__btn,#cc-main .pm__btn{font-weight:700;letter-spacing:.04em;min-height:44px}
+#cc-main .cm__footer{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em}

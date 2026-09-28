@@ -6,14 +6,14 @@ Document de référence pour comparer l'implémentation production à la maquett
 ## 1. TYPOGRAPHIE
 
 ### Polices
-- **League Spartan**, variable 300→900 — Google Fonts. Poids réellement utilisés : 900 (grands titres), 800 (sous-titres, logo, menu, chiffres stats), 700 (boutons, légendes photos), 500 (champs formulaire), 400 (paragraphes).
-- **IBM Plex Mono** 400 et 500 — Google Fonts. Usage : surtitres de section, labels, nav, mentions, footer, marquee.
+- **League Spartan**, variable 300→900 — servie depuis le site (`src/assets/fonts/`, fichiers identiques à Google Fonts v15). Poids réellement utilisés : 900 (grands titres), 800 (sous-titres, logo, menu, chiffres stats), 700 (boutons, légendes photos), 500 (champs formulaire), 400 (paragraphes).
+- **IBM Plex Mono** 400 et 500 — servie depuis le site (fichiers identiques à Google Fonts v20). Usage : surtitres de section, labels, nav, mentions, footer, marquee.
 - Chargement exact :
 ```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300..900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/league-spartan-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
 ```
+- Aucun appel à fonts.googleapis.com / fonts.gstatic.com : `build.mjs` refuse le build sinon.
 
 ### Titre principal « K-PROBAT. » (hero)
 - `font-size: clamp(44px, 13.5vw, 205px)` ; weight 900 ; uppercase ; `letter-spacing: -.02em` ; `line-height: .9` ; couleur #EAE3D4.

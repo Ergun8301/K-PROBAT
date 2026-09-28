@@ -14,9 +14,10 @@
  *  À CHAQUE MISE EN LIGNE d'un changement visuel, incrémenter CACHE_VERSION :
  *  cela purge l'ancien cache chez tous les visiteurs.
  * ========================================================================== */
-const CACHE_VERSION = 'kprobat-v1';
+const CACHE_VERSION = 'kprobat-v2';
 const PRECACHE = [
   '/',
+  '/assets/css/fonts.css',
   '/assets/css/style.css',
   '/assets/css/hover.css',
   '/assets/js/main.js',

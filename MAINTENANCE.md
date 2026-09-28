@@ -14,7 +14,7 @@ modifie avec un éditeur de texte (VS Code recommandé, gratuit).
 
 ```
 repo/
-├── site.config.json          ← LES 2 VALEURS propres au site : siteUrl, client
+├── site.config.json          ← LES 2 VALEURS propres au site : siteUrl, client (+ ga4Id : Google Analytics 4)
 ├── build.mjs                 ← génère site/ à partir de src/ (+ contrôles)
 ├── wrangler.jsonc             ← config Cloudflare Workers (nom du Worker, dossier publié)
 ├── .github/workflows/
@@ -667,13 +667,24 @@ l'assureur, comme l'exige la loi (art. 22-2 loi 96-603, obligation sur devis
 et factures). Rien à compléter sur le site tant que ces coordonnées ne sont
 pas fournies.
 
-**Cookies** : le site n'utilise **aucun** cookie de suivi ni outil de mesure
-d'audience (pas de Google Analytics, pas de pixel). Il n'y a donc **pas de
-bandeau de consentement** — et il ne faut pas en ajouter tant qu'aucun outil
-de mesure n'est ajouté. Ressources tierces déclarées dans la politique de
-confidentialité : Google Fonts, GSAP/Lenis (jsDelivr), Cloudflare
-(hébergement). Le formulaire ne passe par aucun service tiers : voir la
-section « Le formulaire de devis » ci-dessus.
+**Cookies et mesure d'audience** : deux outils.
+- **Cloudflare Web Analytics** (réglé côté Cloudflare, rien dans le dépôt) :
+  sans cookie, exempté de consentement.
+- **Google Analytics 4 — ACTIF** (`site.config.json` → `"ga4Id": "G-DPF6YMWL4H"`),
+  via le module IPPYX « GA4 + bandeau cookies » (`src/modules/cookies-ga4/` :
+  CookieConsent v3 servi depuis le site, habillage K-ProBat). Le build ajoute
+  sur toutes les pages publiques : Consent Mode v2 tout « denied » par défaut,
+  le bandeau (« Tout refuser » aussi visible que « Tout accepter »), gtag.js
+  chargé seulement après acceptation, et le lien « Gérer les cookies » en pied
+  de page. La politique de confidentialité affiche son bloc
+  `<!-- avec-ga4 -->` (le bloc `<!-- sans-ga4 -->` est retiré au build).
+  Pour désactiver GA4 : vider `ga4Id`, push — bandeau, scripts et lien
+  disparaissent.
+
+Les polices sont servies par le site lui-même (`src/assets/fonts/` +
+`src/assets/css/fonts.css`) : aucun appel à Google avant consentement. Le
+formulaire ne passe par aucun service tiers : voir la section « Le formulaire
+de devis » ci-dessus.
 
 **Date** : la ligne « Dernière mise à jour » en haut de chaque page légale
 est à changer à la main à chaque modification de son contenu.

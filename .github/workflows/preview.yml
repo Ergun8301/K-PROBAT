@@ -1,0 +1,133 @@
+# ============================================================================
+#  Prévisualisation automatique des PR (Cloudflare Workers Versions)
+# ----------------------------------------------------------------------------
+#  À chaque PR (ouverture, ou nouveau commit poussé), ce workflow publie une
+#  VERSION du Worker, sans jamais y envoyer le trafic du site en ligne :
+#  k-probat.fr continue de servir la version publiée par deploy.yml, la
+#  prévisualisation vit à une adresse à part (…workers.dev), qui disparaît
+#  d'elle-même (aucune action à faire pour la retirer).
+#
+#  Cloudflare appelle ça une « Version » (wrangler versions upload) : elle est
+#  envoyée au compte, mais AUCUN trafic ne lui est routé tant que personne ne
+#  fait « wrangler versions deploy ». Rien à régler dans le tableau de bord.
+#
+#  Le lien est déposé en commentaire sur la PR, mis à jour à chaque nouveau
+#  commit (un seul commentaire par PR, pas un par commit).
+#
+#  Les 3 secrets/2 vars du Worker (ADMIN_MOT_DE_PASSE, GITHUB_TOKEN, GITHUB_
+#  DEPOT, MAIL_FROM…) sont ceux DU SITE EN LIGNE : la prévisualisation partage
+#  le même espace KV et la même adresse d'e-mail que la production. Donc pas
+#  de test d'envoi de formulaire ici (ce serait une vraie demande, comme pour
+#  le site en ligne) — seul le contenu affiché est vérifié.
+# ============================================================================
+name: Prévisualisation de PR (Cloudflare Workers)
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# Un nouveau commit sur la PR annule la prévisualisation précédente en cours.
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  WRANGLER_VERSION: "4.128.0"
+
+jobs:
+  preview:
+    name: Publier une prévisualisation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le code de la PR
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js (requis par wrangler)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vérifier la présence des secrets (sans les afficher)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          ok=1
+          [ -n "$CLOUDFLARE_API_TOKEN" ]  || { echo "::error title=Secret manquant::CLOUDFLARE_API_TOKEN"; ok=0; }
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || { echo "::error title=Secret manquant::CLOUDFLARE_ACCOUNT_ID"; ok=0; }
+          [ "$ok" = 1 ] || exit 1
+
+      # Même chaîne que le vrai déploiement (deploy.yml) : sans la première
+      # étape, la PR prévisualiserait un accueil qui ignore /admin.
+      - name: Régénérer l'accueil depuis contenu.json (/admin)
+        run: node tools/transpose-maquette.mjs
+
+      - name: Générer le site (src/ → site/) et contrôler les URLs
+        run: node build.mjs
+
+      # « versions upload », PAS « deploy » : la version part sur Cloudflare
+      # mais aucun trafic ne lui est routé. Le site en ligne ne bouge pas.
+      - name: Publier la version de prévisualisation
+        id: preview
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          command: >-
+            versions upload
+            --message "PR #${{ github.event.pull_request.number }} — ${{ github.event.pull_request.head.sha }}"
+
+      - name: Vérifier que la prévisualisation répond
+        env:
+          URL: ${{ steps.preview.outputs.deployment-url }}
+        run: |
+          [ -n "$URL" ] || { echo "::error::wrangler n'a pas renvoyé d'adresse de prévisualisation — voir le journal de l'étape précédente"; exit 1; }
+          code=$(curl -sS -o /dev/null --max-time 20 -w '%{http_code}' "$URL/" || echo 000)
+          [ "$code" = "200" ] || { echo "::error title=Prévisualisation en panne::$URL/ → HTTP $code"; exit 1; }
+          echo "::notice title=Prévisualisation en ligne::$URL"
+
+      # Le contenu affiché doit correspondre à contenu.json — même contrôle
+      # que le site en ligne (tools/verifier-contenu-en-ligne.mjs), pointé
+      # sur l'adresse de prévisualisation.
+      - name: Le contenu de la prévisualisation correspond-il à contenu.json ?
+        env:
+          URL: ${{ steps.preview.outputs.deployment-url }}
+        run: node tools/verifier-contenu-en-ligne.mjs "$URL"
+
+      # Un seul commentaire par PR : repéré par la marque cachée, puis mis à
+      # jour à chaque nouveau commit plutôt que dupliqué.
+      - name: Déposer ou mettre à jour le commentaire de prévisualisation
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marque = '<!-- previsualisation-k-probat -->';
+            const url = `${{ steps.preview.outputs.deployment-url }}`;
+            const enPanne = `${{ job.status }}` !== 'success' || !url;
+            const corps = marque + '\n' + (enPanne
+              ? `⚠️ **La prévisualisation de cette PR a échoué.** Voir le [journal du déploiement](${
+                  `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+                }).`
+              : `🔍 **Prévisualisation de cette PR :** ${url}\n\n`
+                + `Cette adresse ne reçoit aucun trafic du site en ligne — k-probat.fr n'est pas concerné.`
+                + ` Mise à jour à chaque nouveau commit.`);
+            const { data: commentaires } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+            });
+            const existant = commentaires.find(c => c.body.includes(marque));
+            if (existant) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo, comment_id: existant.id, body: corps,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: corps,
+              });
+            }

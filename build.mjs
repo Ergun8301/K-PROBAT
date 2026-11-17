@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 //  Les DEUX seules valeurs propres au site sont dans site.config.json :
 //    siteUrl : adresse publique du site, sans / final  (ex. "https://k-probat.fr")
-//    client  : identifiant du client → utm_source de la signature IPPYX
+//    client  : identifiant du client (nom du projet chez IPPYX)
 //  Option (vide par défaut = module désactivé) :
 //    ga4Id   : identifiant Google Analytics 4 (« G-XXXXXXXXXX ») → active le
 //              module IPPYX « GA4 + bandeau cookies » (src/modules/cookies-ga4/)
@@ -12,7 +12,7 @@
 //  Ce que le build produit dans site/ :
 //    - les pages HTML de src/, avec les jetons remplacés :
 //        {{SITE_URL}}     adresse du site (canonical, Open Graph, JSON-LD…)
-//        {{SIGNATURE}}    signature IPPYX      (src/partials/signature.html)
+//        {{SIGNATURE}}    liens légaux + signature IPPYX (src/partials/signature.html)
 //        {{JSONLD}}       fiche LocalBusiness  (src/partials/jsonld-localbusiness.html)
 //        {{BREADCRUMB}}   fil d'Ariane JSON-LD (src/partials/jsonld-breadcrumb.html)
 //    - sitemap.xml, généré à partir de la liste réelle des pages ;
@@ -67,8 +67,6 @@ if (GA4_ID && !/^G-[A-Z0-9]{4,20}$/.test(GA4_ID))
   errors.push(`site.config.json → "ga4Id" doit être vide ou un identifiant GA4 (ex. "G-ABC123XYZ9") — reçu : ${JSON.stringify(cfg.ga4Id)}`);
 fail();
 const SITE_URL = cfg.siteUrl, SITE_HOST = new URL(SITE_URL).host;
-const SIGNATURE_URL = `https://ippyx.com/?utm_source=${cfg.client}&utm_medium=signature&utm_campaign=footer`;
-const attr = s => s.replace(/&/g, '&amp;');
 const hostOf = u => { try { return new URL(u).host; } catch { return ''; } };
 const URL_RE = /https?:\/\/[^\s"'<>)]+/g;
 const foreign = h => /\.(workers|pages)\.dev$/i.test(h) && h !== SITE_HOST;
@@ -85,7 +83,7 @@ for (const f of sources) {
   for (const [u] of readFileSync(join(ROOT, f), 'utf8').matchAll(URL_RE)) {
     const h = hostOf(u);
     if (/\.(workers|pages)\.dev$/i.test(h) || h === SITE_HOST) errors.push(`${f} : adresse du site en dur « ${u} » → utiliser {{SITE_URL}}`);
-    if (h === 'ippyx.com' && /utm_source=/.test(u)) errors.push(`${f} : lien de signature en dur « ${u} » → utiliser {{SIGNATURE_URL}} (partial)`);
+    if (h === 'ippyx.com' && /utm_source=/.test(u)) errors.push(`${f} : ancien lien de signature IPPYX (avec utm) « ${u} » → signature unique : src/partials/signature-ippyx-fond-sombre.html`);
   }
 }
 fail();
@@ -93,7 +91,12 @@ fail();
 // ---- 3. génération -----------------------------------------------------------
 rmSync(OUT, { recursive: true, force: true }); mkdirSync(OUT, { recursive: true });
 const partial = n => readFileSync(join(SRC, 'partials', n), 'utf8').trim();
-const signature = partial('signature.html').replace(/\{\{SIGNATURE_URL\}\}/g, attr(SIGNATURE_URL));
+const signature = partial('signature.html');
+// Signature IPPYX (version unique du 5 nov. 2026) : copie EXACTE du fichier
+// de référence, sans aucune modification (consigne SIGNATURE-IPPYX.md).
+const SIG_REF = readFileSync(join(SRC, 'partials', 'signature-ippyx-fond-sombre.html'), 'utf8');
+if (!signature.includes(SIG_REF.trim())) errors.push('src/partials/signature.html : la signature IPPYX doit être la copie exacte de src/partials/signature-ippyx-fond-sombre.html');
+if (/ippyx-sig\b/.test(signature)) errors.push('src/partials/signature.html : ancienne signature IPPYX (ippyx-sig) encore présente');
 const jsonld = partial('jsonld-localbusiness.html');
 const crumbTpl = partial('jsonld-breadcrumb.html');
 const jsonText = s => JSON.stringify(s).slice(1, -1);
@@ -205,9 +208,9 @@ fail();
 for (const p of allPages) {
   const html = readFileSync(join(OUT, p), 'utf8');
   for (const [u] of html.matchAll(URL_RE)) if (foreign(hostOf(u))) errors.push(`site/${p} : URL absolue étrangère à siteUrl : ${u}`);
-  for (const k of ['rel="canonical"', 'property="og:url"', 'property="og:image"', 'name="twitter:image"', 'class="ippyx-sig"', 'href="mentions-legales.html"', 'href="confidentialite.html"'])
+  for (const k of ['rel="canonical"', 'property="og:url"', 'property="og:image"', 'name="twitter:image"', 'class="ipx-sig"', 'href="mentions-legales.html"', 'href="confidentialite.html"'])
     if (!html.includes(k)) errors.push(`site/${p} : élément attendu absent (${k})`);
-  if ((html.match(/class="ippyx-sig"/g) || []).length !== 1) errors.push(`site/${p} : la signature doit apparaître exactement une fois`);
+  if ((html.match(/class="ipx-sig"/g) || []).length !== 1) errors.push(`site/${p} : la signature doit apparaître exactement une fois`);
   // JSON-LD : chaque bloc doit être du JSON valide ; LocalBusiness partout, fil d'Ariane sur les pages internes.
   const types = [];
   for (const [, body] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
@@ -229,4 +232,4 @@ for (const f of [...TEXT_FILES, 'sitemap.xml']) {
   for (const [u] of txt.matchAll(URL_RE)) if (foreign(hostOf(u))) errors.push(`site/${f} : URL absolue étrangère à siteUrl : ${u}`);
 }
 fail();
-console.log(`✓ site/ généré — ${pages.length} pages + ${villePages.length} pages locales + sitemap.xml, robots.txt, llms.txt, _headers · siteUrl = ${SITE_URL} · signature utm_source = ${cfg.client} · GA4 + bandeau cookies : ${GA4_ID ? 'ACTIF (' + GA4_ID + ')' : 'désactivé (ga4Id vide)'}`);
+console.log(`✓ site/ généré — ${pages.length} pages + ${villePages.length} pages locales + sitemap.xml, robots.txt, llms.txt, _headers · siteUrl = ${SITE_URL} · signature IPPYX (5 nov. 2026, fond sombre) · GA4 + bandeau cookies : ${GA4_ID ? 'ACTIF (' + GA4_ID + ')' : 'désactivé (ga4Id vide)'}`);

@@ -110,8 +110,6 @@ input::placeholder,textarea::placeholder{color:rgba(34,30,25,.4)}
 /* Pied de page des pages légales : identique à celui de l'accueil. */
 .footer{background:var(--ink);color:rgba(234,227,212,.6);padding:26px clamp(18px,4vw,48px) 6px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em}
 
-/* La signature IPPYX occupe sa propre ligne, en bas du pied de page. */
-footer .ippyx-sig-wrap{flex-basis:100%;border-top:1px solid rgba(234,227,212,.12);margin-top:16px;padding-top:2px}
 
 /* ---- correctifs de mise en page ------------------------------------------
    1) Liste déroulante « type de travaux » : la maquette lui donnait le même

@@ -24,7 +24,8 @@ repo/
 │   ├── mentions-legales.html → Mentions légales (obligatoire)
 │   ├── confidentialite.html  → Politique de confidentialité (obligatoire)
 │   ├── partials/
-│   │   ├── signature.html    → signature IPPYX + liens légaux (source unique, injectés dans toutes les pages)
+│   │   ├── signature.html    → liens légaux + signature IPPYX (source unique, injectés dans toutes les pages)
+│   │   ├── signature-ippyx-fond-sombre.html → signature IPPYX officielle (fichier de référence, ne pas modifier)
 │   │   ├── jsonld-localbusiness.html → fiche LocalBusiness (données structurées, toutes les pages)
 │   │   └── jsonld-breadcrumb.html    → fil d'Ariane JSON-LD (pages légales)
 │   ├── robots.txt · llms.txt · _headers → fichiers SEO / IA (copiés avec l'adresse du site)
@@ -691,18 +692,25 @@ est à changer à la main à chaque modification de son contenu.
 
 ---
 
-## Signature IPPYX (bloc commun à tous les sites de l'agence)
+## Signature IPPYX (version unique du 5 novembre 2026)
 
-Tout en bas du pied de page, centrée, sur sa propre ligne après le
-copyright : « Mentions légales · Confidentialité · Site réalisé par IPPYX ».
-La signature elle-même est **rigoureusement identique sur tous les sites
-clients** ; les deux liens légaux qui la précèdent restent blancs (jamais
-néon, réservé à la signature). Source unique : **`src/partials/signature.html`**,
-injecté dans chaque page par `build.mjs` à l'emplacement `{{SIGNATURE}}`.
+Tout en bas du pied de page, centrée, sur sa propre ligne, **sous** les liens
+légaux (« Mentions légales · Confidentialité · Gérer les cookies ») :
+« RÉALISÉ PAR » + logo IPPYX en pixels + ↗, avec un reflet vert → blanc →
+orange toutes les 6 secondes. Clic → https://ippyx.com dans un nouvel onglet.
 
-Couleurs de marque IPPYX : au repos **blanc, opacité 0,75** ; au survol
-**néon `#D8FF3E`, opacité 1** ; transition 0,3 s ; le logo suit la couleur du
-texte (`currentColor`). Ces couleurs **ne varient pas** d'un site à l'autre.
+- Pied de page **sombre** → version **fond sombre**.
+- Fichier de référence : **`src/partials/signature-ippyx-fond-sombre.html`**
+  (copie exacte du fichier fourni par IPPYX — **ne rien modifier** : logo,
+  couleurs, dégradé, rythme, texte, `aria-label`, `ipx-sr`, `target`).
+- Il est recopié tel quel dans **`src/partials/signature.html`** (entre les
+  commentaires BEGIN/END), injecté dans chaque page par `build.mjs` à
+  l'emplacement `{{SIGNATURE}}`.
+- Le build **échoue** si la copie diffère du fichier de référence, si une
+  ancienne signature (`ippyx-sig`) réapparaît, ou si une page n'a pas
+  exactement **une** signature.
+- Nouvelle version IPPYX : remplacer le fichier de référence ET le bloc
+  BEGIN/END de `signature.html` par le nouveau contenu.
 
 ---
 

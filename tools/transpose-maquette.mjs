@@ -315,6 +315,8 @@ html = html.replace('<div data-fade="" style="display:flex;flex-wrap:wrap;align-
 
 // ---- 6 bis. pied de page : SIRET réel + signature IPPYX (jeton du build) ----
 html = html.replace('SIRET SUR DEMANDE — ASSURANCE DÉCENNALE', 'SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE');
+// Lien discret vers la fiche TurkScop (pied de page)
+html = html.replace('SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE</span>', 'SIRET 380 490 680 00028 — ASSURANCE DÉCENNALE</span>\n  <a href="https://turkscop.com/fr/pro/k-probat-montagnat/" target="_blank" rel="noopener" style="color:rgba(234,227,212,.6);text-decoration:none;border-bottom:1px solid rgba(234,227,212,.25)">ÉGALEMENT SUR TURKSCOP</a>');
 html = html.replace('</footer>', '  {{SIGNATURE}}\n</footer>');
 
 // ---- 7. style-hover / style-focus → vraies règles CSS ----------------------
